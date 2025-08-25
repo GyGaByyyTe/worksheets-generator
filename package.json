@@ -1,0 +1,11 @@
+{
+  "name": "worksheets-generator",
+  "version": "1.0.0",
+  "scripts": {
+    "worksheets:addition": "node scripts/generate-worksheets.js",
+    "worksheets:maze": "node scripts/generate-maze.js",
+    "worksheets:week": "node scripts/generate-week-packs.js"
+  },
+  "author": "GyGaByyyTe",
+  "license": "MIT"
+}

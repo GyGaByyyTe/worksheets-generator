@@ -1,7 +1,8 @@
 const { WIDTH, HEIGHT, MARGIN, choice, headerSVG, wrapSVG } = require('../common');
+const { ICONS } = require('../images');
 
 function pageFindParts(pageNum) {
-  const icons = ['🐟','🐱','🐦'];
+  const icons = ICONS.animals;
   const size = 3;
   const cell = 110;
   const startX = MARGIN + 40;
@@ -10,12 +11,41 @@ function pageFindParts(pageNum) {
   const boardW = cell * size; const boardH = cell * size;
   let content = headerSVG({ title: 'НАЙДИ КУСОЧКИ', subtitle: 'Найди и обведи в каждом поле кусочек, показанный справа.', pageNum });
 
-  // три формы — по одной на каждое поле
-  const shapes = [
-    [[0,0],[0,1]], // 2 клетки — горизонтально
-    [[0,0],[1,0],[1,1]], // 3 клетки — "Г" (угол)
-    [[0,0],[0,1],[0,2],[1,1]]  // 4 клетки — "Т"
+  // Базовый набор форм (полимино до 5 клеток), с последующим случайным поворотом/отражением
+  const baseShapes = [
+    [[0,0],[0,1]],              // домино (2)
+    [[0,0],[0,1],[0,2]],        // три в ряд (3)
+    [[0,0],[1,0],[1,1]],        // L (3)
+    [[0,0],[0,1],[0,2],[1,1]],  // T (4)
+    [[0,0],[1,0],[0,1],[1,1]],  // квадрат 2x2 (4)
+    [[0,0],[0,1],[1,1],[1,2]],  // Z (4)
+    [[0,1],[1,0],[1,1],[1,2],[2,1]], // плюс (крест) (5)
   ];
+
+  function rotate(shape) { // 90° rotation: [r,c] -> [c, -r]
+    const pts = shape.map(([r, c]) => [c, -r]);
+    // normalize to start from [0,0]
+    const minR = Math.min(...pts.map(p => p[0]));
+    const minC = Math.min(...pts.map(p => p[1]));
+    return pts.map(([r, c]) => [r - minR, c - minC]);
+  }
+  function mirror(shape) { // horizontal mirror: [r,c] -> [r, -c]
+    const pts = shape.map(([r, c]) => [r, -c]);
+    const minR = Math.min(...pts.map(p => p[0]));
+    const minC = Math.min(...pts.map(p => p[1]));
+    return pts.map(([r, c]) => [r - minR, c - minC]);
+  }
+  function transformRandom(shape) {
+    let s = shape.map(p => p.slice());
+    const rot = Math.floor(Math.random() * 4);
+    for (let i = 0; i < rot; i++) s = rotate(s);
+    if (Math.random() < 0.5) s = mirror(s);
+    return s;
+  }
+
+  // Выберем 3 случайные разные формы
+  const poolIdxs = baseShapes.map((_, i) => i).sort(() => Math.random() - 0.5).slice(0, 3);
+  const shapes = poolIdxs.map(i => transformRandom(baseShapes[i]));
 
   for (let i = 0; i < 3; i++) {
     // сгенерировать поле

@@ -104,7 +104,7 @@ function pageOrderNumbers(pageNum) {
     const seqEven = makeSeq(sEvenStart, 2, 5);
     const { row: rowEven, missing: missEven } = knockOut(seqEven, 1);
     drawStreetRow(ry - 120, rowEven);
-    missingAll.push(...missEven);
+    missingAll.push(...missEven.map(n => ({ n, street: horizontalNames[idx] })));
 
     // нижняя строка (под дорогой): нечётные
     let sOddStart = sEvenStart - 1;
@@ -112,7 +112,7 @@ function pageOrderNumbers(pageNum) {
     const seqOdd = makeSeq(sOddStart, 2, 5);
     const { row: rowOdd, missing: missOdd } = knockOut(seqOdd, 1);
     drawStreetRow(ry + 70, rowOdd);
-    missingAll.push(...missOdd);
+    missingAll.push(...missOdd.map(n => ({ n, street: horizontalNames[idx] })));
   });
 
   // Домики вдоль вертикальной улицы (3–4 шт.) и «письма» внизу
@@ -137,7 +137,7 @@ function pageOrderNumbers(pageNum) {
     const x = useRight ? vRightX : vLeftX;
     content += housesRow(x, yV, [rowV[i]]);
   });
-  missingAll.push(...missV);
+  missingAll.push(...missV.map(n => ({ n, street: verticalStreet })));
 
   // Письма (конверты) с пропущенными номерами в самом низу
   const envW = 80, envH = 58, envGap = 18;
@@ -146,7 +146,7 @@ function pageOrderNumbers(pageNum) {
   const lettersTotalW = lettersCnt * envW + (lettersCnt - 1) * envGap;
   const lettersStartX = hRoadX + Math.max(10, (totalW - lettersTotalW) / 2);
 
-  missingAll.forEach((n, i) => {
+  missingAll.forEach(({ n, street }, i) => {
     const ex = lettersStartX + i * (envW + envGap);
     const ey = lettersY;
     content += `
@@ -154,6 +154,7 @@ function pageOrderNumbers(pageNum) {
         <rect x="${ex}" y="${ey}" width="${envW}" height="${envH}" rx="6" fill="#fff" stroke="#222"/>
         <polyline points="${ex},${ey + 2} ${ex + envW / 2},${ey + envH / 2} ${ex + envW},${ey + 2}" fill="none" stroke="#222"/>
         <text x="${ex + envW / 2}" y="${ey + envH / 2 + 20}" text-anchor="middle" font-family="Arial, sans-serif" font-size="26">${n}</text>
+        <text x="${ex + envW / 2}" y="${ey + envH + 24}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#555">ул. ${street}</text>
       </g>`;
   });
 

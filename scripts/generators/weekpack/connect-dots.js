@@ -63,18 +63,18 @@ function pageConnectDots(pageNum) {
       }
     }
 
-    // Небольшая растяжка относительно центра и шум
-    const sx = rnd(0.9, 1.1);
-    const sy = rnd(0.9, 1.1);
+    // Более мягкая растяжка и меньший шум, чтобы сохранить узнаваемость силуэта
+    const sx = rnd(0.95, 1.06);
+    const sy = rnd(0.95, 1.06);
     for (let i = 0; i < pts.length; i++) {
       let [x, y] = pts[i];
       x = 0.5 + (x - 0.5) * sx;
       y = 0.5 + (y - 0.5) * sy;
-      x += rnd(-0.03, 0.03);
-      y += rnd(-0.03, 0.03);
+      x += rnd(-0.015, 0.015);
+      y += rnd(-0.015, 0.015);
       // Ограничим, чтобы точки не уехали к краям
-      x = Math.max(0.05, Math.min(0.95, x));
-      y = Math.max(0.25, Math.min(0.85, y));
+      x = Math.max(0.07, Math.min(0.93, x));
+      y = Math.max(0.30, Math.min(0.80, y));
       pts[i] = [x, y];
     }
 
@@ -82,16 +82,53 @@ function pageConnectDots(pageNum) {
     return pts;
   }
 
+  // Ресемплинг полилинии до заданного количества точек (равномерно по длине)
+  function dist(a, b) {
+    const dx = a[0] - b[0]; const dy = a[1] - b[1];
+    return Math.hypot(dx, dy);
+  }
+  function resamplePolyline(pts, targetCount) {
+    if (!pts || pts.length === 0) return [];
+    if (targetCount <= 1) return [pts[0].slice()];
+    // длины сегментов
+    const segLens = [];
+    let total = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const l = dist(pts[i], pts[i + 1]);
+      segLens.push(l); total += l;
+    }
+    if (total === 0) return Array.from({ length: targetCount }, () => pts[0].slice());
+    const step = total / (targetCount - 1);
+    const out = [pts[0].slice()];
+    let acc = 0; let segIdx = 0;
+    for (let k = 1; k < targetCount - 1; k++) {
+      const target = step * k;
+      while (segIdx < segLens.length - 1 && acc + segLens[segIdx] < target) {
+        acc += segLens[segIdx];
+        segIdx++;
+      }
+      const remain = target - acc;
+      const l = segLens[segIdx] || 1e-6;
+      const t = Math.max(0, Math.min(1, remain / l));
+      const [x1, y1] = pts[segIdx];
+      const [x2, y2] = pts[segIdx + 1];
+      out.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t]);
+    }
+    out.push(pts[pts.length - 1].slice());
+    return out;
+  }
+
   const base = choice(BASES);
   const shape = varyShape(base);
+  const targetCount = Math.min(RU_LETTERS.length, Math.floor(Math.random() * 10) + 24); // 24..33
+  const shapeDense = resamplePolyline(shape, targetCount);
 
   const left = MARGIN + 40; const top = 260; const w = WIDTH - left * 2; const h = HEIGHT - top - 120;
   let content = headerSVG({ title: 'СОЕДИНИ ТОЧКИ ПО БУКВАМ', subtitle: 'Соединяй последовательно от А дальше по алфавиту.', pageNum });
   content += `<rect x="${left-20}" y="${top-20}" width="${w+40}" height="${h+40}" rx="16" fill="none" stroke="#ccc"/>`;
 
-  const points = shape.map(([px, py]) => [left + px * w, top + py * h]);
-  const N = Math.min(points.length, RU_LETTERS.length);
-  for (let i = 0; i < N; i++) {
+  const points = shapeDense.map(([px, py]) => [left + px * w, top + py * h]);
+  for (let i = 0; i < points.length; i++) {
     const [x, y] = points[i];
     const letter = RU_LETTERS[i];
     content += `<circle cx="${x}" cy="${y}" r="8" fill="#000"/>

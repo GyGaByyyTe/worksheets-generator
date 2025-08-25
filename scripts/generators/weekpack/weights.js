@@ -49,12 +49,12 @@ function pageWeights(pageNum) {
 
   const usedCombos = new Set();
   const combos = [];
-  while (combos.length < 4) {
+  while (combos.length < 6) {
     const em = pickCombo();
     if (!usedCombos.has(em)) { usedCombos.add(em); combos.push(em); }
   }
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     const cx = i % 2 === 0 ? sx - 220 : sx + 220;
     const cy = top + Math.floor(i / 2) * dy;
     content += scaleSVG(cx, cy, combos[i]);

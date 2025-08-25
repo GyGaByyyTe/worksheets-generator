@@ -54,21 +54,91 @@ function pageClocks(pageNum, options = {}) {
   const ch = Math.floor(gridH / rows);
   let content = headerSVG({ title: 'СКОЛЬКО ВРЕМЕНИ ПОКАЗЫВАЮТ ЧАСЫ?', subtitle: 'Запиши ответ под каждым циферблатом.', pageNum });
   let idx = 0;
+
+  // Подготовка пулов значений и глобальных множеств для уникальности по всему листу (по возможности)
+  const hoursAll = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutesAll = allowAnyMinute
+    ? Array.from({ length: 60 }, (_, i) => i)
+    : (() => {
+        const step = Math.max(1, Math.floor(minutesStep));
+        const len = Math.floor(60 / step);
+        return Array.from({ length: len }, (_, i) => (i * step) % 60);
+      })();
+  const usedHours = new Set();
+  const usedMinutes = new Set();
+  const usedPairs = new Set(); // формат: `${h}:${m}`
+
+  function pickUnique(pool, excludeSet, count) {
+    // Предпочитаем элементы, которые ещё не использовались на листе
+    const available = pool.filter(v => !excludeSet.has(v));
+    const chosen = [];
+    const src = available.length >= count ? available.slice() : pool.slice();
+    while (chosen.length < count && src.length > 0) {
+      const v = choice(src);
+      chosen.push(v);
+      const i = src.indexOf(v);
+      src.splice(i, 1);
+    }
+    // Если вариантов в пуле меньше, чем нужно (напр., minutesStep слишком большой),
+    // добираем оставшиеся, избегая дублей в рамках ряда, если это возможно.
+    if (pool.length < count) {
+      const poolSet = new Set(pool);
+      for (const v of pool) {
+        if (chosen.length >= count) break;
+        if (!chosen.includes(v)) chosen.push(v);
+      }
+      // Если всё равно не хватает — добавляем из пула (возможны повторы при крайней нехватке значений)
+      while (chosen.length < count) {
+        chosen.push(pool[chosen.length % pool.length]);
+      }
+    }
+    return chosen;
+  }
+
+  function permutations3(arr) {
+    return [
+      [arr[0], arr[1], arr[2]],
+      [arr[0], arr[2], arr[1]],
+      [arr[1], arr[0], arr[2]],
+      [arr[1], arr[2], arr[0]],
+      [arr[2], arr[0], arr[1]],
+      [arr[2], arr[1], arr[0]],
+    ];
+  }
+
   for (let r = 0; r < rows; r++) {
+    // Выбираем уникальные в ряду минуты и часы, стараясь не повторяться на листе
+    const rowMinutes = pickUnique(minutesAll, usedMinutes, cols);
+    const rowHours = pickUnique(hoursAll, usedHours, cols);
+
+    // Ищем такое соответствие (час -> минута), чтобы не повторять уже встречавшиеся пары на листе
+    let assignedMinutes = rowMinutes.slice();
+    if (cols === 3) {
+      let best = null;
+      let bestScore = Infinity;
+      for (const pm of permutations3(rowMinutes)) {
+        let score = 0;
+        for (let i = 0; i < cols; i++) {
+          if (usedPairs.has(`${rowHours[i]}:${pm[i]}`)) score++;
+        }
+        if (score < bestScore) { bestScore = score; best = pm; }
+        if (score === 0) break;
+      }
+      assignedMinutes = best || rowMinutes;
+    }
+
+    // Отмечаем использованные по листу значения
+    rowHours.forEach(h => usedHours.add(h));
+    rowMinutes.forEach(m => usedMinutes.add(m));
+
     for (let c = 0; c < cols; c++) {
       idx++;
       const x = MARGIN + c * cw + cw / 2;
       const y = 220 + r * ch + ch / 2 - 10;
       const radius = Math.min(cw, ch) * 0.32;
-      let minute;
-      if (allowAnyMinute) {
-        minute = rndInt(0, 59);
-      } else {
-        const step = Math.max(1, Math.floor(minutesStep));
-        const multiples = Array.from({ length: Math.floor(60 / step) }, (_, i) => (i * step) % 60);
-        minute = choice(multiples);
-      }
-      const hour = rndInt(1, 12);
+      const hour = rowHours[c];
+      const minute = assignedMinutes[c];
+      usedPairs.add(`${hour}:${minute}`);
       content += `
         <g>
           ${drawClock(x, y, radius, hour, minute)}

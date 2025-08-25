@@ -9,15 +9,16 @@
  *   --rows 20      количество строк (клеток)
  *   --cols 20      количество столбцов
  *   --count 10     число файлов
- *   --width 1000   ширина SVG
- *   --height 1000  высота SVG
- *   --margin 20    внешний отступ
+ *   --width 1000   ширина SVG (устарело, теперь внутренняя область страницы)
+ *   --height 1000  высота SVG (устарело, теперь внутренняя область страницы)
+ *   --margin 20    внешний отступ (устарело, теперь внутренняя область страницы)
  *   --seed 123     детерминированная генерация
  *
  * Файлы сохраняются в ./worksheets/mazes/maze-<rows>x<cols>-NN.svg
  */
 const fs = require('fs');
 const path = require('path');
+const { WIDTH, HEIGHT, MARGIN, headerSVG, wrapSVG } = require('./generators/common');
 
 // ------------------------ Утилиты ------------------------
 
@@ -148,7 +149,7 @@ function farthestCell(maze) {
 
 function renderMazeSVG(maze, opts) {
   const { rows, cols, walls } = maze;
-  const { width, height, margin } = opts;
+  const { width, height, margin = 20, offsetX = MARGIN, offsetY = 220, theme = { start: '🐭', finish: '🧀' } } = opts;
 
   // Подгон размеров клеток под целые пиксели
   const cellW = Math.floor((width - margin * 2) / cols);
@@ -178,30 +179,26 @@ function renderMazeSVG(maze, opts) {
     }
   }
 
-  // Иконки: мышь (старт) и сыр (цель)
+  // Иконки: старт и финиш
   const startX = margin + cellW / 2;
   const startY = margin + cellH / 2;
 
   const far = farthestCell(maze);
-  const cheeseX = margin + far.c * cellW + cellW / 2;
-  const cheeseY = margin + far.r * cellH + cellH / 2;
+  const finishX = margin + far.c * cellW + cellW / 2;
+  const finishY = margin + far.r * cellH + cellH / 2;
 
   const iconSize = Math.floor(Math.min(cellW, cellH) * 0.72);
 
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${usedW}" height="${usedH}" viewBox="0 0 ${usedW} ${usedH}">
-  <rect x="0" y="0" width="${usedW}" height="${usedH}" fill="#fff"/>
-  <rect x="${stroke/2}" y="${stroke/2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
-
-  <!-- стены -->
-  ${lines}
-
-  <!-- мышка и сыр -->
-  <text x="${startX}" y="${startY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">🐭</text>
-  <text x="${cheeseX}" y="${cheeseY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">🧀</text>
-</svg>
-`;
-  return svg;
+  const group = `
+  <g transform="translate(${offsetX}, ${offsetY})">
+    <rect x="${stroke/2}" y="${stroke/2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
+    <!-- стены -->
+    ${lines}
+    <!-- иконки старта/финиша -->
+    <text x="${startX}" y="${startY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">${theme.start}</text>
+    <text x="${finishX}" y="${finishY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">${theme.finish}</text>
+  </g>`;
+  return group;
 }
 
 // ------------------------ Основной запуск ------------------------
@@ -213,9 +210,25 @@ function main() {
   const outDir = path.resolve(process.cwd(), 'worksheets', 'mazes');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
+  // Темы иконок: старт / финиш
+  const themes = [
+    { start: '🐭', finish: '🧀' }, // мышь и сыр
+    { start: '🐱', finish: '🧶' }, // кот и клубок
+    { start: '🐟', finish: '🌿' }, // рыба и водоросли
+    { start: '🐶', finish: '🦴' }, // собака и кость
+  ];
+
+  // Размер рабочей области под лабиринт: как в других страницах (шапка ~220)
+  const gridW = WIDTH - MARGIN * 2;
+  const gridH = HEIGHT - 220 - MARGIN;
+
   for (let i = 1; i <= args.count; i++) {
     const maze = generateMaze(args.rows, args.cols, rnd);
-    const svg = renderMazeSVG(maze, { width: args.width, height: args.height, margin: args.margin });
+    const theme = choice(themes, rnd);
+
+    let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${theme.start} к ${theme.finish}.`, pageNum: i });
+    content += renderMazeSVG(maze, { width: gridW, height: gridH, margin: args.margin, offsetX: MARGIN, offsetY: 220, theme });
+    const svg = wrapSVG(content);
 
     const name = `maze-${args.rows}x${args.cols}-${String(i).padStart(2, '0')}.svg`;
     const file = path.join(outDir, name);
@@ -229,3 +242,29 @@ function main() {
 if (require.main === module) {
   main();
 }
+
+
+// Exported helper to build a single maze page SVG on the fly (no filesystem IO)
+function generateMazePage(opts = {}) {
+  const { rows = 20, cols = 20, margin = 20, seed, pageNum = 1, theme } = opts;
+  const rnd = createRng(seed);
+
+  // Themes: start / finish
+  const themes = [
+    { start: '🐭', finish: '🧀' },
+    { start: '🐱', finish: '🧶' },
+    { start: '🐟', finish: '🌿' },
+    { start: '🐶', finish: '🦴' },
+  ];
+  const usedTheme = theme || choice(themes, rnd);
+
+  const gridW = WIDTH - MARGIN * 2;
+  const gridH = HEIGHT - 220 - MARGIN;
+  const maze = generateMaze(rows, cols, rnd);
+
+  let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`, pageNum });
+  content += renderMazeSVG(maze, { width: gridW, height: gridH, margin, offsetX: MARGIN, offsetY: 220, theme: usedTheme });
+  return wrapSVG(content);
+}
+
+module.exports = { generateMazePage };

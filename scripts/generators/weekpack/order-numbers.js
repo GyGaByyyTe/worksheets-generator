@@ -153,9 +153,7 @@ function pageOrderNumbers(pageNum) {
       <g>
         <rect x="${ex}" y="${ey}" width="${envW}" height="${envH}" rx="6" fill="#fff" stroke="#222"/>
         <polyline points="${ex},${ey + 2} ${ex + envW / 2},${ey + envH / 2} ${ex + envW},${ey + 2}" fill="none" stroke="#222"/>
-        <line x1="${ex}" y1="${ey + envH}" x2="${ex + envW / 2}" y2="${ey + envH / 2}" stroke="#222"/>
-        <line x1="${ex + envW}" y1="${ey + envH}" x2="${ex + envW / 2}" y2="${ey + envH / 2}" stroke="#222"/>
-        <text x="${ex + envW / 2}" y="${ey + envH / 2 + 10}" text-anchor="middle" font-family="Arial, sans-serif" font-size="26">${n}</text>
+        <text x="${ex + envW / 2}" y="${ey + envH / 2 + 20}" text-anchor="middle" font-family="Arial, sans-serif" font-size="26">${n}</text>
       </g>`;
   });
 

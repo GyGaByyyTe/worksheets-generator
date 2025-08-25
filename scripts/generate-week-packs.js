@@ -28,6 +28,33 @@ const { pageSpotDifferences } = require('./generators/weekpack/spot-differences'
 const { renderPage: renderAdditionPage, generateTasks } = require('./generators/addition');
 const { generateMazePage } = require('./generate-maze');
 
+function buildDayIndexHtml(dir, files, day) {
+  const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
+  const pages = files.map(f => `    <img class="page" src="${f}" alt="${f}" />`).join('\n');
+  const html = `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>${title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    @page { size: A4 portrait; margin: 0; }
+    html, body { margin: 0; padding: 0; background: #fff; }
+    .page { display: block; width: 210mm; height: 297mm; object-fit: contain; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    @media screen {
+      body { background: #777; }
+      .page { margin: 8px auto; box-shadow: 0 0 8px rgba(0,0,0,.4); background: #fff; }
+    }
+  </style>
+</head>
+<body>
+${pages}
+</body>
+</html>`;
+  fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+}
+
 // ------------------------ Сборка недельных комплектов ------------------------
 function buildWeekPacks() {
   const outRoot = path.resolve(process.cwd(), 'worksheets', 'weekpacks');
@@ -62,6 +89,7 @@ function buildWeekPacks() {
     dayItems.sort(() => Math.random() - 0.5);
 
     let pageNum = 1;
+    const writtenFiles = [];
 
     const nameMap = new Map([
       [pageClocks, 'clocks'],
@@ -77,11 +105,17 @@ function buildWeekPacks() {
     for (const item of dayItems) {
       const svg = item.fn(pageNum);
       const name = nameMap.get(item.fn) || 'page';
-      const file = path.join(dir, `page-${String(pageNum).padStart(2, '0')}-${name}.svg`);
+      const base = `page-${String(pageNum).padStart(2, '0')}-${name}.svg`;
+      const file = path.join(dir, base);
       fs.writeFileSync(file, svg, 'utf8');
+      writtenFiles.push(base);
       console.log(`✓ День ${day}: страница ${pageNum} (${name})`);
       pageNum++;
     }
+
+    // Создадим печатную HTML-страницу с подключением всех SVG по порядку
+    buildDayIndexHtml(dir, writtenFiles, day);
+    console.log(`→ Создано: ${path.join(dir, 'index.html')}`);
   }
 
   console.log('Готово! Комплекты лежат в worksheets/weekpacks/day-01..05');

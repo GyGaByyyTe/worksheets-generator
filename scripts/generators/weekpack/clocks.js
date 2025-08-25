@@ -45,7 +45,8 @@ function drawClock(x, y, r, hour, minute) {
     </g>`;
 }
 
-function pageClocks(pageNum) {
+function pageClocks(pageNum, options = {}) {
+  const { minutesStep = 5, allowAnyMinute = false } = options;
   const cols = 3, rows = 3;
   const gridW = WIDTH - MARGIN * 2;
   const gridH = HEIGHT - 220 - MARGIN;
@@ -59,7 +60,14 @@ function pageClocks(pageNum) {
       const x = MARGIN + c * cw + cw / 2;
       const y = 220 + r * ch + ch / 2 - 10;
       const radius = Math.min(cw, ch) * 0.32;
-      const minute = choice([0, 15, 30, 45]);
+      let minute;
+      if (allowAnyMinute) {
+        minute = rndInt(0, 59);
+      } else {
+        const step = Math.max(1, Math.floor(minutesStep));
+        const multiples = Array.from({ length: Math.floor(60 / step) }, (_, i) => (i * step) % 60);
+        minute = choice(multiples);
+      }
       const hour = rndInt(1, 12);
       content += `
         <g>

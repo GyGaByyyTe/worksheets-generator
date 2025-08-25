@@ -1,4 +1,4 @@
-const { MARGIN, headerSVG, wrapSVG, rndInt } = require('../common');
+const { MARGIN, headerSVG, wrapSVG, rndInt, WIDTH, HEIGHT } = require('../common');
 
 function pageOrderNumbers(pageNum) {
   // список из 20 названий улиц
@@ -46,15 +46,32 @@ function pageOrderNumbers(pageNum) {
   const rightCount = 3; // и по 3 домика справа
   const leftWidth = leftCount * w + (leftCount - 1) * gap;
   const rightWidth = rightCount * w + (rightCount - 1) * gap;
-  const hRoadX = MARGIN - 20; // горизонтальные дороги чуть выходят за ряды домов
+  let hRoadX = MARGIN - 20; // горизонтальные дороги чуть выходят за ряды домов
   const vRoadW = 60; // ширина центральной вертикальной улицы
-  const gapRoad = w + 20; // отступ от домов до дороги (увеличен, чтобы поместились вертикальные домики у дороги)
-  const vRoadX = MARGIN + leftWidth + gapRoad; // начало вертикальной дороги
+  const gapRoad = w + 20; // отступ от домов до дороги (увеличен, чтобы поместились вертикальные домики у дороге)
+  let vRoadX = MARGIN + leftWidth + gapRoad; // начало вертикальной дороги
   const totalW = (vRoadX - hRoadX) + vRoadW + gapRoad + rightWidth + 20; // для ширины горизонтальных дорог
 
-  // y-позиции трёх горизонтальных улиц
+  // Центрирование по X
+  const dx = Math.round((WIDTH - totalW) / 2 - hRoadX);
+  hRoadX += dx;
+  vRoadX += dx;
+  const leftBaseX = MARGIN + dx;
+  
+  // y-позиции горизонтальных улиц
   const roadH = 50;
-  const roadYs = [360, 760];
+  let roadYs = [360, 760];
+  
+  // Вертикальные границы до сдвига
+  let vTop = roadYs[0] - 170; // небольшой вылет вверх
+  let vBottom = roadYs[roadYs.length - 1] + 230; // и вниз
+  
+  // Центрирование по Y относительно страницы
+  const mapCenterY = (vTop + vBottom) / 2;
+  const dy = Math.round(HEIGHT / 2 - mapCenterY);
+  roadYs = roadYs.map(y => y + dy);
+  vTop += dy;
+  vBottom += dy;
 
   // Выбор названий: 1 вертикальная + 2 горизонтальные
   const idxV = rndInt(0, STREET_NAMES.length - 1);
@@ -65,8 +82,6 @@ function pageOrderNumbers(pageNum) {
   // Рисуем улицы
   content += `<g id="roads">`;
   // Вертикальная главная улица (сквозная через все горизонтальные)
-  const vTop = roadYs[0] - 170; // небольшой вылет вверх
-  const vBottom = roadYs[roadYs.length - 1] + 230; // и вниз
   content += `
     <rect x="${vRoadX}" y="${vTop}" width="${vRoadW}" height="${vBottom - vTop}" fill="#f0c948" stroke="#c8a437"/>
     <line x1="${vRoadX + vRoadW / 2}" y1="${vTop + 6}" x2="${vRoadX + vRoadW / 2}" y2="${vBottom - 6}" stroke="#ffffff" stroke-width="3" stroke-dasharray="12 10" opacity="0.9"/>
@@ -79,7 +94,7 @@ function pageOrderNumbers(pageNum) {
     content += `
       <rect x="${hRoadX}" y="${ry}" width="${totalW}" height="${roadH}" fill="#f0c948" stroke="#c8a437"/>
       <line x1="${hRoadX + 10}" y1="${ry + roadH / 2}" x2="${hRoadX + totalW - 10}" y2="${ry + roadH / 2}" stroke="#ffffff" stroke-width="3" stroke-dasharray="12 10" opacity="0.9"/>
-      <text x="${MARGIN + leftWidth / 2}" y="${ry + roadH / 2 - 6}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#555">ул. ${name}</text>
+      <text x="${leftBaseX + leftWidth / 2}" y="${ry + roadH / 2 - 6}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#555">ул. ${name}</text>
       <text x="${vRoadX + vRoadW + gapRoad + rightWidth / 2}" y="${ry + roadH / 2 - 6}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#555">ул. ${name}</text>
     `;
   });
@@ -89,7 +104,7 @@ function pageOrderNumbers(pageNum) {
   function drawStreetRow(y, sequence) {
     const leftSeq = sequence.slice(0, leftCount);
     const rightSeq = sequence.slice(leftCount);
-    content += housesRow(MARGIN, y, leftSeq);
+    content += housesRow(leftBaseX, y, leftSeq);
     content += housesRow(vRoadX + vRoadW + gapRoad, y, rightSeq);
   }
 
@@ -140,7 +155,7 @@ function pageOrderNumbers(pageNum) {
   missingAll.push(...missV.map(n => ({ n, street: verticalStreet })));
 
   // Письма (конверты) с пропущенными номерами в самом низу
-  const envW = 80, envH = 58, envGap = 18;
+  const envW = 80, envH = 58, envGap = 26;
   const lettersCnt = missingAll.length;
   const lettersY = Math.max(vBottom + 110, 1100);
   const lettersTotalW = lettersCnt * envW + (lettersCnt - 1) * envGap;
@@ -148,7 +163,7 @@ function pageOrderNumbers(pageNum) {
 
   missingAll.forEach(({ n, street }, i) => {
     const ex = lettersStartX + i * (envW + envGap);
-    const ey = lettersY;
+    const ey = lettersY + ((i % 3) - 1) * 10; // лёгкая "змейка" по Y, чтобы не наезжали
     content += `
       <g>
         <rect x="${ex}" y="${ey}" width="${envW}" height="${envH}" rx="6" fill="#fff" stroke="#222"/>

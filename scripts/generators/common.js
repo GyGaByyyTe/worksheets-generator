@@ -17,7 +17,7 @@ function headerSVG({ title, subtitle = '', pageNum }) {
   <rect x="16" y="16" width="${WIDTH - 32}" height="${HEIGHT - 32}" rx="18" ry="18" fill="none" stroke="#222" stroke-width="3"/>
   <text x="${MARGIN}" y="60" font-family="Arial, sans-serif" font-size="28">Имя: ____________________________</text>
   <text x="${WIDTH - MARGIN - 360}" y="60" font-family="Arial, sans-serif" font-size="28">Дата: _______________</text>
-  <text x="${MARGIN}" y="110" font-family="Arial Black, Arial, sans-serif" font-size="42">${title}</text>
+  <text x="${MARGIN}" y="110" font-family="Arial Black, Arial, sans-serif" font-size="38">${title}</text>
   ${subtitle ? `<text x="${MARGIN}" y="150" font-family="Arial, sans-serif" font-size="24" fill="#444">${subtitle}</text>` : ''}
   <g>
     <circle cx="${WIDTH - 36}" cy="36" r="22" fill="#000"/>

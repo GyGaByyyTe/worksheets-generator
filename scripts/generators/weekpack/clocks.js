@@ -11,6 +11,21 @@ function drawClock(x, y, r, hour, minute) {
     const y2 = y + Math.sin(a) * r;
     ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="2"/>`);
   }
+  // цифры на циферблате
+  const numbers = [];
+  const nr = r * 0.78; // радиус для цифр
+  const fontSize = Math.max(12, Math.min(24, r * 0.22));
+  const positions = [
+    { label: '12', angle: -Math.PI / 2 },
+    { label: '3', angle: 0 },
+    { label: '6', angle: Math.PI / 2 },
+    { label: '9', angle: Math.PI },
+  ];
+  for (const p of positions) {
+    const tx = x + Math.cos(p.angle) * nr;
+    const ty = y + Math.sin(p.angle) * nr;
+    numbers.push(`<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="${fontSize}" fill="#222">${p.label}</text>`);
+  }
   // стрелки
   const ma = (Math.PI * 2) * (minute / 60) - Math.PI / 2;
   const ha = (Math.PI * 2) * ((hour % 12 + minute / 60) / 12) - Math.PI / 2;
@@ -23,6 +38,7 @@ function drawClock(x, y, r, hour, minute) {
     <g>
       <circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#111" stroke-width="4"/>
       ${ticks.join('')}
+      ${numbers.join('')}
       <line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#111" stroke-width="6" stroke-linecap="round"/>
       <line x1="${x}" y1="${y}" x2="${mx}" y2="${my}" stroke="#111" stroke-width="3" stroke-linecap="round"/>
       <circle cx="${x}" cy="${y}" r="4" fill="#111"/>

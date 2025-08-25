@@ -127,7 +127,6 @@ function renderPage(pageNum, tasks) {
       <rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="#fff"/>
       ${renderHeader(pageNum)}
       ${svgCells}
-      <text class="small" x="${WIDTH - 16}" y="${HEIGHT - 10}" text-anchor="end">Сгенерировано автоматически • без перехода через десяток</text>
     </svg>
   `;
   return svg;

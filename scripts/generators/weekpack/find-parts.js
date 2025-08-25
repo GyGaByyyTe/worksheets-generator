@@ -12,9 +12,9 @@ function pageFindParts(pageNum) {
 
   // три формы — по одной на каждое поле
   const shapes = [
-    [[0,0],[0,1]], // горизонтальный
-    [[0,0],[1,0]], // вертикальный
-    [[0,0],[1,1]]  // диагональный (вариация)
+    [[0,0],[0,1]], // 2 клетки — горизонтально
+    [[0,0],[1,0],[1,1]], // 3 клетки — "Г" (угол)
+    [[0,0],[0,1],[0,2],[1,1]]  // 4 клетки — "Т"
   ];
 
   for (let i = 0; i < 3; i++) {
@@ -59,7 +59,6 @@ function pageFindParts(pageNum) {
     });
   }
 
-  content += `<text x="${WIDTH - 12}" y="${HEIGHT - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">Найди кусочки • автогенерация</text>`;
   return wrapSVG(content);
 }
 

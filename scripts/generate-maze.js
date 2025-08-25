@@ -199,10 +199,6 @@ function renderMazeSVG(maze, opts) {
   <!-- мышка и сыр -->
   <text x="${startX}" y="${startY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">🐭</text>
   <text x="${cheeseX}" y="${cheeseY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">🧀</text>
-
-  <text x="${usedW - 12}" y="${usedH - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">
-    Сгенерировано автоматически • lab
-  </text>
 </svg>
 `;
   return svg;

@@ -60,7 +60,6 @@ function pageWeights(pageNum) {
     content += scaleSVG(cx, cy, combos[i]);
   }
 
-  content += `<text x="${WIDTH - 12}" y="${HEIGHT - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">Весы • автогенерация</text>`;
   return wrapSVG(content);
 }
 

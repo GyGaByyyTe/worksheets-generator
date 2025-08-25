@@ -64,7 +64,6 @@ function pageConnectDots(pageNum) {
                 <text x="${x + 12}" y="${y + 4}" font-family="Arial, sans-serif" font-size="20">${letter}</text>`;
   }
 
-  content += `<text x="${WIDTH - 12}" y="${HEIGHT - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">Соедини точки • автогенерация</text>`;
   return wrapSVG(content);
 }
 

@@ -1,7 +1,8 @@
 const { WIDTH, MARGIN, choice, headerSVG, wrapSVG, rndInt } = require('../common');
 
 function pageSpotDifferences(pageNum) {
-  const shapes = ['●','▲','■','★'];
+  // Include both filled and outline variants of shapes
+  const shapes = ['●','○','▲','△','■','□','★','☆'];
   const size = 4, cell = 84; const gap = 12; const startX = MARGIN + 60; const startYTop = 260;
   const symbolFont = 36; // slightly smaller to match the reduced cell size
   const textOffset = Math.round(cell * 0.18); // baseline tweak for vertical centering
@@ -50,7 +51,6 @@ function pageSpotDifferences(pageNum) {
   const startYBottom = startYTop + pairHeight + verticalSpacing;
   content += renderPair(startYBottom);
 
-  content += `<text x="${WIDTH - 12}" y="${1414 - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">Найди отличия • автогенерация</text>`;
   return wrapSVG(content);
 }
 

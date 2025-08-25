@@ -69,7 +69,6 @@ function pageClocks(pageNum) {
         </g>`;
     }
   }
-  content += `<text x="${WIDTH - 12}" y="${HEIGHT - 10}" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#777">Часы • автогенерация</text>`;
   return wrapSVG(content);
 }
 

@@ -126,6 +126,31 @@ function rotateStartToBottomLeft(pts) {
 }
 
 // Дополнительно: bbox и нормализация множества полилиний к общему bbox
+function getBBoxOfD(d, samples = 300) {
+  const props = new SVGPathProperties(d);
+  const L = props.getTotalLength();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (let i = 0; i < samples; i++) {
+    const p = props.getPointAtLength((L * i) / Math.max(1, samples - 1));
+    if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+  }
+  return { minX, minY, maxX, maxY, w: Math.max(0, maxX - minX), h: Math.max(0, maxY - minY) };
+}
+
+// Небольшой помощник: проверяем, «насколько» bbox пути покрывает общий bbox
+function frameCoverage(b, global) {
+  const gw = Math.max(1e-6, global.maxX - global.minX);
+  const gh = Math.max(1e-6, global.maxY - global.minY);
+  // Насколько близко стороны к границам общего bbox (0 — совпадает, 1 — далеко)
+  const leftGap   = Math.abs(b.minX - global.minX) / gw;
+  const rightGap  = Math.abs(global.maxX - b.maxX) / gw;
+  const topGap    = Math.abs(b.minY - global.minY) / gh;
+  const bottomGap = Math.abs(global.maxY - b.maxY) / gh;
+  // Чем меньше сумма, тем «рамочнее» путь
+  return leftGap + rightGap + topGap + bottomGap;
+}
+
 function getBBox(ptsArr) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const pts of ptsArr) {
@@ -253,25 +278,48 @@ async function imageToDots({
     // Разворачиваем каждый <path d="..."> на его под‑пути, чтобы не соединять разные контуры одной ломаной
     const allDs = dList.flatMap(d => splitSubpaths(d));
 
-    // Отсортируем пути по значимости
-    const items = allDs.map(d => {
-      const len = pathLength(d);
-      const area = pathAreaApprox(d);
-      return { d, len, area };
-    }).sort((a, b) => (b.area - a.area) || (b.len - a.len));
+    // Предварительно считаем bbox каждого под‑пути, чтобы найти «глобальные» границы
+    const preBBoxes = allDs.map(d => getBBoxOfD(svgpath(d).unshort().unarc().abs().toString(), 240));
+    const globalBBox = preBBoxes.reduce((g, b) => ({
+      minX: Math.min(g.minX, b.minX),
+      minY: Math.min(g.minY, b.minY),
+      maxX: Math.max(g.maxX, b.maxX),
+      maxY: Math.max(g.maxY, b.maxY),
+    }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
 
-    const mainArea = items[0].area || 1;
+    // Отсортируем пути по значимости
+    const items = allDs.map((d, idx) => {
+      const dAbs = svgpath(d).unshort().unarc().abs().toString();
+      const len = pathLength(dAbs);
+      const area = pathAreaApprox(dAbs);
+      const bbox = preBBoxes[idx];
+      const frameScore = frameCoverage(bbox, globalBBox);
+      return { d: dAbs, len, area, bbox, frameScore };
+    })
+    // Вперёд — крупные по площади, а при равной площади — не «рамочные»
+    .sort((a, b) => (b.area - a.area) || (a.frameScore - b.frameScore) || (b.len - a.len));
+
+    // Фильтруем «рамочные» пути: очень близки к границам глобального bbox
+    // Порог подберите при необходимости. 0.05 означает ~5% суммарного зазора от ширины+высоты.
+    const FRAME_THRESHOLD = 0.06;
+    const goodItems = items.filter(it => it.frameScore > FRAME_THRESHOLD);
+
+    // Если всё отфильтровали (например, картинка реально чёрная рамка),
+    // возвращаемся к исходному списку.
+    const ranked = goodItems.length ? goodItems : items;
+
+    const mainArea = (ranked[0]?.area) || 1;
     const contoursD = [];
     const decorD = [];
 
-    for (const it of items) {
+    for (const it of ranked) {
       if (multiContours && contoursD.length < maxContours && it.area > mainArea * decorAreaRatio) {
         contoursD.push(it.d);
       } else {
         decorD.push(it.d);
       }
     }
-    if (!contoursD.length) contoursD.push(items[0].d);
+    if (!contoursD.length && ranked.length) contoursD.push(ranked[0].d);
 
     // Подготовим «полилинии» для каждого контура
     const densePerContour = contoursD.map(d => {

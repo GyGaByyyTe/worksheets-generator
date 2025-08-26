@@ -9,7 +9,7 @@ const sharp = require('sharp');
 const { imageToDots } = require('./image_path_to_dots_processor');
 
 function parseArgs(argv) {
-  const args = { input: 'base.jpg', output: undefined, points: 30, threshold: 180, numbering: 'continuous' };
+  const args = { input: 'base.jpg', output: undefined, points: 80, threshold: 180, numbering: 'continuous' };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--input' || a === '-i') args.input = argv[++i];

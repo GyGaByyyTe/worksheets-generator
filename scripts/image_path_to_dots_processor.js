@@ -170,34 +170,34 @@ function normalizeWithBBox(pts, bbox) {
 function pointsToSVGMulti({ contours, decor = [], width = 1000, height = 700, margin = 50, numbering = 'continuous' /* 'continuous' | 'perContour' */ }) {
   const left = margin, top = margin;
   const w = width - margin * 2, h = height - margin * 2;
-
+  //
   const dxAlt = [10, -16, 10, -16, 0, 14, -14, 0];
   const dyAlt = [-12, -12, 20, 20, -20, 16, 16, 22];
-
+  //
   let num = 1;
   const layers = [];
 
   // Декор — просто тонкие линии
-  if (decor.length) {
-    const paths = decor.map(d => {
-      const p = new SVGPathProperties(d);
-      const L = p.getTotalLength();
-      const step = Math.max(2.5, L / 260); // умеренно плотный штрих
-      const pts = [];
-      for (let s = 0; s <= L; s += step) {
-        const { x, y } = p.getPointAtLength(s);
-        pts.push([x, y]);
-      }
-      return pts;
-    });
-    const bbox = getBBox(paths);
-    const scaled = paths.map(pts => normalizeWithBBox(pts, bbox));
-    const pathStr = scaled.map(pts => {
-      const toPx = ([px, py]) => `${(left + px * w).toFixed(1)} ${(top + py * h).toFixed(1)}`;
-      return `M ${toPx(scaled[0][0])} ` + pts.map(p => `L ${toPx(p)}`).join(' ');
-    });
-    layers.push(`<g stroke="#111" stroke-width="2" fill="none" opacity="0.85">${pathStr.map(s => `<path d="${s}"/>`).join('')}</g>`);
-  }
+  // if (decor.length) {
+  //   const paths = decor.map(d => {
+  //     const p = new SVGPathProperties(d);
+  //     const L = p.getTotalLength();
+  //     const step = Math.max(2.5, L / 260); // умеренно плотный штрих
+  //     const pts = [];
+  //     for (let s = 0; s <= L; s += step) {
+  //       const { x, y } = p.getPointAtLength(s);
+  //       pts.push([x, y]);
+  //     }
+  //     return pts;
+  //   });
+    // const bbox = getBBox(paths);
+    // const scaled = paths.map(pts => normalizeWithBBox(pts, bbox));
+    // const pathStr = scaled.map(pts => {
+    //   const toPx = ([px, py]) => `${(left + px * w).toFixed(1)} ${(top + py * h).toFixed(1)}`;
+    //   return `M ${toPx(scaled[0][0])} ` + pts.map(p => `L ${toPx(p)}`).join(' ');
+    // });
+    // layers.push(`<g stroke="#111" stroke-width="2" fill="none" opacity="0.85">${pathStr.map(s => `<path d="${s}"/>`).join('')}</g>`);
+  // }
 
   // Контуры с точками
   const dots = [];

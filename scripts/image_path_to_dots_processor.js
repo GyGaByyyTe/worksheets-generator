@@ -1,11 +1,11 @@
 // JavaScript
-// npm i sharp node-potrace svg-path-properties svgpath simplify-js
+// npm i sharp potrace svg-path-properties svgpath simplify-js
 
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const { Potrace } = require('node-potrace');
-const { SVGPathProperties } = require('svg-path-properties');
+const { Potrace } = require('potrace');
+const { svgPathProperties: SVGPathProperties } = require('svg-path-properties');
 const svgpath = require('svgpath');
 const simplify = require('simplify-js');
 const os = require('os');
@@ -40,6 +40,21 @@ function extractPathsD(svgStr) {
   return dList;
 }
 
+// Добавлено: разбиение одного d на независимые под‑пути (последовательности команд от M до следующего M)
+function splitSubpaths(d) {
+  // Нормализуем кривые и относительные команды, чтобы M и Z были явными
+  const norm = svgpath(d).unshort().unarc().abs().toString();
+  const parts = [];
+  const re = /([Mm][^Mm]+)/g; // фрагмент от M до следующего M (невключительно)
+  let m;
+  while ((m = re.exec(norm)) !== null) {
+    const seg = m[1].trim();
+    if (seg.length > 0) parts.push(seg);
+  }
+  return parts.length ? parts : [norm];
+}
+
+
 function pathLength(d) {
   return new SVGPathProperties(d).getTotalLength();
 }
@@ -65,14 +80,21 @@ function pathAreaApprox(d, samples = 400) {
 function resamplePathD(d, targetCount) {
   const props = new SVGPathProperties(d);
   const total = props.getTotalLength();
-  const step = total / (targetCount - 1);
+  if (targetCount <= 1) {
+    const p0 = props.getPointAtLength(0);
+    return [[p0.x, p0.y]];
+  }
+  // Семплируем на полуинтервале [0, total), чтобы не получить дубль первой точки на длине total
+  const step = total / targetCount; // а не (targetCount - 1)
   const pts = [];
   for (let i = 0; i < targetCount; i++) {
-    const p = props.getPointAtLength(step * i);
+    const l = Math.min(total - 1e-6, i * step); // защищаемся от попадания ровно в total
+    const p = props.getPointAtLength(l);
     pts.push([p.x, p.y]);
   }
   return pts;
 }
+
 
 function normalizePoints(pts) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -228,8 +250,11 @@ async function imageToDots({
     const dList = extractPathsD(svgStr);
     if (!dList.length) throw new Error('Контур не найден. Попробуйте другой threshold или более контрастное изображение.');
 
+    // Разворачиваем каждый <path d="..."> на его под‑пути, чтобы не соединять разные контуры одной ломаной
+    const allDs = dList.flatMap(d => splitSubpaths(d));
+
     // Отсортируем пути по значимости
-    const items = dList.map(d => {
+    const items = allDs.map(d => {
       const len = pathLength(d);
       const area = pathAreaApprox(d);
       return { d, len, area };
@@ -268,22 +293,24 @@ async function imageToDots({
     });
     const sumL = lengths.reduce((a, b) => a + b, 0) || 1;
     let remainder = pointsCount;
-    const counts = lengths.map((L, i) => {
-      const v = Math.max(6, Math.round(pointsCount * (L / sumL))); // минимум точек на контур
+    const counts = lengths.map(L => {
+      const v = Math.max(3, Math.round(pointsCount * (L / sumL))); // минимум точек на контур уменьшен до 3
       remainder -= v;
       return v;
     });
-    // Подправим округление, чтобы сумма = pointsCount
-    for (let i = 0; remainder !== 0 && i < counts.length; i++) {
+    // Подправим, чтобы сумма точно равнялась pointsCount
+    let i = 0;
+    while (remainder !== 0 && counts.length) {
       const step = remainder > 0 ? 1 : -1;
-      counts[i] += step; remainder -= step;
+      counts[i] = Math.max(3, counts[i] + step);
+      remainder -= step;
+      i = (i + 1) % counts.length;
     }
 
-    // Равномерно отсемплируем каждую полилинию
-    const sampledContours = densePerContour.map((pts, i) => {
+    // Равномерно отсемплируем каждую полилинию, избегая дублирующей замыкающей точки
+    const sampledContours = densePerContour.map((pts, idx) => {
       const dPoly = 'M ' + pts.map(([x, y]) => `${x} ${y}`).join(' L ') + ' Z';
-      const s = resamplePathD(dPoly, counts[i]);
-      return s;
+      return resamplePathD(dPoly, counts[idx]);
     });
 
     // Совместим в единый bbox и зададим красивый старт для каждого контура

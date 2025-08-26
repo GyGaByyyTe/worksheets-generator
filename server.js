@@ -33,7 +33,7 @@ function allTaskKeys() {
   return Object.keys(GENERATORS);
 }
 
-function renderForm({ days = 1, selected = allTaskKeys(), message = '' } = {}) {
+function renderForm({ days = 1, selected = ['connect-dots'], message = '' } = {}) {
   const tasks = [
     { key: 'clocks', label: 'Часы' },
     { key: 'weights', label: 'Весы' },

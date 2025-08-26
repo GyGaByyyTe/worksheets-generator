@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+  <rect x="45" y="45" width="910" height="610" fill="none" stroke="#ccc" rx="14"/>
+  <path d="M 67.9 640.0 L 286.6 640.0 L 505.3 640.0 L 724.0 640.0 L 937.9 636.8 L 938.6 491.5 L 939.3 346.3 L 940.0 201.0 L 934.3 60.0 L 715.6 60.4 L 496.9 60.8 L 278.2 61.1 L 60.0 63.0 L 60.5 208.3 L 60.9 353.6 L 61.4 498.8" fill="none" stroke="#bbb" stroke-width="1.5" stroke-dasharray="6 8" />
+  <path d="M 157.2 615.3 L 386.1 615.3 L 614.9 615.3 L 843.7 615.3 L 901.7 501.8 L 901.7 349.9 L 901.7 197.9 L 843.7 84.4 L 614.9 84.4 L 386.1 84.4 L 157.2 84.4 L 98.5 197.9 L 97.5 349.9 L 98.5 501.8" fill="none" stroke="#bbb" stroke-width="1.5" stroke-dasharray="6 8" />
+  <circle cx="67.9" cy="640.0" r="6.5" fill="#000"/>
+  <circle cx="286.6" cy="640.0" r="6.5" fill="#000"/>
+  <circle cx="505.3" cy="640.0" r="6.5" fill="#000"/>
+  <circle cx="724.0" cy="640.0" r="6.5" fill="#000"/>
+  <circle cx="937.9" cy="636.8" r="6.5" fill="#000"/>
+  <circle cx="938.6" cy="491.5" r="6.5" fill="#000"/>
+  <circle cx="939.3" cy="346.3" r="6.5" fill="#000"/>
+  <circle cx="940.0" cy="201.0" r="6.5" fill="#000"/>
+  <circle cx="934.3" cy="60.0" r="6.5" fill="#000"/>
+  <circle cx="715.6" cy="60.4" r="6.5" fill="#000"/>
+  <circle cx="496.9" cy="60.8" r="6.5" fill="#000"/>
+  <circle cx="278.2" cy="61.1" r="6.5" fill="#000"/>
+  <circle cx="60.0" cy="63.0" r="6.5" fill="#000"/>
+  <circle cx="60.5" cy="208.3" r="6.5" fill="#000"/>
+  <circle cx="60.9" cy="353.6" r="6.5" fill="#000"/>
+  <circle cx="61.4" cy="498.8" r="6.5" fill="#000"/>
+  <circle cx="157.2" cy="615.3" r="6.5" fill="#000"/>
+  <circle cx="386.1" cy="615.3" r="6.5" fill="#000"/>
+  <circle cx="614.9" cy="615.3" r="6.5" fill="#000"/>
+  <circle cx="843.7" cy="615.3" r="6.5" fill="#000"/>
+  <circle cx="901.7" cy="501.8" r="6.5" fill="#000"/>
+  <circle cx="901.7" cy="349.9" r="6.5" fill="#000"/>
+  <circle cx="901.7" cy="197.9" r="6.5" fill="#000"/>
+  <circle cx="843.7" cy="84.4" r="6.5" fill="#000"/>
+  <circle cx="614.9" cy="84.4" r="6.5" fill="#000"/>
+  <circle cx="386.1" cy="84.4" r="6.5" fill="#000"/>
+  <circle cx="157.2" cy="84.4" r="6.5" fill="#000"/>
+  <circle cx="98.5" cy="197.9" r="6.5" fill="#000"/>
+  <circle cx="97.5" cy="349.9" r="6.5" fill="#000"/>
+  <circle cx="98.5" cy="501.8" r="6.5" fill="#000"/>
+  <text x="77.9" y="628.0" font-family="Arial, sans-serif" font-size="16" fill="#111">1</text>
+  <text x="270.6" y="628.0" font-family="Arial, sans-serif" font-size="16" fill="#111">2</text>
+  <text x="515.3" y="660.0" font-family="Arial, sans-serif" font-size="16" fill="#111">3</text>
+  <text x="708.0" y="660.0" font-family="Arial, sans-serif" font-size="16" fill="#111">4</text>
+  <text x="937.9" y="616.8" font-family="Arial, sans-serif" font-size="16" fill="#111">5</text>
+  <text x="952.6" y="507.5" font-family="Arial, sans-serif" font-size="16" fill="#111">6</text>
+  <text x="925.3" y="362.3" font-family="Arial, sans-serif" font-size="16" fill="#111">7</text>
+  <text x="940.0" y="223.0" font-family="Arial, sans-serif" font-size="16" fill="#111">8</text>
+  <text x="944.3" y="48.0" font-family="Arial, sans-serif" font-size="16" fill="#111">9</text>
+  <text x="699.6" y="48.4" font-family="Arial, sans-serif" font-size="16" fill="#111">10</text>
+  <text x="506.9" y="80.8" font-family="Arial, sans-serif" font-size="16" fill="#111">11</text>
+  <text x="262.2" y="81.1" font-family="Arial, sans-serif" font-size="16" fill="#111">12</text>
+  <text x="60.0" y="43.0" font-family="Arial, sans-serif" font-size="16" fill="#111">13</text>
+  <text x="74.5" y="224.3" font-family="Arial, sans-serif" font-size="16" fill="#111">14</text>
+  <text x="46.9" y="369.6" font-family="Arial, sans-serif" font-size="16" fill="#111">15</text>
+  <text x="61.4" y="520.8" font-family="Arial, sans-serif" font-size="16" fill="#111">16</text>
+  <text x="167.2" y="603.3" font-family="Arial, sans-serif" font-size="16" fill="#111">17</text>
+  <text x="370.1" y="603.3" font-family="Arial, sans-serif" font-size="16" fill="#111">18</text>
+  <text x="624.9" y="635.3" font-family="Arial, sans-serif" font-size="16" fill="#111">19</text>
+  <text x="827.7" y="635.3" font-family="Arial, sans-serif" font-size="16" fill="#111">20</text>
+  <text x="901.7" y="481.8" font-family="Arial, sans-serif" font-size="16" fill="#111">21</text>
+  <text x="915.7" y="365.9" font-family="Arial, sans-serif" font-size="16" fill="#111">22</text>
+  <text x="887.7" y="213.9" font-family="Arial, sans-serif" font-size="16" fill="#111">23</text>
+  <text x="843.7" y="106.4" font-family="Arial, sans-serif" font-size="16" fill="#111">24</text>
+  <text x="624.9" y="72.4" font-family="Arial, sans-serif" font-size="16" fill="#111">25</text>
+  <text x="370.1" y="72.4" font-family="Arial, sans-serif" font-size="16" fill="#111">26</text>
+  <text x="167.2" y="104.4" font-family="Arial, sans-serif" font-size="16" fill="#111">27</text>
+  <text x="82.5" y="217.9" font-family="Arial, sans-serif" font-size="16" fill="#111">28</text>
+  <text x="97.5" y="329.9" font-family="Arial, sans-serif" font-size="16" fill="#111">29</text>
+  <text x="112.5" y="517.8" font-family="Arial, sans-serif" font-size="16" fill="#111">30</text>
+</svg>

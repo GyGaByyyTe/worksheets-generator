@@ -2,11 +2,13 @@
 // npm i sharp node-potrace svg-path-properties svgpath simplify-js
 
 const fs = require('fs');
+const path = require('path');
 const sharp = require('sharp');
 const { Potrace } = require('node-potrace');
 const { SVGPathProperties } = require('svg-path-properties');
 const svgpath = require('svgpath');
 const simplify = require('simplify-js');
+const os = require('os');
 
 async function preprocessToBW(inputPath, tmpPath, { width = 1000, threshold = 180 } = {}) {
   // Готовим чёрно-белый силуэт для более качественной трассировки
@@ -217,87 +219,91 @@ async function imageToDots({
   decorAreaRatio = 0.18, // всё, что существенно меньше главного по площади — считаем декором
   numbering = 'continuous' // 'continuous' | 'perContour'
 }) {
-  const tmpBW = '.tmp-bw.png';
-  await preprocessToBW(input, tmpBW, { width: 1200, threshold });
+  const tmpBW = path.join(os.tmpdir(), `dots-bw-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+  try {
+    await preprocessToBW(input, tmpBW, { width: 1200, threshold });
 
-  const svgStr = await traceWithPotrace(tmpBW, { turdSize: 80, optCurve: true, alphaMax: 1.0, despeckle: true });
+    const svgStr = await traceWithPotrace(tmpBW, { turdSize: 80, optCurve: true, alphaMax: 1.0, despeckle: true });
 
-  const dList = extractPathsD(svgStr);
-  if (!dList.length) throw new Error('Контур не найден. Попробуйте другой threshold или более контрастное изображение.');
+    const dList = extractPathsD(svgStr);
+    if (!dList.length) throw new Error('Контур не найден. Попробуйте другой threshold или более контрастное изображение.');
 
-  // Отсортируем пути по значимости
-  const items = dList.map(d => {
-    const len = pathLength(d);
-    const area = pathAreaApprox(d);
-    return { d, len, area };
-  }).sort((a, b) => (b.area - a.area) || (b.len - a.len));
+    // Отсортируем пути по значимости
+    const items = dList.map(d => {
+      const len = pathLength(d);
+      const area = pathAreaApprox(d);
+      return { d, len, area };
+    }).sort((a, b) => (b.area - a.area) || (b.len - a.len));
 
-  const mainArea = items[0].area || 1;
-  const contoursD = [];
-  const decorD = [];
+    const mainArea = items[0].area || 1;
+    const contoursD = [];
+    const decorD = [];
 
-  for (const it of items) {
-    if (multiContours && contoursD.length < maxContours && it.area > mainArea * decorAreaRatio) {
-      contoursD.push(it.d);
-    } else {
-      decorD.push(it.d);
+    for (const it of items) {
+      if (multiContours && contoursD.length < maxContours && it.area > mainArea * decorAreaRatio) {
+        contoursD.push(it.d);
+      } else {
+        decorD.push(it.d);
+      }
     }
-  }
-  if (!contoursD.length) contoursD.push(items[0].d);
+    if (!contoursD.length) contoursD.push(items[0].d);
 
-  // Подготовим «полилинии» для каждого контура
-  const densePerContour = contoursD.map(d => {
-    const dClean = svgpath(d).unshort().unarc().toString();
-    // плотная выборка для последующего упрощения
-    const dense = resamplePathD(dClean, 600);
-    return simplifyPolyline(dense, simplifyTolerance);
-  });
+    // Подготовим «полилинии» для каждого контура
+    const densePerContour = contoursD.map(d => {
+      const dClean = svgpath(d).unshort().unarc().toString();
+      // плотная выборка для последующего упрощения
+      const dense = resamplePathD(dClean, 600);
+      return simplifyPolyline(dense, simplifyTolerance);
+    });
 
-  // Пропорционально длинам распределим точки
-  const lengths = densePerContour.map(pts => {
-    let L = 0;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const dx = pts[i + 1][0] - pts[i][0];
-      const dy = pts[i + 1][1] - pts[i][1];
-      L += Math.hypot(dx, dy);
+    // Пропорционально длинам распределим точки
+    const lengths = densePerContour.map(pts => {
+      let L = 0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const dx = pts[i + 1][0] - pts[i][0];
+        const dy = pts[i + 1][1] - pts[i][1];
+        L += Math.hypot(dx, dy);
+      }
+      return L;
+    });
+    const sumL = lengths.reduce((a, b) => a + b, 0) || 1;
+    let remainder = pointsCount;
+    const counts = lengths.map((L, i) => {
+      const v = Math.max(6, Math.round(pointsCount * (L / sumL))); // минимум точек на контур
+      remainder -= v;
+      return v;
+    });
+    // Подправим округление, чтобы сумма = pointsCount
+    for (let i = 0; remainder !== 0 && i < counts.length; i++) {
+      const step = remainder > 0 ? 1 : -1;
+      counts[i] += step; remainder -= step;
     }
-    return L;
-  });
-  const sumL = lengths.reduce((a, b) => a + b, 0) || 1;
-  let remainder = pointsCount;
-  const counts = lengths.map((L, i) => {
-    const v = Math.max(6, Math.round(pointsCount * (L / sumL))); // минимум точек на контур
-    remainder -= v;
-    return v;
-  });
-  // Подправим округление, чтобы сумма = pointsCount
-  for (let i = 0; remainder !== 0 && i < counts.length; i++) {
-    const step = remainder > 0 ? 1 : -1;
-    counts[i] += step; remainder -= step;
+
+    // Равномерно отсемплируем каждую полилинию
+    const sampledContours = densePerContour.map((pts, i) => {
+      const dPoly = 'M ' + pts.map(([x, y]) => `${x} ${y}`).join(' L ') + ' Z';
+      const s = resamplePathD(dPoly, counts[i]);
+      return s;
+    });
+
+    // Совместим в единый bbox и зададим красивый старт для каждого контура
+    const bbox = getBBox(sampledContours);
+    const normalized = sampledContours.map(pts => rotateStartToBottomLeft(normalizeWithBBox(pts, bbox)));
+
+    // Рендер: несколько контуров + декоративные штрихи
+    const svgOut = pointsToSVGMulti({
+      contours: normalized,
+      decor: decorD,
+      width: 1000,
+      height: 700,
+      margin: 60,
+      numbering
+    });
+    fs.writeFileSync(outSvg, svgOut, 'utf8');
+    return outSvg;
+  } finally {
+    try { fs.unlinkSync(tmpBW); } catch (e) { /* ignore */ }
   }
-
-  // Равномерно отсемплируем каждую полилинию
-  const sampledContours = densePerContour.map((pts, i) => {
-    const dPoly = 'M ' + pts.map(([x, y]) => `${x} ${y}`).join(' L ') + ' Z';
-    const s = resamplePathD(dPoly, counts[i]);
-    return s;
-  });
-
-  // Совместим в единый bbox и зададим красивый старт для каждого контура
-  const bbox = getBBox(sampledContours);
-  const normalized = sampledContours.map(pts => rotateStartToBottomLeft(normalizeWithBBox(pts, bbox)));
-
-  // Рендер: несколько контуров + декоративные штрихи
-  const svgOut = pointsToSVGMulti({
-    contours: normalized,
-    decor: decorD,
-    width: 1000,
-    height: 700,
-    margin: 60,
-    numbering
-  });
-  fs.writeFileSync(outSvg, svgOut, 'utf8');
-  return outSvg;
 }
 
 // Пример запуска:
@@ -315,3 +321,5 @@ if (require.main === module) {
   }).then(f => console.log('Сохранено:', f))
     .catch(e => console.error(e));
 }
+
+module.exports = { imageToDots, pointsToSVGPage, pointsToSVGMulti };

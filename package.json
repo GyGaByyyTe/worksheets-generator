@@ -13,6 +13,11 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "node-potrace": "^2.1.8",
+    "sharp": "^0.33.4",
+    "simplify-js": "^1.2.4",
+    "svg-path-properties": "^1.1.0",
+    "svgpath": "^2.6.0"
   }
 }

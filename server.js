@@ -5,6 +5,7 @@ const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
 const { generateCustom, GENERATORS } = require('./scripts/generate-custom');
+const { imageToDots } = require('./scripts/image_path_to_dots_processor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -83,8 +84,17 @@ function renderForm({ days = 1, selected = allTaskKeys(), message = '' } = {}) {
 
       <div style="margin:12px 0;">
         <label><strong>Изображения для задания «соедини по точкам»</strong> (опционально):</label>
-        <div class="muted">Если выбран «соедини по точкам», можно загрузить 1–N картинок-силуэтов (реализация автогенерации из картинок — позже).</div>
+        <div class="muted">Если выбран «соедини по точкам», можно загрузить 1–N силуэтов. Сервер преобразует их в задание с точками.</div>
         <input id="connectImages" type="file" name="connectImages" multiple accept=".png,.jpg,.jpeg,.svg" />
+        <div class="row files">
+          <label>Макс. точек на картинку:
+            <input type="text" name="connectPoints" placeholder="50 или CSV: 30,40,50" />
+          </label>
+          <label>Порог бинаризации:
+            <input type="number" name="connectThreshold" min="0" max="255" value="180" />
+          </label>
+          <span class="muted">По умолчанию 50 точек (предел 6–50). Можно задать одно число или список через запятую — по количеству картинок.</span>
+        </div>
       </div>
       <div style="margin-top:16px;">
         <button class="btn" type="submit">Сгенерировать</button>
@@ -128,10 +138,40 @@ app.post('/generate', upload.array('connectImages', 50), async (req, res) => {
     }
     const days = Math.max(1, Math.min(31, parseInt(req.body.days, 10) || 1));
 
-    // Files saved by multer (not yet used for generation)
-    const files = (req.files || []).map(f => ({ name: f.originalname, path: f.path }));
+    // Files saved by multer (filter to raster formats supported by processor)
+    const files = (req.files || [])
+      .filter(f => /\.(png|jpg|jpeg)$/i.test(f.originalname))
+      .map(f => ({ name: f.originalname, path: f.path }));
 
     const result = generateCustom({ days, tasks: selected });
+
+    // Process uploaded silhouettes into connect-the-dots pages if requested
+    const connectIdx = selected.indexOf('connect-dots');
+    let processed = [];
+    if (connectIdx !== -1 && (files && files.length)) {
+      const pad2 = (n) => String(n).padStart(2, '0');
+      const threshold = Math.max(0, Math.min(255, parseInt(req.body.connectThreshold, 10) || 180));
+      const pointsRaw = (req.body.connectPoints || '').trim();
+      let pointsList = [];
+      if (pointsRaw) {
+        pointsList = pointsRaw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => Number.isFinite(n));
+      }
+      const maxToProcess = Math.min(days, files.length);
+      for (let i = 0; i < maxToProcess; i++) {
+        const f = files[i];
+        const dayRes = result.days[i];
+        const outFile = path.join(dayRes.dir, `page-${pad2(connectIdx + 1)}-connect-dots.svg`);
+        let pts = pointsList[i] != null ? pointsList[i] : (pointsList.length === 1 ? pointsList[0] : 50);
+        pts = Math.max(6, Math.min(50, parseInt(pts, 10) || 50));
+        try {
+          await imageToDots({ input: f.path, outSvg: outFile, pointsCount: pts, threshold, multiContours: false });
+          processed.push({ day: i + 1, file: outFile, points: pts });
+        } catch (err) {
+          console.error('connect-dots processing failed for day', i + 1, err);
+          processed.push({ day: i + 1, error: String(err && err.message || err) });
+        }
+      }
+    }
 
     // Build links
     const wsRoot = path.resolve(process.cwd(), 'worksheets');
@@ -140,6 +180,22 @@ app.post('/generate', upload.array('connectImages', 50), async (req, res) => {
       const href = '/worksheets/' + rel;
       return `<li>День ${String(day).padStart(2,'0')}: <a href="${href}" target="_blank">${href}</a></li>`;
     }).join('');
+
+    // Build processed summary HTML
+    let processedHtml = '';
+    if (files.length) {
+      if (connectIdx === -1) {
+        processedHtml = `<p class=\"muted\">Загружено файлов для «соедини по точкам»: ${files.length}, но тип задания не выбран — файлы не обработаны.</p>`;
+      } else if (processed.length) {
+        const ok = processed.filter(p => !p.error);
+        const bad = processed.filter(p => p.error);
+        const okList = ok.map(p => `<li>День ${String(p.day).padStart(2,'0')}: ${p.points} точек</li>`).join('');
+        const badList = bad.map(p => `<li>День ${String(p.day).padStart(2,'0')}: ошибка — ${p.error}</li>`).join('');
+        processedHtml = `${ok.length ? `<h3>Преобразованные силуэты:</h3><ul>${okList}</ul>` : ''}${bad.length ? `<h4>Ошибки:</h4><ul>${badList}</ul>` : ''}`;
+      } else {
+        processedHtml = `<p class=\"muted\">Загружено файлов для «соедини по точкам»: ${files.length}, но не удалось обработать ни один файл.</p>`;
+      }
+    }
 
     res.send(`<!doctype html>
 <html lang="ru">
@@ -160,7 +216,7 @@ app.post('/generate', upload.array('connectImages', 50), async (req, res) => {
   <div class="card">
     <h1>Готово!</h1>
     <p>Сгенерировано дней: <strong>${days}</strong>. Выбрано типов: <strong>${selected.length}</strong>.</p>
-    ${files.length ? `<p class="muted">Загружено файлов для «соедини по точкам»: ${files.length} (пока не используется в генерации)</p>` : ''}
+    ${processedHtml}
     <h3>Ссылки на страницы:</h3>
     <ul>${dayLinks}</ul>
     <p><a class="btn" href="/">← Назад к генератору</a> <a class="btn" href="/worksheets/" target="_blank">Открыть папку worksheets</a></p>

@@ -7,7 +7,16 @@
   "license": "MIT",
   "scripts": {
     "build": "echo No build step for core",
-    "test": "node -e \"console.log('core ok')\""
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "<rootDir>/test/**/*.test.js"
+    ]
   },
   "dependencies": {
     "potrace": "^2.1.0",

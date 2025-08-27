@@ -1,3 +1,5 @@
 .idea
+*/**/.next/
+generated/
 node_modules/
 worksheets/

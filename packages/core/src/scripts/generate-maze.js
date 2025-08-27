@@ -1,57 +1,13 @@
 /* eslint-disable no-console */
 /**
  * Генератор SVG-лабиринтов в стиле печатных заданий.
- *
- * Запуск по умолчанию:
- *   npm run worksheets:maze
- *
- * Параметры CLI (необязательно):
- *   --rows 20      количество строк (клеток)
- *   --cols 20      количество столбцов
- *   --count 10     число файлов
- *   --width 1000   ширина SVG (устарело, теперь внутренняя область страницы)
- *   --height 1000  высота SVG (устарело, теперь внутренняя область страницы)
- *   --margin 20    внешний отступ (устарело, теперь внутренняя область страницы)
- *   --seed 123     детерминированная генерация
- *
- * Файлы сохраняются в ./worksheets/mazes/maze-<rows>x<cols>-NN.svg
+ * Совместимая версия с оригинальным scripts/generate-maze.js (животные и на всю страницу).
  */
 const fs = require('fs');
 const path = require('path');
 const { WIDTH, HEIGHT, MARGIN, headerSVG, wrapSVG } = require('./generators/common');
 
 // ------------------------ Утилиты ------------------------
-
-function parseArgs(argv) {
-  const args = { rows: 20, cols: 20, count: 10, width: 1000, height: 1000, margin: 20, seed: undefined };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    const [k, v] = a.startsWith('--') && a.includes('=') ? a.split('=') : [a, argv[i + 1]];
-    const set = (key, val) => {
-      if (val === undefined || String(key).startsWith('--') === false) return;
-      const n = Number(val);
-      args[key.replace(/^--/, '')] = Number.isFinite(n) ? n : val;
-    };
-    switch (true) {
-      case a === '--rows': set('--rows', argv[++i]); break;
-      case a.startsWith('--rows='): set('--rows', v); break;
-      case a === '--cols': set('--cols', argv[++i]); break;
-      case a.startsWith('--cols='): set('--cols', v); break;
-      case a === '--count': set('--count', argv[++i]); break;
-      case a.startsWith('--count='): set('--count', v); break;
-      case a === '--width': set('--width', argv[++i]); break;
-      case a.startsWith('--width='): set('--width', v); break;
-      case a === '--height': set('--height', argv[++i]); break;
-      case a.startsWith('--height='): set('--height', v); break;
-      case a === '--margin': set('--margin', argv[++i]); break;
-      case a.startsWith('--margin='): set('--margin', v); break;
-      case a === '--seed': args.seed = argv[++i]; break;
-      case a.startsWith('--seed='): args.seed = v; break;
-      default: break;
-    }
-  }
-  return args;
-}
 
 // Простенький детерминированный генератор случайных чисел (Mulberry32)
 function createRng(seedStr) {
@@ -113,74 +69,115 @@ function generateMaze(rows, cols, rnd) {
     stack.push([nr, nc]);
   }
 
-  return { rows, cols, walls };
+  return { rows, cols, walls, index };
 }
 
-function renderMazeSVG({ rows, cols, walls }, { cellSize = 22, stroke = 3, margin = 16, start = [0, 0], finish = [rows - 1, cols - 1] } = {}) {
-  const W = margin * 2 + cols * cellSize;
-  const H = margin * 2 + rows * cellSize;
-  const ix = (r, c) => r * cols + c;
+// Нахождение самой удалённой клетки от старта (0,0)
+function farthestCell(maze) {
+  const { rows, cols, walls, index } = maze;
+  const q = [[0, 0]];
+  const dist = new Map([[index(0, 0), 0]]);
+  while (q.length) {
+    const [r, c] = q.shift();
+    const i = index(r, c);
+    const w = walls[i];
+    const moves = [];
+    if (!w.N) moves.push([r - 1, c]);
+    if (!w.E) moves.push([r, c + 1]);
+    if (!w.S) moves.push([r + 1, c]);
+    if (!w.W) moves.push([r, c - 1]);
+    for (const [nr, nc] of moves) {
+      const ni = index(nr, nc);
+      if (!dist.has(ni)) {
+        dist.set(ni, dist.get(i) + 1);
+        q.push([nr, nc]);
+      }
+    }
+  }
+  let maxI = 0; let maxD = -1;
+  for (const [i, d] of dist.entries()) {
+    if (d > maxD) { maxD = d; maxI = i; }
+  }
+  return { r: Math.floor(maxI / cols), c: maxI % cols, distance: maxD };
+}
 
-  const lines = [];
+// ------------------------ Рендер в SVG ------------------------
+
+function renderMazeSVG(maze, opts) {
+  const { rows, cols, walls } = maze;
+  const { width, height, margin = 20, offsetX = MARGIN, offsetY = 220, theme = { start: '🐭', finish: '🧀' } } = opts;
+
+  // Подгон размеров клеток под целые пиксели
+  const cellW = Math.floor((width - margin * 2) / cols);
+  const cellH = Math.floor((height - margin * 2) / rows);
+  const usedW = cellW * cols + margin * 2;
+  const usedH = cellH * rows + margin * 2;
+
+  const stroke = 6; // толщина стен
+  const line = (x1, y1, x2, y2) =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-linecap="square" stroke-width="${stroke}"/>`;
+
+  let lines = '';
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const x = margin + c * cellSize;
-      const y = margin + r * cellSize;
-      const w = walls[ix(r, c)];
-      if (w.N) lines.push(`<line x1="${x}" y1="${y}" x2="${x + cellSize}" y2="${y}" stroke="#111" stroke-width="${stroke}"/>`);
-      if (w.E) lines.push(`<line x1="${x + cellSize}" y1="${y}" x2="${x + cellSize}" y2="${y + cellSize}" stroke="#111" stroke-width="${stroke}"/>`);
-      if (w.S) lines.push(`<line x1="${x}" y1="${y + cellSize}" x2="${x + cellSize}" y2="${y + cellSize}" stroke="#111" stroke-width="${stroke}"/>`);
-      if (w.W) lines.push(`<line x1="${x}" y1="${y}" x2="${x}" y2="${y + cellSize}" stroke="#111" stroke-width="${stroke}"/>`);
+      const i = r * cols + c;
+      const w = walls[i];
+      const x = margin + c * cellW;
+      const y = margin + r * cellH;
+
+      // Рисуем верхнюю и левую стены для каждой клетки,
+      // плюс правую/нижнюю для последнего столбца/строки.
+      if (w.N) lines += line(x, y, x + cellW, y);
+      if (w.W) lines += line(x, y, x, y + cellH);
+      if (c === cols - 1 && w.E) lines += line(x + cellW, y, x + cellW, y + cellH);
+      if (r === rows - 1 && w.S) lines += line(x, y + cellH, x + cellW, y + cellH);
     }
   }
 
-  // старт/финиш
-  const [sr, sc] = start;
-  const [fr, fc] = finish;
-  const sx = margin + sc * cellSize + cellSize / 2;
-  const sy = margin + sr * cellSize + cellSize / 2;
-  const fx = margin + fc * cellSize + cellSize / 2;
-  const fy = margin + fr * cellSize + cellSize / 2;
+  // Иконки: старт и финиш
+  const startX = margin + cellW / 2;
+  const startY = margin + cellH / 2;
 
-  const startEl = `<circle cx="${sx}" cy="${sy}" r="${cellSize * 0.28}" fill="#0a0"/>`;
-  const endEl = `<rect x="${fx - cellSize * 0.28}" y="${fy - cellSize * 0.28}" width="${cellSize * 0.56}" height="${cellSize * 0.56}" fill="#a00"/>`;
+  const far = farthestCell(maze);
+  const finishX = margin + far.c * cellW + cellW / 2;
+  const finishY = margin + far.r * cellH + cellH / 2;
 
-  const inner = `
-  <g transform="translate(${MARGIN}, ${MARGIN})">
-    ${lines.join('\n')}
-    ${startEl}
-    ${endEl}
+  const iconSize = Math.floor(Math.min(cellW, cellH) * 0.72);
+
+  const group = `
+  <g transform="translate(${offsetX}, ${offsetY})">
+    <rect x="${stroke/2}" y="${stroke/2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
+    <!-- стены -->
+    ${lines}
+    <!-- иконки старта/финиша -->
+    <text x="${startX}" y="${startY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">${theme.start}</text>
+    <text x="${finishX}" y="${finishY + iconSize * 0.35}" font-size="${iconSize}" text-anchor="middle">${theme.finish}</text>
   </g>`;
-
-  const header = headerSVG({ title: 'Найди путь в лабиринте', subtitle: '', pageNum: 1 });
-  return wrapSVG(`${header}
-  <g transform="translate(0, 160)">
-    <rect x="16" y="16" width="${WIDTH - 32}" height="${HEIGHT - 240}" rx="18" ry="18" fill="none" stroke="#444" stroke-width="2"/>
-    <g transform="translate(60, 60)">${inner}</g>
-  </g>`);
+  return group;
 }
 
-function generateMazePage({ pageNum = 1, seed } = {}) {
+// Экспортируемая функция сборки одной страницы
+function generateMazePage(opts = {}) {
+  const { rows = 20, cols = 20, margin = 20, seed, pageNum = 1, theme } = opts;
   const rnd = createRng(seed);
-  const rows = 20, cols = 20;
+
+  // Темы иконок: старт / финиш
+  const themes = [
+    { start: '🐭', finish: '🧀' },
+    { start: '🐱', finish: '🧶' },
+    { start: '🐟', finish: '🌿' },
+    { start: '🐶', finish: '🦴' },
+  ];
+  const usedTheme = theme || choice(themes, rnd);
+
+  const gridW = WIDTH - MARGIN * 2;
+  const gridH = HEIGHT - 220 - MARGIN;
   const maze = generateMaze(rows, cols, rnd);
-  const svg = renderMazeSVG(maze, {});
-  return svg;
+
+  let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`, pageNum });
+  content += renderMazeSVG(maze, { width: gridW, height: gridH, margin, offsetX: MARGIN, offsetY: 220, theme: usedTheme });
+  return wrapSVG(content);
 }
 
-if (require.main === module) {
-  const args = parseArgs(process.argv.slice(2));
-  const outDir = path.resolve(process.cwd(), 'worksheets', 'mazes');
-  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-
-  const rnd = createRng(args.seed);
-  for (let i = 0; i < args.count; i++) {
-    const maze = generateMaze(args.rows, args.cols, rnd);
-    const svg = renderMazeSVG(maze, {});
-    const file = path.join(outDir, `maze-${args.rows}x${args.cols}-${String(i + 1).padStart(2, '0')}.svg`);
-    fs.writeFileSync(file, svg, 'utf8');
-    console.log('✓', file);
-  }
-}
-
-module.exports = { parseArgs, createRng, generateMaze, renderMazeSVG, generateMazePage };
+module.exports = { generateMazePage };

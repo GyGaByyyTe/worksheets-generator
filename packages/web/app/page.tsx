@@ -2,8 +2,19 @@
 import React from 'react';
 
 function apiBase() {
-  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-  return 'http://localhost:4000';
+  const v = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL)
+    ? process.env.NEXT_PUBLIC_API_URL
+    : 'http://localhost:4000';
+  // normalize: remove trailing slashes to prevent double slashes when concatenating
+  return v.replace(/\/+$/, '');
+}
+
+function absUrl(u: string) {
+  if (!u) return u;
+  if (u.startsWith('http://') || u.startsWith('https://')) return u;
+  const base = apiBase();
+  if (u.startsWith('/')) return `${base}${u}`;
+  return `${base}/${u}`;
 }
 
 type GenerateResponse = {
@@ -93,13 +104,13 @@ export default function Page() {
       {result && (
         <div className="results">
           <h2>Результаты</h2>
-          <div className="outdir">Папка: <a href={result.outDir} target="_blank">{result.outDir}</a></div>
+          <div className="outdir">Папка: <a href={absUrl(result.outDir)} target="_blank" rel="noreferrer">{absUrl(result.outDir)}</a></div>
           {result.days.map(d => (
             <div key={d.day} className="day">
-              <h3>День {d.day} — <a href={d.indexHtml} target="_blank">просмотр страниц</a></h3>
+              <h3>День {d.day} — <a href={absUrl(d.indexHtml)} target="_blank" rel="noreferrer">просмотр страниц</a></h3>
               <div className="images">
                 {d.files.map((f, i) => (
-                  <a key={i} href={f} target="_blank"><img src={f} alt={`page ${i+1}`} /></a>
+                  <a key={i} href={absUrl(f)} target="_blank" rel="noreferrer"><img src={absUrl(f)} alt={`page ${i+1}`} /></a>
                 ))}
               </div>
             </div>

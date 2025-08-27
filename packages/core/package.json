@@ -1,0 +1,19 @@
+{
+  "name": "@wg/core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "build": "echo No build step for core",
+    "test": "node -e \"console.log('core ok')\""
+  },
+  "dependencies": {
+    "potrace": "^2.1.0",
+    "sharp": "^0.33.4",
+    "simplify-js": "^1.2.4",
+    "svg-path-properties": "^1.1.0",
+    "svgpath": "^2.6.0"
+  }
+}

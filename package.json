@@ -1,24 +1,17 @@
 {
   "name": "worksheets-generator",
+  "private": true,
   "version": "1.0.0",
-  "scripts": {
-    "start": "node server.js",
-    "server": "node server.js",
-    "worksheets:addition": "node scripts/generate-worksheets.js",
-    "worksheets:maze": "node scripts/generate-maze.js",
-    "worksheets:week": "node scripts/generate-week-packs.js",
-    "worksheets:custom": "node -e \"require('./scripts/generate-custom').generateCustom({days:1,tasks:['maze']})\"",
-    "debug:dots": "node scripts\\debug-dots.js"
-  },
-  "author": "GyGaByyyTe",
   "license": "MIT",
-  "dependencies": {
-    "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1",
-    "potrace": "^2.1.0",
-    "sharp": "^0.33.4",
-    "simplify-js": "^1.2.4",
-    "svg-path-properties": "^1.1.0",
-    "svgpath": "^2.6.0"
-  }
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @wg/server --filter @wg/web dev",
+    "dev:server": "pnpm --filter @wg/server dev",
+    "dev:web": "pnpm --filter @wg/web dev",
+    "build": "pnpm -r build",
+    "start": "pnpm -r --parallel --filter @wg/server --filter @wg/web start",
+    "start:server": "pnpm --filter @wg/server start",
+    "start:web": "pnpm --filter @wg/web start",
+    "test": "pnpm -r test"
+  },
+  "author": "GyGaByyyTe"
 }

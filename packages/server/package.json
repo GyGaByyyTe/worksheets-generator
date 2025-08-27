@@ -1,0 +1,19 @@
+{
+  "name": "@wg/server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "build": "echo No build step for server",
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "test": "node -e \"console.log('server ok')\""
+  },
+  "dependencies": {
+    "@wg/core": "workspace:*",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

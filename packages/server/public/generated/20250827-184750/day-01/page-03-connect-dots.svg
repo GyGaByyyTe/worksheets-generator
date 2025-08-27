@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1414" viewBox="0 0 1000 1414"><rect width="1000" height="1414" fill="#fff"/>
+  <rect x="16" y="16" width="968" height="1382" rx="18" ry="18" fill="none" stroke="#222" stroke-width="3"/>
+  <text x="40" y="60" font-family="Arial, sans-serif" font-size="28">Имя: ____________________________</text>
+  <text x="600" y="60" font-family="Arial, sans-serif" font-size="28">Дата: _______________</text>
+  <text x="40" y="110" font-family="Arial Black, Arial, sans-serif" font-size="38">СОЕДИНИ ТОЧКИ ПО БУКВАМ</text>
+  <text x="40" y="150" font-family="Arial, sans-serif" font-size="24" fill="#444">Соединяй последовательно от А дальше по алфавиту.</text>
+  <g>
+    <circle cx="964" cy="36" r="22" fill="#000"/>
+    <text x="964" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#fff">3</text>
+  </g><rect x="60" y="240" width="880" height="1074" rx="16" fill="none" stroke="#ccc"/><circle cx="214.6429152573335" cy="786.5446813111727" r="8" fill="#000"/>
+                <text x="226.6429152573335" y="790.5446813111727" font-family="Arial, sans-serif" font-size="20">А</text><circle cx="252.9883701654032" cy="752.6676286251916" r="8" fill="#000"/>
+                <text x="264.98837016540324" y="756.6676286251916" font-family="Arial, sans-serif" font-size="20">Б</text><circle cx="291.3338250734729" cy="718.7905759392106" r="8" fill="#000"/>
+                <text x="303.3338250734729" y="722.7905759392106" font-family="Arial, sans-serif" font-size="20">В</text><circle cx="329.67927998154266" cy="684.9135232532298" r="8" fill="#000"/>
+                <text x="341.67927998154266" y="688.9135232532298" font-family="Arial, sans-serif" font-size="20">Г</text><circle cx="373.75906325252095" cy="664.6620078617735" r="8" fill="#000"/>
+                <text x="385.75906325252095" y="668.6620078617735" font-family="Arial, sans-serif" font-size="20">Д</text><circle cx="418.35864988085893" cy="645.6456153274833" r="8" fill="#000"/>
+                <text x="430.35864988085893" y="649.6456153274833" font-family="Arial, sans-serif" font-size="20">Е</text><circle cx="462.9582365091969" cy="626.629222793193" r="8" fill="#000"/>
+                <text x="474.9582365091969" y="630.629222793193" font-family="Arial, sans-serif" font-size="20">Ё</text><circle cx="507.5578231375348" cy="607.6128302589026" r="8" fill="#000"/>
+                <text x="519.5578231375348" y="611.6128302589026" font-family="Arial, sans-serif" font-size="20">Ж</text><circle cx="548.2604965310506" cy="635.2723185900388" r="8" fill="#000"/>
+                <text x="560.2604965310506" y="639.2723185900388" font-family="Arial, sans-serif" font-size="20">З</text><circle cx="588.7856985630585" cy="665.057497596746" r="8" fill="#000"/>
+                <text x="600.7856985630585" y="669.057497596746" font-family="Arial, sans-serif" font-size="20">И</text><circle cx="629.3109005950664" cy="694.8426766034534" r="8" fill="#000"/>
+                <text x="641.3109005950664" y="698.8426766034534" font-family="Arial, sans-serif" font-size="20">Й</text><circle cx="670.284709789772" cy="723.5682088747811" r="8" fill="#000"/>
+                <text x="682.284709789772" y="727.5682088747811" font-family="Arial, sans-serif" font-size="20">К</text><circle cx="713.3327804218686" cy="747.394166321586" r="8" fill="#000"/>
+                <text x="725.3327804218686" y="751.394166321586" font-family="Arial, sans-serif" font-size="20">Л</text><circle cx="756.3808510539652" cy="771.2201237683907" r="8" fill="#000"/>
+                <text x="768.3808510539652" y="775.2201237683907" font-family="Arial, sans-serif" font-size="20">М</text><circle cx="788.7929077992187" cy="731.8532734707493" r="8" fill="#000"/>
+                <text x="800.7929077992187" y="735.8532734707493" font-family="Arial, sans-serif" font-size="20">Н</text><circle cx="820.6072312263127" cy="688.9350507267411" r="8" fill="#000"/>
+                <text x="832.6072312263127" y="692.9350507267411" font-family="Arial, sans-serif" font-size="20">О</text><circle cx="843.2602916470023" cy="732.4853005511155" r="8" fill="#000"/>
+                <text x="855.2602916470023" y="736.4853005511155" font-family="Arial, sans-serif" font-size="20">П</text><circle cx="848.916245492906" cy="784.3733449081844" r="8" fill="#000"/>
+                <text x="860.916245492906" y="788.3733449081844" font-family="Arial, sans-serif" font-size="20">Р</text><circle cx="828.6437679907957" cy="836.8414762181683" r="8" fill="#000"/>
+                <text x="840.6437679907957" y="840.8414762181683" font-family="Arial, sans-serif" font-size="20">С</text><circle cx="800.377206038129" cy="833.9846854572462" r="8" fill="#000"/>
+                <text x="812.377206038129" y="837.9846854572462" font-family="Arial, sans-serif" font-size="20">Т</text><circle cx="766.6504416384568" cy="793.3392927944609" r="8" fill="#000"/>
+                <text x="778.6504416384568" y="797.3392927944609" font-family="Arial, sans-serif" font-size="20">У</text><circle cx="727.5036034174096" cy="797.3273490549345" r="8" fill="#000"/>
+                <text x="739.5036034174096" y="801.3273490549345" font-family="Arial, sans-serif" font-size="20">Ф</text><circle cx="685.5953055506768" cy="824.0555878500594" r="8" fill="#000"/>
+                <text x="697.5953055506768" y="828.0555878500594" font-family="Arial, sans-serif" font-size="20">Х</text><circle cx="643.15996718548" cy="849.4753450576752" r="8" fill="#000"/>
+                <text x="655.15996718548" y="853.4753450576752" font-family="Arial, sans-serif" font-size="20">Ц</text><circle cx="600.5076120940315" cy="874.3563156040968" r="8" fill="#000"/>
+                <text x="612.5076120940315" y="878.3563156040968" font-family="Arial, sans-serif" font-size="20">Ч</text><circle cx="557.8552570025831" cy="899.2372861505183" r="8" fill="#000"/>
+                <text x="569.8552570025831" y="903.2372861505183" font-family="Arial, sans-serif" font-size="20">Ш</text><circle cx="515.2029019111346" cy="924.1182566969399" r="8" fill="#000"/>
+                <text x="527.2029019111346" y="928.1182566969399" font-family="Arial, sans-serif" font-size="20">Щ</text><circle cx="470.9106890434399" cy="924.1656618886192" r="8" fill="#000"/>
+                <text x="482.9106890434399" y="928.1656618886192" font-family="Arial, sans-serif" font-size="20">Ъ</text><circle cx="425.5538510584021" cy="908.0906704842032" r="8" fill="#000"/>
+                <text x="437.5538510584021" y="912.0906704842032" font-family="Arial, sans-serif" font-size="20">Ы</text><circle cx="380.1970130733642" cy="892.0156790797874" r="8" fill="#000"/>
+                <text x="392.1970130733642" y="896.0156790797874" font-family="Arial, sans-serif" font-size="20">Ь</text><circle cx="334.8401750883263" cy="875.9406876753716" r="8" fill="#000"/>
+                <text x="346.8401750883263" y="879.9406876753716" font-family="Arial, sans-serif" font-size="20">Э</text></svg>

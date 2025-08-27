@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1414" viewBox="0 0 1000 1414"><rect width="1000" height="1414" fill="#fff"/>
+  <rect x="16" y="16" width="968" height="1382" rx="18" ry="18" fill="none" stroke="#222" stroke-width="3"/>
+  <text x="40" y="60" font-family="Arial, sans-serif" font-size="28">Имя: ____________________________</text>
+  <text x="600" y="60" font-family="Arial, sans-serif" font-size="28">Дата: _______________</text>
+  <text x="40" y="110" font-family="Arial Black, Arial, sans-serif" font-size="38">СКОЛЬКО ВЕСИТ?</text>
+  <text x="40" y="150" font-family="Arial, sans-serif" font-size="24" fill="#444">Посмотри в легенду сверху и подпиши вес на дисплее весов.</text>
+  <g>
+    <circle cx="964" cy="36" r="22" fill="#000"/>
+    <text x="964" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#fff">2</text>
+  </g><g>
+      <text x="50" y="210" font-size="48">🦎</text>
+      <text x="124" y="210" font-family="Arial, sans-serif" font-size="24">2 кг</text>
+    </g><g>
+      <text x="230" y="210" font-size="48">🐢</text>
+      <text x="304" y="210" font-family="Arial, sans-serif" font-size="24">5 кг</text>
+    </g><g>
+      <text x="410" y="210" font-size="48">🐊</text>
+      <text x="484" y="210" font-family="Arial, sans-serif" font-size="24">9 кг</text>
+    </g><g>
+      <text x="590" y="210" font-size="48">🦀</text>
+      <text x="664" y="210" font-family="Arial, sans-serif" font-size="24">1 кг</text>
+    </g>
+      <g>
+        <rect x="110" y="310" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="80" y="324" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="150" y="370" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="280" y="290" font-size="54" text-anchor="middle">🦎🐢</text>
+        <text x="280" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g>
+      <g>
+        <rect x="550" y="310" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="520" y="324" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="590" y="370" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="720" y="290" font-size="54" text-anchor="middle">🦀🐢🦎</text>
+        <text x="720" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g>
+      <g>
+        <rect x="110" y="610" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="80" y="624" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="150" y="670" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="280" y="590" font-size="54" text-anchor="middle">🐊🐢</text>
+        <text x="280" y="722" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g>
+      <g>
+        <rect x="550" y="610" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="520" y="624" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="590" y="670" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="720" y="590" font-size="54" text-anchor="middle">🦀🐢</text>
+        <text x="720" y="722" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g>
+      <g>
+        <rect x="110" y="910" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="80" y="924" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="150" y="970" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="280" y="890" font-size="54" text-anchor="middle">🦀🐊🐢</text>
+        <text x="280" y="1022" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g>
+      <g>
+        <rect x="550" y="910" width="340" height="14" rx="6" fill="#555"/>
+        <rect x="520" y="924" width="400" height="190" rx="18" fill="#777"/>
+        <rect x="590" y="970" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
+        <text x="720" y="890" font-size="54" text-anchor="middle">🦀🦎</text>
+        <text x="720" y="1022" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#999">?</text>
+      </g></svg>

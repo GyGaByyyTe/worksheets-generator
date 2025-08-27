@@ -74,7 +74,24 @@ function pathAreaApprox(d, samples = 400) {
     const a = pts[i], b = pts[(i + 1) % pts.length];
     area += a.x * b.y - b.x * a.y;
   }
+  // Возвращаем модуль для совместимости со старым кодом
   return Math.abs(area) / 2;
+}
+// Добавлено: знаковая площадь, чтобы отличать внешние контуры от «дыр»
+function signedPathArea(d, samples = 400) {
+  const props = new SVGPathProperties(d);
+  const L = props.getTotalLength();
+  const pts = [];
+  for (let i = 0; i < samples; i++) {
+    const p = props.getPointAtLength((L * i) / samples);
+    pts.push({ x: p.x, y: p.y });
+  }
+  let s = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    s += a.x * b.y - b.x * a.y;
+  }
+  return 0.5 * s; // знак: >0 — одна ориентация, <0 — противоположная
 }
 
 function resamplePathD(d, targetCount) {
@@ -166,6 +183,23 @@ function normalizeWithBBox(pts, bbox) {
   return pts.map(([x, y]) => [(x - bbox.minX) / bbox.w, (y - bbox.minY) / bbox.h]);
 }
 
+// Новая: нормализация с сохранением соотношения сторон (contain/cover)
+function normalizeWithBBoxPreserveAR(pts, bbox, { fit = 'contain' } = {}) {
+  const bw = Math.max(1e-9, bbox.w);
+  const bh = Math.max(1e-9, bbox.h);
+  const s = fit === 'cover' ? Math.min(bw, bh) : Math.max(bw, bh); // contain по умолчанию
+  const nxSpan = bw / s;
+  const nySpan = bh / s;
+  // Центрируем в единичном квадрате
+  const offsetX = (1 - nxSpan) / 2;
+  const offsetY = (1 - nySpan) / 2;
+  return pts.map(([x, y]) => {
+    const nx = offsetX + (x - bbox.minX) / s;
+    const ny = offsetY + (y - bbox.minY) / s;
+    // лёгкое ограничение на случай численных ошибок
+    return [Math.max(0, Math.min(1, nx)), Math.max(0, Math.min(1, ny))];
+  });
+}
 // Улучшенный рендер: несколько контуров + декоративные штрихи
 function pointsToSVGMulti({ contours, decor = [], width = 1000, height = 700, margin = 50, numbering = 'continuous' /* 'continuous' | 'perContour' */ }) {
   const left = margin, top = margin;
@@ -265,12 +299,17 @@ async function imageToDots({
   maxContours = 6,
   decorAreaRatio = 0.18, // всё, что существенно меньше главного по площади — считаем декором
   numbering = 'continuous' // 'continuous' | 'perContour'
+  ,
+  // Новые опции:
+  targetContours = null,      // если задано (например, 2) — жёстко берём столько главных контуров
+  pointsDistribution = 'proportional' // 'proportional' | 'equal'
 }) {
   const tmpBW = path.join(os.tmpdir(), `dots-bw-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
   try {
     await preprocessToBW(input, tmpBW, { width: 1200, threshold });
 
-    const svgStr = await traceWithPotrace(tmpBW, { turdSize: 80, optCurve: true, alphaMax: 1.0, despeckle: true });
+    // Меньший turdSize сохраняет тонкие элементы (например, кончик хвоста)
+    const svgStr = await traceWithPotrace(tmpBW, { turdSize: 20, optCurve: true, alphaMax: 1.0, despeckle: true });
 
     const dList = extractPathsD(svgStr);
     if (!dList.length) throw new Error('Контур не найден. Попробуйте другой threshold или более контрастное изображение.');
@@ -292,34 +331,66 @@ async function imageToDots({
       const dAbs = svgpath(d).unshort().unarc().abs().toString();
       const len = pathLength(dAbs);
       const area = pathAreaApprox(dAbs);
+      const sArea = signedPathArea(dAbs);
       const bbox = preBBoxes[idx];
       const frameScore = frameCoverage(bbox, globalBBox);
-      return { d: dAbs, len, area, bbox, frameScore };
+      const boxArea = Math.max(1e-6, bbox.w * bbox.h);
+      return { d: dAbs, len, area, signedArea: sArea, bbox, boxArea, frameScore };
     })
-    // Вперёд — крупные по площади, а при равной площади — не «рамочные»
-    .sort((a, b) => (b.area - a.area) || (a.frameScore - b.frameScore) || (b.len - a.len));
+    // Сортируем по «размеру объекта» — площади bbox. Это отсекает узкие полоски.
+    .sort((a, b) => (b.boxArea - a.boxArea) || (a.frameScore - b.frameScore) || (b.len - a.len));
 
-    // Фильтруем «рамочные» пути: очень близки к границам глобального bbox
-    // Порог подберите при необходимости. 0.05 означает ~5% суммарного зазора от ширины+высоты.
+    // Фильтруем «рамочные» пути
     const FRAME_THRESHOLD = 0.06;
     const goodItems = items.filter(it => it.frameScore > FRAME_THRESHOLD);
 
-    // Если всё отфильтровали (например, картинка реально чёрная рамка),
-    // возвращаемся к исходному списку.
     const ranked = goodItems.length ? goodItems : items;
 
-    const mainArea = (ranked[0]?.area) || 1;
+    // Главный контур: по максимальной площади
+    const main = ranked[0];
+    if (!main) throw new Error('Контуры не найдены после фильтрации.');
+    // Для отбора «крупных объектов» используем площадь bbox
+    const mainArea = (main.boxArea || 1);
+    const mainOrient = Math.sign(main.signedArea) || 1; // ориентир по направлению обхода
+
     const contoursD = [];
     const decorD = [];
 
-    for (const it of ranked) {
-      if (multiContours && contoursD.length < maxContours && it.area > mainArea * decorAreaRatio) {
-        contoursD.push(it.d);
+    // Если явно не нужны много контуров — оставляем только главный внешний
+    if (!multiContours) {
+      contoursD.push(main.d);
+    } else {
+      // Вариант выбора: либо «авто» с порогом площади, либо «ровно N самых крупных»
+      if (targetContours && targetContours > 0) {
+        for (const it of ranked) {
+          const sameOrientation = (Math.sign(it.signedArea) || 1) === mainOrient;
+          // отсечём совсем мелкие мусорные контуры по площади bbox
+          const notTooSmall = (it.boxArea || 0) > mainArea * Math.min(0.10, decorAreaRatio);
+          if (sameOrientation && notTooSmall) {
+            contoursD.push(it.d);
+            if (contoursD.length >= Math.min(targetContours, maxContours)) break;
+          } else {
+            decorD.push(it.d);
+          }
+        }
+        if (!contoursD.length) contoursD.push(main.d);
       } else {
-        decorD.push(it.d);
+        for (const it of ranked) {
+          // Берём только контуры с той же ориентацией, что и главный (отсеивает «дыры»)
+          const sameOrientation = (Math.sign(it.signedArea) || 1) === mainOrient;
+          if (
+            sameOrientation &&
+            contoursD.length < maxContours &&
+            (it.boxArea || 0) > mainArea * decorAreaRatio
+          ) {
+            contoursD.push(it.d);
+          } else {
+            decorD.push(it.d);
+          }
+        }
+        if (!contoursD.length) contoursD.push(main.d);
       }
     }
-    if (!contoursD.length && ranked.length) contoursD.push(ranked[0].d);
 
     // Подготовим «полилинии» для каждого контура
     const densePerContour = contoursD.map(d => {
@@ -329,30 +400,46 @@ async function imageToDots({
       return simplifyPolyline(dense, simplifyTolerance);
     });
 
-    // Пропорционально длинам распределим точки
-    const lengths = densePerContour.map(pts => {
-      let L = 0;
-      for (let i = 0; i < pts.length - 1; i++) {
-        const dx = pts[i + 1][0] - pts[i][0];
-        const dy = pts[i + 1][1] - pts[i][1];
-        L += Math.hypot(dx, dy);
+    // Пропорционально длинам или поровну распределим точки
+    let counts;
+    if (pointsDistribution === 'equal') {
+      const n = densePerContour.length || 1;
+      const minPer = 3;
+      counts = Array(n).fill(Math.max(minPer, Math.floor(pointsCount / n)));
+      let sum = counts.reduce((a, b) => a + b, 0);
+      let r = pointsCount - sum;
+      let i = 0;
+      while (r !== 0 && n > 0) {
+        const step = r > 0 ? 1 : -1;
+        counts[i] = Math.max(minPer, counts[i] + step);
+        r -= step;
+        i = (i + 1) % n;
       }
-      return L;
-    });
-    const sumL = lengths.reduce((a, b) => a + b, 0) || 1;
-    let remainder = pointsCount;
-    const counts = lengths.map(L => {
-      const v = Math.max(3, Math.round(pointsCount * (L / sumL))); // минимум точек на контур уменьшен до 3
-      remainder -= v;
-      return v;
-    });
-    // Подправим, чтобы сумма точно равнялась pointsCount
-    let i = 0;
-    while (remainder !== 0 && counts.length) {
-      const step = remainder > 0 ? 1 : -1;
-      counts[i] = Math.max(3, counts[i] + step);
-      remainder -= step;
-      i = (i + 1) % counts.length;
+    } else {
+      const lengths = densePerContour.map(pts => {
+        let L = 0;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const dx = pts[i + 1][0] - pts[i][0];
+          const dy = pts[i + 1][1] - pts[i][1];
+          L += Math.hypot(dx, dy);
+        }
+        return L;
+      });
+      const sumL = lengths.reduce((a, b) => a + b, 0) || 1;
+      let remainder = pointsCount;
+      counts = lengths.map(L => {
+        const v = Math.max(3, Math.round(pointsCount * (L / sumL)));
+        remainder -= v;
+        return v;
+      });
+      // Подправим, чтобы сумма точно равнялась pointsCount
+      let i = 0;
+      while (remainder !== 0 && counts.length) {
+        const step = remainder > 0 ? 1 : -1;
+        counts[i] = Math.max(3, counts[i] + step);
+        remainder -= step;
+        i = (i + 1) % counts.length;
+      }
     }
 
     // Равномерно отсемплируем каждую полилинию, избегая дублирующей замыкающей точки
@@ -363,7 +450,12 @@ async function imageToDots({
 
     // Совместим в единый bbox и зададим красивый старт для каждого контура
     const bbox = getBBox(sampledContours);
-    const normalized = sampledContours.map(pts => rotateStartToBottomLeft(normalizeWithBBox(pts, bbox)));
+    // БЫЛО: независимое масштабирование по осям => искажения
+    // const normalized = sampledContours.map(pts => rotateStartToBottomLeft(normalizeWithBBox(pts, bbox)));
+    // СТАЛО: сохранение пропорций (fit='contain')
+    const normalized = sampledContours.map(pts =>
+      rotateStartToBottomLeft(normalizeWithBBoxPreserveAR(pts, bbox, { fit: 'contain' }))
+    );
 
     // Рендер: несколько контуров + декоративные штрихи
     const svgOut = pointsToSVGMulti({

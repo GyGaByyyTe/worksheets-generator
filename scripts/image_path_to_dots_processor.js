@@ -10,12 +10,14 @@ const svgpath = require('svgpath');
 const simplify = require('simplify-js');
 const os = require('os');
 
-async function preprocessToBW(inputPath, tmpPath, { width = 1000, threshold = 180 } = {}) {
-  // Готовим чёрно-белый силуэт для более качественной трассировки
+async function preprocessToBW(inputPath, tmpPath, { width = 1000, threshold = 180, blurSigma = 1.4 } = {}) {
+  // Для line-art слегка размоем перед порогом, чтобы слить двойные обводки и убрать тонкие внутренние штрихи
+  // (полоски на спине/лбу не будут попадать в основной контур)
   await sharp(inputPath)
     .resize({ width, withoutEnlargement: true })
     .grayscale()
-    .threshold(threshold) // подберите порог под свои картинки
+    .blur(blurSigma)             // добавлено
+    .threshold(threshold)
     .toFile(tmpPath);
 }
 
@@ -297,27 +299,29 @@ async function imageToDots({
   threshold = 180,
   multiContours = true,
   maxContours = 6,
-  decorAreaRatio = 0.18, // всё, что существенно меньше главного по площади — считаем декором
-  numbering = 'continuous' // 'continuous' | 'perContour'
+  decorAreaRatio = 0.18,
+  numbering = 'continuous'
   ,
   // Новые опции:
-  targetContours = null,      // если задано (например, 2) — жёстко берём столько главных контуров
-  pointsDistribution = 'proportional' // 'proportional' | 'equal'
+  targetContours = null,
+  pointsDistribution = 'proportional',
+  // Тонкая настройка препроцессинга line-art:
+  blurSigma = 1.8 // 1.3–1.8: больше — сильнее «слипание» полосок (по умолчанию достаточно для детских контуров)
 }) {
   const tmpBW = path.join(os.tmpdir(), `dots-bw-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
   try {
-    await preprocessToBW(input, tmpBW, { width: 1200, threshold });
+    // Было: без размытия — внутренние полоски попадали в набор контуров
+    // Стало: легкое размытие перед порогом, чтобы получить чистый силуэт
+    await preprocessToBW(input, tmpBW, { width: 1200, threshold, blurSigma });
 
-    // Меньший turdSize сохраняет тонкие элементы (например, кончик хвоста)
-    const svgStr = await traceWithPotrace(tmpBW, { turdSize: 20, optCurve: true, alphaMax: 1.0, despeckle: true });
+    // Также оставляем маленький turdSize, чтобы не обрезать тонкий хвост
+    const svgStr = await traceWithPotrace(tmpBW, { turdSize: 8, optCurve: true, alphaMax: 1.0, despeckle: true });
 
     const dList = extractPathsD(svgStr);
     if (!dList.length) throw new Error('Контур не найден. Попробуйте другой threshold или более контрастное изображение.');
 
-    // Разворачиваем каждый <path d="..."> на его под‑пути, чтобы не соединять разные контуры одной ломаной
     const allDs = dList.flatMap(d => splitSubpaths(d));
 
-    // Предварительно считаем bbox каждого под‑пути, чтобы найти «глобальные» границы
     const preBBoxes = allDs.map(d => getBBoxOfD(svgpath(d).unshort().unarc().abs().toString(), 240));
     const globalBBox = preBBoxes.reduce((g, b) => ({
       minX: Math.min(g.minX, b.minX),
@@ -326,7 +330,7 @@ async function imageToDots({
       maxY: Math.max(g.maxY, b.maxY),
     }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
 
-    // Отсортируем пути по значимости
+    // Добавили метрику «тонкости» для отсечения узких декоративных полос
     const items = allDs.map((d, idx) => {
       const dAbs = svgpath(d).unshort().unarc().abs().toString();
       const len = pathLength(dAbs);
@@ -335,38 +339,39 @@ async function imageToDots({
       const bbox = preBBoxes[idx];
       const frameScore = frameCoverage(bbox, globalBBox);
       const boxArea = Math.max(1e-6, bbox.w * bbox.h);
-      return { d: dAbs, len, area, signedArea: sArea, bbox, boxArea, frameScore };
+      const minSide = Math.min(Math.max(1e-6, bbox.w), Math.max(1e-6, bbox.h));
+      const maxSide = Math.max(bbox.w, bbox.h, 1e-6);
+      const thinScore = minSide / maxSide; // близко к 0 — очень узкий (полоска)
+      return { d: dAbs, len, area, signedArea: sArea, bbox, boxArea, frameScore, thinScore, minSide, maxSide };
     })
-    // Сортируем по «размеру объекта» — площади bbox. Это отсекает узкие полоски.
     .sort((a, b) => (b.boxArea - a.boxArea) || (a.frameScore - b.frameScore) || (b.len - a.len));
 
-    // Фильтруем «рамочные» пути
     const FRAME_THRESHOLD = 0.06;
     const goodItems = items.filter(it => it.frameScore > FRAME_THRESHOLD);
-
     const ranked = goodItems.length ? goodItems : items;
 
-    // Главный контур: по максимальной площади
     const main = ranked[0];
     if (!main) throw new Error('Контуры не найдены после фильтрации.');
-    // Для отбора «крупных объектов» используем площадь bbox
     const mainArea = (main.boxArea || 1);
-    const mainOrient = Math.sign(main.signedArea) || 1; // ориентир по направлению обхода
+    const mainOrient = Math.sign(main.signedArea) || 1;
 
     const contoursD = [];
     const decorD = [];
 
-    // Если явно не нужны много контуров — оставляем только главный внешний
+    // Порог «тонкости»: полоски и узкие штрихи отправляем в декор
+    // (исключение — сам главный контур или очень крупные по площади элементы)
+    const THINNESS_LIMIT = 0.26;                 // чем меньше — тем тоньше
+    const ABS_MIN_SIDE = Math.sqrt(mainArea) * 0.22; // совсем узкие относительно главного — в декор
+
     if (!multiContours) {
       contoursD.push(main.d);
     } else {
-      // Вариант выбора: либо «авто» с порогом площади, либо «ровно N самых крупных»
       if (targetContours && targetContours > 0) {
         for (const it of ranked) {
           const sameOrientation = (Math.sign(it.signedArea) || 1) === mainOrient;
-          // отсечём совсем мелкие мусорные контуры по площади bbox
           const notTooSmall = (it.boxArea || 0) > mainArea * Math.min(0.10, decorAreaRatio);
-          if (sameOrientation && notTooSmall) {
+          const notThin = it === main || it.thinScore >= THINNESS_LIMIT || it.minSide >= ABS_MIN_SIDE || (it.boxArea > mainArea * 0.45);
+          if (sameOrientation && notTooSmall && notThin) {
             contoursD.push(it.d);
             if (contoursD.length >= Math.min(targetContours, maxContours)) break;
           } else {
@@ -376,12 +381,13 @@ async function imageToDots({
         if (!contoursD.length) contoursD.push(main.d);
       } else {
         for (const it of ranked) {
-          // Берём только контуры с той же ориентацией, что и главный (отсеивает «дыры»)
           const sameOrientation = (Math.sign(it.signedArea) || 1) === mainOrient;
+          const notThin = it === main || it.thinScore >= THINNESS_LIMIT || it.minSide >= ABS_MIN_SIDE || (it.boxArea > mainArea * 0.45);
           if (
             sameOrientation &&
             contoursD.length < maxContours &&
-            (it.boxArea || 0) > mainArea * decorAreaRatio
+            (it.boxArea || 0) > mainArea * decorAreaRatio &&
+            notThin
           ) {
             contoursD.push(it.d);
           } else {
@@ -395,9 +401,10 @@ async function imageToDots({
     // Подготовим «полилинии» для каждого контура
     const densePerContour = contoursD.map(d => {
       const dClean = svgpath(d).unshort().unarc().toString();
-      // плотная выборка для последующего упрощения
       const dense = resamplePathD(dClean, 600);
-      return simplifyPolyline(dense, simplifyTolerance);
+      // Чуть менее агрессивное упрощение — сохраняем форму хвоста/головы
+      const tol = Math.min(simplifyTolerance, 1.2);
+      return simplifyPolyline(dense, tol);
     });
 
     // Пропорционально длинам или поровну распределим точки
@@ -460,7 +467,7 @@ async function imageToDots({
     // Рендер: несколько контуров + декоративные штрихи
     const svgOut = pointsToSVGMulti({
       contours: normalized,
-      decor: decorD,
+      decor: decorD, // полоски попадут сюда и не будут мешать силуэту
       width: 1000,
       height: 700,
       margin: 60,

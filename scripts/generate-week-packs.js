@@ -24,13 +24,20 @@ const { pageWeights } = require('./generators/weekpack/weights');
 const { pageConnectDots } = require('./generators/weekpack/connect-dots');
 const { pageFindParts } = require('./generators/weekpack/find-parts');
 const { pageOrderNumbers } = require('./generators/weekpack/order-numbers');
-const { pageSpotDifferences } = require('./generators/weekpack/spot-differences');
-const { renderPage: renderAdditionPage, generateTasks } = require('./generators/addition');
+const {
+  pageSpotDifferences,
+} = require('./generators/weekpack/spot-differences');
+const {
+  renderPage: renderAdditionPage,
+  generateTasks,
+} = require('./generators/addition');
 const { generateMazePage } = require('./generate-maze');
 
 function buildDayIndexHtml(dir, files, day) {
   const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
-  const pages = files.map(f => `    <img class="page" src="${f}" alt="${f}" />`).join('\n');
+  const pages = files
+    .map((f) => `    <img class="page" src="${f}" alt="${f}" />`)
+    .join('\n');
   const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -61,7 +68,8 @@ function buildWeekPacks() {
   ensureDir(outRoot);
 
   // Встроенные генераторы для «сложения» и «лабиринта»
-  const pageAddition = (pageNum) => renderAdditionPage(pageNum, generateTasks());
+  const pageAddition = (pageNum) =>
+    renderAdditionPage(pageNum, generateTasks());
   const pageMaze = (pageNum) => generateMazePage({ pageNum });
 
   // Базовые страницы (6 типов) + встроенные extras
@@ -80,10 +88,12 @@ function buildWeekPacks() {
     const dir = path.join(outRoot, `day-${String(day).padStart(2, '0')}`);
     ensureDir(dir);
     // Очистим старые SVG, чтобы не осталось файлов от предыдущих запусков
-    fs.readdirSync(dir).forEach(f => { if (f.toLowerCase().endsWith('.svg')) fs.unlinkSync(path.join(dir, f)); });
+    fs.readdirSync(dir).forEach((f) => {
+      if (f.toLowerCase().endsWith('.svg')) fs.unlinkSync(path.join(dir, f));
+    });
 
     // Список элементов дня: один вариант каждого вида
-    const dayItems = generators.map(fn => ({ type: 'gen', fn }));
+    const dayItems = generators.map((fn) => ({ type: 'gen', fn }));
 
     // Перемешаем порядок
     dayItems.sort(() => Math.random() - 0.5);

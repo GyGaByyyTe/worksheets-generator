@@ -3,7 +3,7 @@
 
 // Basic animal icon set for puzzles (default emojis for now)
 const ICONS = {
-  animals: ['🐟', '🐱', '🐦', '🐰', '🐢', '🦊', '🦉']
+  animals: ['🐟', '🐱', '🐦', '🐰', '🐢', '🦊', '🦉'],
 };
 
 module.exports = { ICONS };

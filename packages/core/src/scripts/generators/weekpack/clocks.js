@@ -1,15 +1,25 @@
-const { WIDTH, HEIGHT, MARGIN, rndInt, choice, headerSVG, wrapSVG } = require('../common');
+const {
+  WIDTH,
+  HEIGHT,
+  MARGIN,
+  rndInt,
+  choice,
+  headerSVG,
+  wrapSVG,
+} = require('../common');
 
 function drawClock(x, y, r, hour, minute) {
   const ticks = [];
   for (let i = 0; i < 60; i += 5) {
-    const a = (Math.PI * 2) * (i / 60) - Math.PI / 2;
+    const a = Math.PI * 2 * (i / 60) - Math.PI / 2;
     const len = i % 15 === 0 ? 10 : 6;
     const x1 = x + Math.cos(a) * (r - len);
     const y1 = y + Math.sin(a) * (r - len);
     const x2 = x + Math.cos(a) * r;
     const y2 = y + Math.sin(a) * r;
-    ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="2"/>`);
+    ticks.push(
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="2"/>`,
+    );
   }
   // цифры на циферблате
   const numbers = [];
@@ -24,11 +34,13 @@ function drawClock(x, y, r, hour, minute) {
   for (const p of positions) {
     const tx = x + Math.cos(p.angle) * nr;
     const ty = y + Math.sin(p.angle) * nr;
-    numbers.push(`<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="${fontSize}" fill="#222">${p.label}</text>`);
+    numbers.push(
+      `<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="${fontSize}" fill="#222">${p.label}</text>`,
+    );
   }
   // стрелки
-  const ma = (Math.PI * 2) * (minute / 60) - Math.PI / 2;
-  const ha = (Math.PI * 2) * ((hour % 12 + minute / 60) / 12) - Math.PI / 2;
+  const ma = Math.PI * 2 * (minute / 60) - Math.PI / 2;
+  const ha = Math.PI * 2 * (((hour % 12) + minute / 60) / 12) - Math.PI / 2;
   const mx = x + Math.cos(ma) * (r * 0.82);
   const my = y + Math.sin(ma) * (r * 0.82);
   const hx = x + Math.cos(ha) * (r * 0.55);
@@ -47,12 +59,17 @@ function drawClock(x, y, r, hour, minute) {
 
 function pageClocks(pageNum, options = {}) {
   const { minutesStep = 5, allowAnyMinute = false } = options;
-  const cols = 3, rows = 3;
+  const cols = 3,
+    rows = 3;
   const gridW = WIDTH - MARGIN * 2;
   const gridH = HEIGHT - 220 - MARGIN;
   const cw = Math.floor(gridW / cols);
   const ch = Math.floor(gridH / rows);
-  let content = headerSVG({ title: 'СКОЛЬКО ВРЕМЕНИ ПОКАЗЫВАЮТ ЧАСЫ?', subtitle: 'Запиши ответ под каждым циферблатом.', pageNum });
+  let content = headerSVG({
+    title: 'СКОЛЬКО ВРЕМЕНИ ПОКАЗЫВАЮТ ЧАСЫ?',
+    subtitle: 'Запиши ответ под каждым циферблатом.',
+    pageNum,
+  });
   let idx = 0;
 
   // Подготовка пулов значений и глобальных множеств для уникальности по всему листу (по возможности)
@@ -70,7 +87,7 @@ function pageClocks(pageNum, options = {}) {
 
   function pickUnique(pool, excludeSet, count) {
     // Предпочитаем элементы, которые ещё не использовались на листе
-    const available = pool.filter(v => !excludeSet.has(v));
+    const available = pool.filter((v) => !excludeSet.has(v));
     const chosen = [];
     const src = available.length >= count ? available.slice() : pool.slice();
     while (chosen.length < count && src.length > 0) {
@@ -121,15 +138,18 @@ function pageClocks(pageNum, options = {}) {
         for (let i = 0; i < cols; i++) {
           if (usedPairs.has(`${rowHours[i]}:${pm[i]}`)) score++;
         }
-        if (score < bestScore) { bestScore = score; best = pm; }
+        if (score < bestScore) {
+          bestScore = score;
+          best = pm;
+        }
         if (score === 0) break;
       }
       assignedMinutes = best || rowMinutes;
     }
 
     // Отмечаем использованные по листу значения
-    rowHours.forEach(h => usedHours.add(h));
-    rowMinutes.forEach(m => usedMinutes.add(m));
+    rowHours.forEach((h) => usedHours.add(h));
+    rowMinutes.forEach((m) => usedMinutes.add(m));
 
     for (let c = 0; c < cols; c++) {
       idx++;

@@ -7,6 +7,7 @@ This repository is a pnpm workspace containing three packages:
 - `@wg/web` — Next.js 15 (App Router, TypeScript) UI for requesting generations from the server and showing results.
 
 ## Prerequisites
+
 - Node.js 18+
 - pnpm 8+ (recommended to enable via Corepack)
 

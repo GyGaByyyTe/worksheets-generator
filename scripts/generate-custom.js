@@ -14,13 +14,20 @@ const { pageWeights } = require('./generators/weekpack/weights');
 const { pageConnectDots } = require('./generators/weekpack/connect-dots');
 const { pageFindParts } = require('./generators/weekpack/find-parts');
 const { pageOrderNumbers } = require('./generators/weekpack/order-numbers');
-const { pageSpotDifferences } = require('./generators/weekpack/spot-differences');
-const { renderPage: renderAdditionPage, generateTasks } = require('./generators/addition');
+const {
+  pageSpotDifferences,
+} = require('./generators/weekpack/spot-differences');
+const {
+  renderPage: renderAdditionPage,
+  generateTasks,
+} = require('./generators/addition');
 const { generateMazePage } = require('./generate-maze');
 
 function buildDayIndexHtml(dir, files, day) {
   const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
-  const pages = files.map(f => `    <img class="page" src="${f}" alt="${f}" />`).join('\n');
+  const pages = files
+    .map((f) => `    <img class="page" src="${f}" alt="${f}" />`)
+    .join('\n');
   const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -48,47 +55,52 @@ ${pages}
 // Обёртка для страницы сложения, аналогичная недельному генератору
 const pageAddition = (pageNum) => renderAdditionPage(pageNum, generateTasks());
 // Обёртка для лабиринта с объектом опций
-const pageMaze = (pageNum, options) => generateMazePage({ pageNum, ...(options || {}) });
+const pageMaze = (pageNum, options) =>
+  generateMazePage({ pageNum, ...(options || {}) });
 
 // Карта ключ -> функция генерации SVG страницы
 const GENERATORS = {
-  'clocks': pageClocks,
-  'weights': pageWeights,
+  clocks: pageClocks,
+  weights: pageWeights,
   'connect-dots': pageConnectDots,
   'find-parts': pageFindParts,
-  'postman': pageOrderNumbers,
+  postman: pageOrderNumbers,
   'spot-diff': pageSpotDifferences,
-  'addition': pageAddition,
-  'maze': pageMaze,
+  addition: pageAddition,
+  maze: pageMaze,
 };
 
 // Отображение функции -> короткое имя файла (для консистентных имён)
 const NAME_BY_KEY = {
-  'clocks': 'clocks',
-  'weights': 'weights',
+  clocks: 'clocks',
+  weights: 'weights',
   'connect-dots': 'connect-dots',
   'find-parts': 'find-parts',
-  'postman': 'postman',
+  postman: 'postman',
   'spot-diff': 'spot-diff',
-  'addition': 'addition',
-  'maze': 'maze',
+  addition: 'addition',
+  maze: 'maze',
 };
 
 function timestamp() {
   const d = new Date();
   const pad = (n, k = 2) => String(n).padStart(k, '0');
-  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
 function generateCustom({ days = 1, tasks = [], outRoot, seed } = {}) {
   if (!Array.isArray(tasks) || tasks.length === 0) {
     throw new Error('Не выбрано ни одного вида задания.');
   }
-  const invalid = tasks.filter(k => !GENERATORS[k]);
-  if (invalid.length) throw new Error(`Неизвестные типы заданий: ${invalid.join(', ')}`);
+  const invalid = tasks.filter((k) => !GENERATORS[k]);
+  if (invalid.length)
+    throw new Error(`Неизвестные типы заданий: ${invalid.join(', ')}`);
 
   const ts = timestamp();
-  const outBase = path.resolve(process.cwd(), outRoot || path.join('worksheets', 'custom', ts));
+  const outBase = path.resolve(
+    process.cwd(),
+    outRoot || path.join('worksheets', 'custom', ts),
+  );
   ensureDir(outBase);
 
   const result = { outDir: outBase, days: [] };
@@ -98,7 +110,9 @@ function generateCustom({ days = 1, tasks = [], outRoot, seed } = {}) {
     ensureDir(dir);
 
     // Очистка устаревших svg
-    fs.readdirSync(dir).forEach(f => { if (f.toLowerCase().endsWith('.svg')) fs.unlinkSync(path.join(dir, f)); });
+    fs.readdirSync(dir).forEach((f) => {
+      if (f.toLowerCase().endsWith('.svg')) fs.unlinkSync(path.join(dir, f));
+    });
 
     let pageNum = 1;
     const written = [];
@@ -115,7 +129,12 @@ function generateCustom({ days = 1, tasks = [], outRoot, seed } = {}) {
     }
 
     buildDayIndexHtml(dir, written, day);
-    result.days.push({ day, dir, files: written, indexHtml: path.join(dir, 'index.html') });
+    result.days.push({
+      day,
+      dir,
+      files: written,
+      indexHtml: path.join(dir, 'index.html'),
+    });
   }
 
   return result;

@@ -5,7 +5,13 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { WIDTH, HEIGHT, MARGIN, headerSVG, wrapSVG } = require('./generators/common');
+const {
+  WIDTH,
+  HEIGHT,
+  MARGIN,
+  headerSVG,
+  wrapSVG,
+} = require('./generators/common');
 
 // ------------------------ Утилиты ------------------------
 
@@ -21,7 +27,7 @@ function createRng(seedStr) {
     h = Math.imul(h ^ (h >>> 16), 2246822507);
     h = Math.imul(h ^ (h >>> 13), 3266489909);
     const t = (h ^= h >>> 16) >>> 0;
-    return (t / 4294967296);
+    return t / 4294967296;
   };
 }
 
@@ -37,7 +43,12 @@ function choice(arr, rnd) {
  */
 function generateMaze(rows, cols, rnd) {
   const total = rows * cols;
-  const walls = Array.from({ length: total }, () => ({ N: true, E: true, S: true, W: true }));
+  const walls = Array.from({ length: total }, () => ({
+    N: true,
+    E: true,
+    S: true,
+    W: true,
+  }));
   const visited = new Array(total).fill(false);
 
   const index = (r, c) => r * cols + c;
@@ -56,7 +67,9 @@ function generateMaze(rows, cols, rnd) {
 
   while (stack.length) {
     const [r, c] = stack[stack.length - 1];
-    const unvisited = neighbors(r, c).filter(([nr, nc]) => !visited[index(nr, nc)]);
+    const unvisited = neighbors(r, c).filter(
+      ([nr, nc]) => !visited[index(nr, nc)],
+    );
     if (unvisited.length === 0) {
       stack.pop();
       continue;
@@ -94,9 +107,13 @@ function farthestCell(maze) {
       }
     }
   }
-  let maxI = 0; let maxD = -1;
+  let maxI = 0;
+  let maxD = -1;
   for (const [i, d] of dist.entries()) {
-    if (d > maxD) { maxD = d; maxI = i; }
+    if (d > maxD) {
+      maxD = d;
+      maxI = i;
+    }
   }
   return { r: Math.floor(maxI / cols), c: maxI % cols, distance: maxD };
 }
@@ -105,7 +122,14 @@ function farthestCell(maze) {
 
 function renderMazeSVG(maze, opts) {
   const { rows, cols, walls } = maze;
-  const { width, height, margin = 20, offsetX = MARGIN, offsetY = 220, theme = { start: '🐭', finish: '🧀' } } = opts;
+  const {
+    width,
+    height,
+    margin = 20,
+    offsetX = MARGIN,
+    offsetY = 220,
+    theme = { start: '🐭', finish: '🧀' },
+  } = opts;
 
   // Подгон размеров клеток под целые пиксели
   const cellW = Math.floor((width - margin * 2) / cols);
@@ -130,8 +154,10 @@ function renderMazeSVG(maze, opts) {
       // плюс правую/нижнюю для последнего столбца/строки.
       if (w.N) lines += line(x, y, x + cellW, y);
       if (w.W) lines += line(x, y, x, y + cellH);
-      if (c === cols - 1 && w.E) lines += line(x + cellW, y, x + cellW, y + cellH);
-      if (r === rows - 1 && w.S) lines += line(x, y + cellH, x + cellW, y + cellH);
+      if (c === cols - 1 && w.E)
+        lines += line(x + cellW, y, x + cellW, y + cellH);
+      if (r === rows - 1 && w.S)
+        lines += line(x, y + cellH, x + cellW, y + cellH);
     }
   }
 
@@ -147,7 +173,7 @@ function renderMazeSVG(maze, opts) {
 
   const group = `
   <g transform="translate(${offsetX}, ${offsetY})">
-    <rect x="${stroke/2}" y="${stroke/2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
+    <rect x="${stroke / 2}" y="${stroke / 2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
     <!-- стены -->
     ${lines}
     <!-- иконки старта/финиша -->
@@ -175,8 +201,19 @@ function generateMazePage(opts = {}) {
   const gridH = HEIGHT - 220 - MARGIN;
   const maze = generateMaze(rows, cols, rnd);
 
-  let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`, pageNum });
-  content += renderMazeSVG(maze, { width: gridW, height: gridH, margin, offsetX: MARGIN, offsetY: 220, theme: usedTheme });
+  let content = headerSVG({
+    title: 'ЛАБИРИНТ',
+    subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`,
+    pageNum,
+  });
+  content += renderMazeSVG(maze, {
+    width: gridW,
+    height: gridH,
+    margin,
+    offsetX: MARGIN,
+    offsetY: 220,
+    theme: usedTheme,
+  });
   return wrapSVG(content);
 }
 

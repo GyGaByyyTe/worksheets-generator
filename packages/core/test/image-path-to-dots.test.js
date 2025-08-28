@@ -14,7 +14,6 @@ const {
   pointsToSVGPage,
   pointsToSVGMulti,
   // tmpFilePath is part of internal API; test its behavior too
-  
 } = require('../src/scripts/image_path_to_dots_processor.js');
 
 // NOTE: we intentionally do not import preprocessToBW / traceWithPotrace / imageToDots in tests
@@ -53,9 +52,18 @@ test('pathAreaApprox and signedPathArea for square with orientation', () => {
   assert.ok(a1 > 80 && a1 < 120, `area approx out of range: ${a1}`);
   const s1 = signedPathArea(ccw);
   const s2 = signedPathArea(cw);
-  assert.ok(Math.sign(s1) === -Math.sign(s2) && Math.sign(s1) !== 0, 'signed areas should have opposite non-zero signs');
-  assert.ok(Math.abs(s1) > 80 && Math.abs(s1) < 120, `|signed area| ~ 100 got ${s1}`);
-  assert.ok(Math.abs(s2) > 80 && Math.abs(s2) < 120, `|signed area| ~ 100 got ${s2}`);
+  assert.ok(
+    Math.sign(s1) === -Math.sign(s2) && Math.sign(s1) !== 0,
+    'signed areas should have opposite non-zero signs',
+  );
+  assert.ok(
+    Math.abs(s1) > 80 && Math.abs(s1) < 120,
+    `|signed area| ~ 100 got ${s1}`,
+  );
+  assert.ok(
+    Math.abs(s2) > 80 && Math.abs(s2) < 120,
+    `|signed area| ~ 100 got ${s2}`,
+  );
 });
 
 test('resamplePathD returns exact count without duplicating last point', () => {
@@ -65,7 +73,10 @@ test('resamplePathD returns exact count without duplicating last point', () => {
   const first = pts[0];
   const last = pts[pts.length - 1];
   // should not equal exactly (avoid sampling at total length)
-  assert.ok(first[0] !== last[0] || first[1] !== last[1], 'first and last points should differ');
+  assert.ok(
+    first[0] !== last[0] || first[1] !== last[1],
+    'first and last points should differ',
+  );
 });
 
 test('simplifyPoints reduces points for nearly collinear points with tolerance', () => {
@@ -78,12 +89,20 @@ test('simplifyPoints reduces points for nearly collinear points with tolerance',
 });
 
 test('pointsToSVGPath and page/multi wrappers output expected structure', () => {
-  const pts = [[50, 60], [70, 60], [70, 80]];
+  const pts = [
+    [50, 60],
+    [70, 60],
+    [70, 80],
+  ];
   const d = pointsToSVGPath(pts);
   assert.ok(d.startsWith('M'));
   assert.ok(d.includes('L'));
 
-  const page = pointsToSVGPage(pts, { title: 'T', pageNum: 2, showNumbering: true });
+  const page = pointsToSVGPage(pts, {
+    title: 'T',
+    pageNum: 2,
+    showNumbering: true,
+  });
   assert.ok(page.startsWith('<svg'));
   assert.ok(page.includes('T'));
   assert.ok(page.includes('2'));

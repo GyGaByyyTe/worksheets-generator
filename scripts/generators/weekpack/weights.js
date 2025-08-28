@@ -1,4 +1,11 @@
-const { WIDTH, HEIGHT, MARGIN, rndInt, headerSVG, wrapSVG } = require('../common');
+const {
+  WIDTH,
+  HEIGHT,
+  MARGIN,
+  rndInt,
+  headerSVG,
+  wrapSVG,
+} = require('../common');
 
 function pageWeights(pageNum) {
   // 4 зверя-эмодзи и их случайные веса 1–9 кг
@@ -10,7 +17,11 @@ function pageWeights(pageNum) {
   ];
   // Перенесём легенду ниже, чтобы не наезжала на заголовок/подзаголовок
   const legendY = 210;
-  let content = headerSVG({ title: 'СКОЛЬКО ВЕСИТ?', subtitle: 'Посмотри в легенду сверху и подпиши вес на дисплее весов.', pageNum });
+  let content = headerSVG({
+    title: 'СКОЛЬКО ВЕСИТ?',
+    subtitle: 'Посмотри в легенду сверху и подпиши вес на дисплее весов.',
+    pageNum,
+  });
 
   // Легенда
   const lx = MARGIN + 10;
@@ -24,10 +35,11 @@ function pageWeights(pageNum) {
 
   // Рисунок весов
   function scaleSVG(x, y, labelEmojis) {
-    const trayW = 340, trayH = 14;
+    const trayW = 340,
+      trayH = 14;
     return `
       <g>
-        <rect x="${x - trayW/2}" y="${y}" width="${trayW}" height="${trayH}" rx="6" fill="#555"/>
+        <rect x="${x - trayW / 2}" y="${y}" width="${trayW}" height="${trayH}" rx="6" fill="#555"/>
         <rect x="${x - 200}" y="${y + 14}" width="400" height="190" rx="18" fill="#777"/>
         <rect x="${x - 130}" y="${y + 60}" width="260" height="70" rx="12" fill="#fff" stroke="#ccc"/>
         <text x="${x}" y="${y - 20}" font-size="54" text-anchor="middle">${labelEmojis}</text>
@@ -42,8 +54,8 @@ function pageWeights(pageNum) {
 
   function pickCombo() {
     const k = rndInt(2, 3);
-    const idxs = [0,1,2,3].sort(() => Math.random() - 0.5).slice(0, k);
-    const em = idxs.map(i => animals[i].emoji).join('');
+    const idxs = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, k);
+    const em = idxs.map((i) => animals[i].emoji).join('');
     return em;
   }
 
@@ -51,7 +63,10 @@ function pageWeights(pageNum) {
   const combos = [];
   while (combos.length < 6) {
     const em = pickCombo();
-    if (!usedCombos.has(em)) { usedCombos.add(em); combos.push(em); }
+    if (!usedCombos.has(em)) {
+      usedCombos.add(em);
+      combos.push(em);
+    }
   }
 
   for (let i = 0; i < 6; i++) {

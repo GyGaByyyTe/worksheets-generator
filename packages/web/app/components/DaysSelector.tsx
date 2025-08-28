@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React from 'react';
 
 export type DaysSelectorProps = {
@@ -8,16 +8,22 @@ export type DaysSelectorProps = {
   max?: number;
 };
 
-export default function DaysSelector({ days, onChange, min = 1, max = 7 }: DaysSelectorProps) {
+export default function DaysSelector({
+  days,
+  onChange,
+  min = 1,
+  max = 7,
+}: DaysSelectorProps) {
   return (
     <div className="row">
       <label>Дней:</label>
-      <input name="days"
+      <input
+        name="days"
         type="number"
         min={min}
         max={max}
         value={days}
-        onChange={e => onChange(Number(e.target.value || min))}
+        onChange={(e) => onChange(Number(e.target.value || min))}
       />
     </div>
   );

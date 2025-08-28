@@ -3,7 +3,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 
-const { WIDTH, HEIGHT, MARGIN, ensureDir, headerSVG, wrapSVG } = require('../src/scripts/generators/common.js');
+const {
+  WIDTH,
+  HEIGHT,
+  MARGIN,
+  ensureDir,
+  headerSVG,
+  wrapSVG,
+} = require('../src/scripts/generators/common.js');
 
 test('constants are numbers and within expected ranges', () => {
   assert.equal(typeof WIDTH, 'number');
@@ -14,12 +21,18 @@ test('constants are numbers and within expected ranges', () => {
 });
 
 test('ensureDir creates directory recursively', () => {
-  const dir = path.join(os.tmpdir(), `wg-core-test-${Date.now()}-${Math.random().toString(36).slice(2)}`, 'nested');
+  const dir = path.join(
+    os.tmpdir(),
+    `wg-core-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    'nested',
+  );
   assert.equal(fs.existsSync(dir), false);
   ensureDir(dir);
   assert.equal(fs.existsSync(dir), true);
   // cleanup best-effort
-  try { fs.rmSync(path.dirname(dir), { recursive: true, force: true }); } catch (_) {}
+  try {
+    fs.rmSync(path.dirname(dir), { recursive: true, force: true });
+  } catch (_) {}
 });
 
 test('headerSVG and wrapSVG produce strings with expected content', () => {

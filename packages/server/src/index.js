@@ -37,7 +37,7 @@ app.get('/tasks', (_req, res) => {
 function tsStamp() {
   const d = new Date();
   const pad = (n, k = 2) => String(n).padStart(k, '0');
-  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
 function writeFileSafe(absPath, data, encoding) {
@@ -48,7 +48,9 @@ function writeFileSafe(absPath, data, encoding) {
 
 function buildDayIndexHtml(dir, files, day) {
   const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
-  const pages = files.map(f => `    <img class="page" src="${f}" alt="${f}" />`).join('\n');
+  const pages = files
+    .map((f) => `    <img class="page" src="${f}" alt="${f}" />`)
+    .join('\n');
   const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -91,7 +93,9 @@ app.post('/generate/worksheets', async (req, res) => {
   try {
     const { days = 1, tasks = [], seed, imageDots } = req.body || {};
     if (!Array.isArray(tasks) || tasks.length === 0) {
-      return res.status(400).json({ error: 'tasks array is required and must be non-empty' });
+      return res
+        .status(400)
+        .json({ error: 'tasks array is required and must be non-empty' });
     }
     const ts = tsStamp();
     const outAbs = path.join(generatedDir, ts);
@@ -107,8 +111,14 @@ app.post('/generate/worksheets', async (req, res) => {
         const buf = dataUrlToBuffer(row.imageDataUrl);
         if (!buf) continue;
         // determine ext by mime
-        const mime = (row.imageDataUrl.split(';')[0] || '').split(':')[1] || 'image/png';
-        const ext = mime.includes('jpeg') || mime.includes('jpg') ? '.jpg' : mime.includes('png') ? '.png' : '.bin';
+        const mime =
+          (row.imageDataUrl.split(';')[0] || '').split(':')[1] || 'image/png';
+        const ext =
+          mime.includes('jpeg') || mime.includes('jpg')
+            ? '.jpg'
+            : mime.includes('png')
+              ? '.png'
+              : '.bin';
         const inTmp = tmpPath(ext);
         fs.writeFileSync(inTmp, buf);
         try {
@@ -116,7 +126,11 @@ app.post('/generate/worksheets', async (req, res) => {
           const dir = dayObj.dir;
           if (!Array.isArray(dayObj.files)) dayObj.files = [];
           // Try to find existing default connect-dots page and overwrite it
-          const idx = dayObj.files.findIndex(f => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+          const idx = dayObj.files.findIndex(
+            (f) =>
+              typeof f === 'string' &&
+              f.toLowerCase().endsWith('-connect-dots.svg'),
+          );
           let base;
           if (idx >= 0) {
             base = dayObj.files[idx];
@@ -134,20 +148,37 @@ app.post('/generate/worksheets', async (req, res) => {
             threshold: Number(row.threshold) || 180,
             multiContours: !!row.multiContours,
             maxContours: Math.max(1, Number(row.maxContours) || 6),
-            decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
-            numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
-            pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+            decorAreaRatio: Math.max(
+              0,
+              Math.min(0.9, Number(row.decorAreaRatio) || 0.18),
+            ),
+            numbering:
+              row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
+            pointsDistribution:
+              row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
             blurSigma: Number(row.blurSigma) || 1.4,
-            targetContours: Array.isArray(row.targetContours) ? row.targetContours.map(n => Number(n)).filter(n => Number.isFinite(n)) : null,
+            targetContours: Array.isArray(row.targetContours)
+              ? row.targetContours
+                  .map((n) => Number(n))
+                  .filter((n) => Number.isFinite(n))
+              : null,
           };
           await imageToDots(opts);
           // update files list (only push if we appended a new file)
           if (idx < 0) dayObj.files.push(base);
           // rebuild index.html with all files
-          const filesAbs = dayObj.files.map(f => path.join(dir, f));
-          buildDayIndexHtml(dir, filesAbs.map(f => path.basename(f)), dayObj.day);
+          const filesAbs = dayObj.files.map((f) => path.join(dir, f));
+          buildDayIndexHtml(
+            dir,
+            filesAbs.map((f) => path.basename(f)),
+            dayObj.day,
+          );
         } finally {
-          try { fs.unlinkSync(inTmp); } catch (_) { /* ignore */ }
+          try {
+            fs.unlinkSync(inTmp);
+          } catch (_) {
+            /* ignore */
+          }
         }
       }
     }
@@ -160,10 +191,10 @@ app.post('/generate/worksheets', async (req, res) => {
       return `/static/${urlPath}`;
     };
 
-    const daysOut = result.days.map(d => ({
+    const daysOut = result.days.map((d) => ({
       day: d.day,
       dir: makeUrl(d.dir),
-      files: d.files.map(f => makeUrl(path.join(d.dir, f))),
+      files: d.files.map((f) => makeUrl(path.join(d.dir, f))),
       indexHtml: makeUrl(path.join(d.dir, 'index.html')),
     }));
 
@@ -180,5 +211,7 @@ app.post('/generate/worksheets', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`@wg/server is running at http://localhost:${PORT}`);
-  console.log(`Static files served from ${publicDir} at http://localhost:${PORT}/static/`);
+  console.log(
+    `Static files served from ${publicDir} at http://localhost:${PORT}/static/`,
+  );
 });

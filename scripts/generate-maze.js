@@ -18,36 +18,80 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { WIDTH, HEIGHT, MARGIN, headerSVG, wrapSVG } = require('./generators/common');
+const {
+  WIDTH,
+  HEIGHT,
+  MARGIN,
+  headerSVG,
+  wrapSVG,
+} = require('./generators/common');
 
 // ------------------------ Утилиты ------------------------
 
 function parseArgs(argv) {
-  const args = { rows: 20, cols: 20, count: 10, width: 1000, height: 1000, margin: 20, seed: undefined };
+  const args = {
+    rows: 20,
+    cols: 20,
+    count: 10,
+    width: 1000,
+    height: 1000,
+    margin: 20,
+    seed: undefined,
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    const [k, v] = a.startsWith('--') && a.includes('=') ? a.split('=') : [a, argv[i + 1]];
+    const [k, v] =
+      a.startsWith('--') && a.includes('=') ? a.split('=') : [a, argv[i + 1]];
     const set = (key, val) => {
       if (val === undefined || String(key).startsWith('--') === false) return;
       const n = Number(val);
       args[key.replace(/^--/, '')] = Number.isFinite(n) ? n : val;
     };
     switch (true) {
-      case a === '--rows': set('--rows', argv[++i]); break;
-      case a.startsWith('--rows='): set('--rows', v); break;
-      case a === '--cols': set('--cols', argv[++i]); break;
-      case a.startsWith('--cols='): set('--cols', v); break;
-      case a === '--count': set('--count', argv[++i]); break;
-      case a.startsWith('--count='): set('--count', v); break;
-      case a === '--width': set('--width', argv[++i]); break;
-      case a.startsWith('--width='): set('--width', v); break;
-      case a === '--height': set('--height', argv[++i]); break;
-      case a.startsWith('--height='): set('--height', v); break;
-      case a === '--margin': set('--margin', argv[++i]); break;
-      case a.startsWith('--margin='): set('--margin', v); break;
-      case a === '--seed': args.seed = argv[++i]; break;
-      case a.startsWith('--seed='): args.seed = v; break;
-      default: break;
+      case a === '--rows':
+        set('--rows', argv[++i]);
+        break;
+      case a.startsWith('--rows='):
+        set('--rows', v);
+        break;
+      case a === '--cols':
+        set('--cols', argv[++i]);
+        break;
+      case a.startsWith('--cols='):
+        set('--cols', v);
+        break;
+      case a === '--count':
+        set('--count', argv[++i]);
+        break;
+      case a.startsWith('--count='):
+        set('--count', v);
+        break;
+      case a === '--width':
+        set('--width', argv[++i]);
+        break;
+      case a.startsWith('--width='):
+        set('--width', v);
+        break;
+      case a === '--height':
+        set('--height', argv[++i]);
+        break;
+      case a.startsWith('--height='):
+        set('--height', v);
+        break;
+      case a === '--margin':
+        set('--margin', argv[++i]);
+        break;
+      case a.startsWith('--margin='):
+        set('--margin', v);
+        break;
+      case a === '--seed':
+        args.seed = argv[++i];
+        break;
+      case a.startsWith('--seed='):
+        args.seed = v;
+        break;
+      default:
+        break;
     }
   }
   return args;
@@ -65,7 +109,7 @@ function createRng(seedStr) {
     h = Math.imul(h ^ (h >>> 16), 2246822507);
     h = Math.imul(h ^ (h >>> 13), 3266489909);
     const t = (h ^= h >>> 16) >>> 0;
-    return (t / 4294967296);
+    return t / 4294967296;
   };
 }
 
@@ -81,7 +125,12 @@ function choice(arr, rnd) {
  */
 function generateMaze(rows, cols, rnd) {
   const total = rows * cols;
-  const walls = Array.from({ length: total }, () => ({ N: true, E: true, S: true, W: true }));
+  const walls = Array.from({ length: total }, () => ({
+    N: true,
+    E: true,
+    S: true,
+    W: true,
+  }));
   const visited = new Array(total).fill(false);
 
   const index = (r, c) => r * cols + c;
@@ -100,7 +149,9 @@ function generateMaze(rows, cols, rnd) {
 
   while (stack.length) {
     const [r, c] = stack[stack.length - 1];
-    const unvisited = neighbors(r, c).filter(([nr, nc]) => !visited[index(nr, nc)]);
+    const unvisited = neighbors(r, c).filter(
+      ([nr, nc]) => !visited[index(nr, nc)],
+    );
     if (unvisited.length === 0) {
       stack.pop();
       continue;
@@ -138,9 +189,13 @@ function farthestCell(maze) {
       }
     }
   }
-  let maxI = 0; let maxD = -1;
+  let maxI = 0;
+  let maxD = -1;
   for (const [i, d] of dist.entries()) {
-    if (d > maxD) { maxD = d; maxI = i; }
+    if (d > maxD) {
+      maxD = d;
+      maxI = i;
+    }
   }
   return { r: Math.floor(maxI / cols), c: maxI % cols, distance: maxD };
 }
@@ -149,7 +204,14 @@ function farthestCell(maze) {
 
 function renderMazeSVG(maze, opts) {
   const { rows, cols, walls } = maze;
-  const { width, height, margin = 20, offsetX = MARGIN, offsetY = 220, theme = { start: '🐭', finish: '🧀' } } = opts;
+  const {
+    width,
+    height,
+    margin = 20,
+    offsetX = MARGIN,
+    offsetY = 220,
+    theme = { start: '🐭', finish: '🧀' },
+  } = opts;
 
   // Подгон размеров клеток под целые пиксели
   const cellW = Math.floor((width - margin * 2) / cols);
@@ -174,8 +236,10 @@ function renderMazeSVG(maze, opts) {
       // плюс правую/нижнюю для последнего столбца/строки.
       if (w.N) lines += line(x, y, x + cellW, y);
       if (w.W) lines += line(x, y, x, y + cellH);
-      if (c === cols - 1 && w.E) lines += line(x + cellW, y, x + cellW, y + cellH);
-      if (r === rows - 1 && w.S) lines += line(x, y + cellH, x + cellW, y + cellH);
+      if (c === cols - 1 && w.E)
+        lines += line(x + cellW, y, x + cellW, y + cellH);
+      if (r === rows - 1 && w.S)
+        lines += line(x, y + cellH, x + cellW, y + cellH);
     }
   }
 
@@ -191,7 +255,7 @@ function renderMazeSVG(maze, opts) {
 
   const group = `
   <g transform="translate(${offsetX}, ${offsetY})">
-    <rect x="${stroke/2}" y="${stroke/2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
+    <rect x="${stroke / 2}" y="${stroke / 2}" width="${usedW - stroke}" height="${usedH - stroke}" fill="none" stroke="#111" stroke-width="${stroke}"/>
     <!-- стены -->
     ${lines}
     <!-- иконки старта/финиша -->
@@ -226,14 +290,27 @@ function main() {
     const maze = generateMaze(args.rows, args.cols, rnd);
     const theme = choice(themes, rnd);
 
-    let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${theme.start} к ${theme.finish}.`, pageNum: i });
-    content += renderMazeSVG(maze, { width: gridW, height: gridH, margin: args.margin, offsetX: MARGIN, offsetY: 220, theme });
+    let content = headerSVG({
+      title: 'ЛАБИРИНТ',
+      subtitle: `Проведи путь от ${theme.start} к ${theme.finish}.`,
+      pageNum: i,
+    });
+    content += renderMazeSVG(maze, {
+      width: gridW,
+      height: gridH,
+      margin: args.margin,
+      offsetX: MARGIN,
+      offsetY: 220,
+      theme,
+    });
     const svg = wrapSVG(content);
 
     const name = `maze-${args.rows}x${args.cols}-${String(i).padStart(2, '0')}.svg`;
     const file = path.join(outDir, name);
     fs.writeFileSync(file, svg, 'utf8');
-    console.log(`✓ Лабиринт ${i}/${args.count} сохранён: worksheets/mazes/${name}`);
+    console.log(
+      `✓ Лабиринт ${i}/${args.count} сохранён: worksheets/mazes/${name}`,
+    );
   }
 
   console.log('Готово! Откройте SVG-файлы в папке worksheets/mazes.');
@@ -242,7 +319,6 @@ function main() {
 if (require.main === module) {
   main();
 }
-
 
 // Exported helper to build a single maze page SVG on the fly (no filesystem IO)
 function generateMazePage(opts = {}) {
@@ -262,8 +338,19 @@ function generateMazePage(opts = {}) {
   const gridH = HEIGHT - 220 - MARGIN;
   const maze = generateMaze(rows, cols, rnd);
 
-  let content = headerSVG({ title: 'ЛАБИРИНТ', subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`, pageNum });
-  content += renderMazeSVG(maze, { width: gridW, height: gridH, margin, offsetX: MARGIN, offsetY: 220, theme: usedTheme });
+  let content = headerSVG({
+    title: 'ЛАБИРИНТ',
+    subtitle: `Проведи путь от ${usedTheme.start} к ${usedTheme.finish}.`,
+    pageNum,
+  });
+  content += renderMazeSVG(maze, {
+    width: gridW,
+    height: gridH,
+    margin,
+    offsetX: MARGIN,
+    offsetY: 220,
+    theme: usedTheme,
+  });
   return wrapSVG(content);
 }
 

@@ -83,7 +83,7 @@ function renderCell(x, y, idx, a, b) {
   const line2Y = line1Y + 58;
   const answerY = line2Y + 26;
 
-  const rightX = x +  padding * 10;
+  const rightX = x + padding * 10;
 
   return `
     <g>
@@ -132,7 +132,10 @@ function renderPage(pageNum, tasks) {
   return svg;
 }
 
-function generateAdditionWorksheets({ count = 10, outDir = 'worksheets' } = {}) {
+function generateAdditionWorksheets({
+  count = 10,
+  outDir = 'worksheets',
+} = {}) {
   const out = path.resolve(process.cwd(), outDir);
   if (!fs.existsSync(out)) fs.mkdirSync(out, { recursive: true });
 

@@ -9,8 +9,12 @@ function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-function rndInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function choice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function rndInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function choice(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 function headerSVG({ title, subtitle = '', pageNum }) {
   return `

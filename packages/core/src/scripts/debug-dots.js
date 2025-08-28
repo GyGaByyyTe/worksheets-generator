@@ -49,7 +49,7 @@ async function main() {
     outSvg: svgPath,
     pointsCount: Math.max(6, Math.min(200, parseInt(points, 10) || 50)),
     threshold: Math.max(0, Math.min(255, parseInt(threshold, 10) || 180)),
-    multiContours: true,
+    multiContours: false,
   });
 
   console.log(`SVG saved: ${svgFile}`);

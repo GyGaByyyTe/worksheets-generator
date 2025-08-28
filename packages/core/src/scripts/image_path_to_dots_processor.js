@@ -242,24 +242,53 @@ async function imageToDots({ input, outSvg, pointsCount = 50, simplifyTolerance 
   // 6) Ресемплируем и упрощаем каждую траекторию
   const resultPaths = mainSubpaths.map((d, i) => simplifyPoints(resamplePathD(d, alloc[i]), simplifyTolerance));
 
-  // 7) Нумерация точек
+  // 7) Подготовим масштабирование и позиционирование в области контента страницы
+  const width = 1000, height = 1414;
+  // Зададим прямоугольник контента, оставив место под шапку и поля
+  const left = 60;
+  const top = 210; // оставить место под заголовком
+  const right = width - 60;
+  const bottom = height - 60;
+  const availW = Math.max(1, right - left);
+  const availH = Math.max(1, bottom - top);
+
+  // Посчитаем границы исходных точек
+  const allPts = resultPaths.flat();
+  const xs = allPts.map(p => p[0]);
+  const ys = allPts.map(p => p[1]);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const bw = Math.max(1, maxX - minX);
+  const bh = Math.max(1, maxY - minY);
+
+  // Единый масштаб с сохранением пропорций + центрирование
+  const scale = Math.min(availW / bw, availH / bh);
+  const usedW = bw * scale;
+  const usedH = bh * scale;
+  const ox = left + (availW - usedW) / 2 - minX * scale;
+  const oy = top + (availH - usedH) / 2 - minY * scale;
+
+  const scaledPaths = resultPaths.map(pts => pts.map(([x, y]) => [x * scale + ox, y * scale + oy]));
+
+  // 8) Нумерация точек уже после масштабирования
   let numbered = [];
   if (numbering === 'per-contour') {
     let globalIdx = 1;
-    for (const pts of resultPaths) {
+    for (const pts of scaledPaths) {
       for (let i = 0; i < pts.length; i++) numbered.push([pts[i][0], pts[i][1], globalIdx++]);
     }
   } else {
     // continuous
     let idx = 1;
-    for (const pts of resultPaths) for (const p of pts) numbered.push([p[0], p[1], idx++]);
+    for (const pts of scaledPaths) for (const p of pts) numbered.push([p[0], p[1], idx++]);
   }
 
-  // 8) Выведем страницу SVG
-  const dPaths = resultPaths.map(pointsToSVGPath);
+  // 9) Выведем страницу SVG
+  const dPaths = scaledPaths.map(pointsToSVGPath);
   const circles = numbered.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6.5" fill="#000"/>`).join('\n');
   const numbers = numbered.map(([x, y], i) => `<text x="${x + 10}" y="${y - 12}" font-family="Arial, sans-serif" font-size="16" fill="#111">${i + 1}</text>`).join('\n');
-  const width = 1000, height = 1414;
 
   const pathEls = dPaths.map(d => `<path d="${d}" fill="none" stroke="#bbb" stroke-width="1.5" stroke-dasharray="6 8" />`).join('\n');
   const header = `

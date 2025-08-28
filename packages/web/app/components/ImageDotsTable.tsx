@@ -103,43 +103,43 @@ export default function ImageDotsTable({ rows, setRows, lockedCount = null }: Im
               <tr key={i}>
                 <td style={tdCenter}>{i + 1}</td>
                 <td style={td}>
-                  <input type="file" accept="image/*" onChange={(e) => update(i, { file: e.target.files?.[0] || null })} />
+                  <input name={`imageDots[${i}][file]`} type="file" accept="image/*" onChange={(e) => update(i, { file: e.target.files?.[0] || null })} />
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" min={5} max={1000} value={r.pointsCount} onChange={e => update(i, { pointsCount: clampInt(e.target.value, 5, 1000) })} />
+                  <input name={`imageDots[${i}][pointsCount]`} type="number" min={5} max={1000} value={r.pointsCount} onChange={e => update(i, { pointsCount: clampInt(e.target.value, 5, 1000) })} />
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" step={0.1} min={0.1} max={10} value={r.simplifyTolerance} onChange={e => update(i, { simplifyTolerance: clampFloat(e.target.value, 0.1, 10) })} />
+                  <input name={`imageDots[${i}][simplifyTolerance]`} type="number" step={0.1} min={0.1} max={10} value={r.simplifyTolerance} onChange={e => update(i, { simplifyTolerance: clampFloat(e.target.value, 0.1, 10) })} />
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" min={0} max={255} value={r.threshold} onChange={e => update(i, { threshold: clampInt(e.target.value, 0, 255) })} />
+                  <input name={`imageDots[${i}][threshold]`} type="number" min={0} max={255} value={r.threshold} onChange={e => update(i, { threshold: clampInt(e.target.value, 0, 255) })} />
                 </td>
                 <td style={tdCenter}>
-                  <input type="checkbox" checked={r.multiContours} onChange={e => update(i, { multiContours: e.target.checked })} />
+                  <input name={`imageDots[${i}][multiContours]`} type="checkbox" checked={r.multiContours} onChange={e => update(i, { multiContours: e.target.checked })} />
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" min={1} max={20} value={r.maxContours} onChange={e => update(i, { maxContours: clampInt(e.target.value, 1, 20) })} />
+                  <input name={`imageDots[${i}][maxContours]`} type="number" min={1} max={20} value={r.maxContours} onChange={e => update(i, { maxContours: clampInt(e.target.value, 1, 20) })} />
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" step={0.01} min={0} max={0.9} value={r.decorAreaRatio} onChange={e => update(i, { decorAreaRatio: clampFloat(e.target.value, 0, 0.9) })} />
+                  <input name={`imageDots[${i}][decorAreaRatio]`} type="number" step={0.01} min={0} max={0.9} value={r.decorAreaRatio} onChange={e => update(i, { decorAreaRatio: clampFloat(e.target.value, 0, 0.9) })} />
                 </td>
                 <td style={td}>
-                  <select value={r.numbering} onChange={e => update(i, { numbering: e.target.value as NumberingMode })}>
+                  <select name={`imageDots[${i}][numbering]`} value={r.numbering} onChange={e => update(i, { numbering: e.target.value as NumberingMode })}>
                     <option value="continuous">Непрерывная</option>
                     <option value="per-contour">По контурам</option>
                   </select>
                 </td>
                 <td style={td}>
-                  <select value={r.pointsDistribution} onChange={e => update(i, { pointsDistribution: e.target.value as PointsDistribution })}>
+                  <select name={`imageDots[${i}][pointsDistribution]`} value={r.pointsDistribution} onChange={e => update(i, { pointsDistribution: e.target.value as PointsDistribution })}>
                     <option value="proportional">Пропорц.</option>
                     <option value="equal">Поровну</option>
                   </select>
                 </td>
                 <td style={tdNarrow}>
-                  <input type="number" step={0.1} min={0} max={10} value={r.blurSigma} onChange={e => update(i, { blurSigma: clampFloat(e.target.value, 0, 10) })} />
+                  <input name={`imageDots[${i}][blurSigma]`} type="number" step={0.1} min={0} max={10} value={r.blurSigma} onChange={e => update(i, { blurSigma: clampFloat(e.target.value, 0, 10) })} />
                 </td>
                 <td style={td}>
-                  <input type="text" placeholder="например: 0,2,5" value={r.targetContours || ''} onChange={e => update(i, { targetContours: e.target.value })} />
+                  <input name={`imageDots[${i}][targetContours]`} type="text" placeholder="например: 0,2,5" value={r.targetContours || ''} onChange={e => update(i, { targetContours: e.target.value })} />
                 </td>
                 {lockedCount == null && (
                   <td style={tdCenter}>

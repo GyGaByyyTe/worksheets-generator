@@ -1,17 +1,10 @@
 import GeneratorForm from './components/GeneratorForm';
-import { apiBase } from './lib/api';
 import { refreshTasks } from './actions';
+import { getDefaultTaskState } from './lib/const';
 
 export default async function Page() {
-  let tasks: string[] = [];
-  try {
-    const r = await fetch(`${apiBase()}/tasks`, { cache: 'no-store' });
-    const data = await r.json();
-    tasks = data?.keys || [];
-  } catch (e) {
-    // Fail silently; the client component will attempt a client-side fetch as a fallback
-    tasks = [];
-  }
+  const data = await refreshTasks(getDefaultTaskState());
+  const tasks: string[] = data.tasks;
 
-  return <GeneratorForm initialTasks={tasks} refreshAction={refreshTasks} />;
+  return <GeneratorForm tasks={tasks} />;
 }

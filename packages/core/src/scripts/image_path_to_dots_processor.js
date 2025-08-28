@@ -144,8 +144,9 @@ function pointsToSVGPage(points, { title = 'Соедини по точкам', w
   const circles = points.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6.5" fill="#000"/>`).join('\n');
   const numbers = showNumbering ? points.map(([x, y], i) => `<text x="${x + 10}" y="${y - 12}" font-family="Arial, sans-serif" font-size="16" fill="#111">${i + 1}</text>`).join('\n') : '';
 
+  // <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
   const svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
+  
   <path d="${d}" fill="none" stroke="#bbb" stroke-width="1.5" stroke-dasharray="6 8" />
   ${circles}
   ${numbers}
@@ -169,8 +170,8 @@ function pointsToSVGMulti(paths, { width = 1000, height = 1414, pageNum = 1 } = 
   const pathEls = all.map(p => `<path d="${p.d}" fill="none" stroke="#bbb" stroke-width="1.5" stroke-dasharray="6 8" />`).join('\n');
   const circles = all.map(p => p.circles).join('\n');
 
+  // <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
   const svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
   ${pathEls}
   ${circles}
   </svg>`;
@@ -297,11 +298,11 @@ async function imageToDots({ input, outSvg, pointsCount = 50, simplifyTolerance 
   <text x="${width - 400}" y="60" font-family="Arial, sans-serif" font-size="28">Дата: _______________</text>
   <text x="40" y="110" font-family="Arial Black, Arial, sans-serif" font-size="38">Соедини по точкам</text>`;
 
+  // <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
   const page = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <rect width="${width}" height="${height}" fill="#fff"/>
   ${header}
   <g>
-    <rect x="45" y="45" width="${width - 90}" height="${height - 90}" fill="none" stroke="#ccc" rx="14"/>
     ${pathEls}
     ${circles}
     ${numbers}

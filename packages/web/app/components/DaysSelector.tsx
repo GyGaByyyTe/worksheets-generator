@@ -12,7 +12,7 @@ export default function DaysSelector({ days, onChange, min = 1, max = 7 }: DaysS
   return (
     <div className="row">
       <label>Дней:</label>
-      <input
+      <input name="days"
         type="number"
         min={min}
         max={max}

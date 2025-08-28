@@ -4,13 +4,13 @@ const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
-const { generateCustom, GENERATORS } = require('@wg/core');
+const { generateCustom, GENERATORS, imageToDots } = require('@wg/core');
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 
 app.use(cors());
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 const serverRoot = path.resolve(__dirname, '..');
 const publicDir = path.join(serverRoot, 'public');

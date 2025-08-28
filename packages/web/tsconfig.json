@@ -6,7 +6,7 @@
       "dom.iterable",
       "es2020"
     ],
-    "allowJs": false,
+    "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -16,9 +16,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {},
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "node"
+    ],
     "plugins": [
       {
         "name": "next"

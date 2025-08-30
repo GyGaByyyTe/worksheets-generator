@@ -6,9 +6,16 @@ const os = require('os');
 const express = require('express');
 const cors = require('cors');
 const { generateCustom, GENERATORS, imageToDots } = require('@wg/core');
+const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-it';
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
+
+// Initialize Prisma Client (DATABASE_URL must be set)
+const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -89,7 +96,126 @@ function tmpPath(ext = '.png') {
   return path.join(base, `wg-upload-${Date.now()}-${rand}${ext}`);
 }
 
-app.post('/generate/worksheets', async (req, res) => {
+// --- Auth helpers and middleware ---
+function optionalAuth(req, _res, next) {
+  try {
+    const hdr =
+      req.headers && (req.headers.authorization || req.headers.Authorization);
+    if (hdr && typeof hdr === 'string') {
+      const m = hdr.match(/^Bearer\s+(.+)$/i);
+      if (m) {
+        try {
+          req.user = jwt.verify(m[1], JWT_SECRET);
+        } catch (_) {
+          // ignore invalid token to allow anonymous
+        }
+      }
+    }
+  } catch (_) {
+    // ignore
+  }
+  next();
+}
+
+function detectMimeByExt(filename) {
+  const low = String(filename || '').toLowerCase();
+  if (low.endsWith('.svg')) return 'image/svg+xml';
+  if (low.endsWith('.png')) return 'image/png';
+  if (low.endsWith('.jpg') || low.endsWith('.jpeg')) return 'image/jpeg';
+  return 'application/octet-stream';
+}
+
+async function ingestGenerationToDb({ userId, seed, tasks, days, result }) {
+  // Create generation first
+  const gen = await prisma.generation.create({
+    data: { userId: userId || null, seed: seed || null, tasks, days },
+  });
+
+  // Save pages
+  for (const d of result.days) {
+    for (const relFile of d.files) {
+      const abs = path.join(d.dir, relFile);
+      const mime = detectMimeByExt(relFile);
+      if (mime === 'image/svg+xml') {
+        const svg = fs.readFileSync(abs, 'utf8');
+        await prisma.page.create({
+          data: {
+            generationId: gen.id,
+            day: d.day,
+            filename: relFile,
+            mimeType: mime,
+            svgText: svg,
+            sizeBytes: Buffer.byteLength(svg, 'utf8'),
+          },
+        });
+      } else {
+        const buf = fs.readFileSync(abs);
+        await prisma.page.create({
+          data: {
+            generationId: gen.id,
+            day: d.day,
+            filename: relFile,
+            mimeType: mime,
+            binary: buf,
+            sizeBytes: buf.length,
+          },
+        });
+      }
+    }
+  }
+  return gen;
+}
+
+// --- Auth routes ---
+app.post('/auth/register', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password || String(password).length < 6) {
+      return res
+        .status(400)
+        .json({ error: 'email and password (min 6 chars) required' });
+    }
+    const hash = await bcrypt.hash(String(password), 12);
+    const user = await prisma.user.create({
+      data: { email: String(email).toLowerCase(), passwordHash: hash },
+    });
+    return res.status(201).json({ id: user.id, email: user.email });
+  } catch (e) {
+    const msg = String((e && e.message) || e);
+    if (msg.includes('Unique constraint')) {
+      return res.status(409).json({ error: 'email already registered' });
+    }
+    return res.status(400).json({ error: msg });
+  }
+});
+
+app.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password)
+      return res.status(400).json({ error: 'email and password required' });
+    const user = await prisma.user.findUnique({
+      where: { email: String(email).toLowerCase() },
+    });
+    if (!user) return res.status(401).json({ error: 'invalid credentials' });
+    const ok = await bcrypt.compare(String(password), user.passwordHash);
+    if (!ok) return res.status(401).json({ error: 'invalid credentials' });
+    const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
+    return res.json({ token });
+  } catch (e) {
+    return res.status(400).json({ error: String((e && e.message) || e) });
+  }
+});
+
+app.get('/me', optionalAuth, async (req, res) => {
+  if (!req.user) return res.json({ user: null });
+  // return basic info
+  return res.json({ user: { id: req.user.sub, email: req.user.email } });
+});
+
+app.post('/generate/worksheets', optionalAuth, async (req, res) => {
   try {
     const { days = 1, tasks = [], seed, imageDots } = req.body || {};
     if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -183,29 +309,92 @@ app.post('/generate/worksheets', async (req, res) => {
       }
     }
 
-    // Build URLs for the generated files
-    const makeUrl = (absPath) => {
-      const rel = path.relative(publicDir, absPath);
-      // Convert Windows backslashes to URL slashes
-      const urlPath = rel.split(path.sep).join('/');
-      return `/static/${urlPath}`;
-    };
+    // Ingest into DB (files are currently on FS)
+    const gen = await ingestGenerationToDb({
+      userId: req.user && req.user.sub ? req.user.sub : null,
+      seed,
+      tasks,
+      days,
+      result,
+    });
 
-    const daysOut = result.days.map((d) => ({
-      day: d.day,
-      dir: makeUrl(d.dir),
-      files: d.files.map((f) => makeUrl(path.join(d.dir, f))),
-      indexHtml: makeUrl(path.join(d.dir, 'index.html')),
-    }));
+    // Query pages and build DB-backed URLs
+    const pages = await prisma.page.findMany({
+      where: { generationId: gen.id },
+      orderBy: [{ day: 'asc' }, { filename: 'asc' }],
+      select: { id: true, day: true, filename: true },
+    });
+
+    const uniqueDays = [...new Set(pages.map((p) => p.day))];
+    const daysOut = uniqueDays.map((dayNum) => {
+      const files = pages.filter((p) => p.day === dayNum);
+      return {
+        day: dayNum,
+        dir: `/generations/${gen.id}/day/${dayNum}`,
+        files: files.map((f) => `/files/${f.id}`),
+        indexHtml: `/generations/${gen.id}/day/${dayNum}/index.html`,
+      };
+    });
+
+    // Optionally cleanup FS directory
+    try {
+      fs.rmSync(result.outDir, { recursive: true, force: true });
+    } catch (_) {}
 
     res.json({
-      outDir: makeUrl(result.outDir),
+      outDir: `/generations/${gen.id}`,
       days: daysOut,
     });
   } catch (err) {
     console.error(err);
     const msg = String((err && err.message) || err);
     res.status(400).json({ error: msg });
+  }
+});
+
+// Stream a single page file from DB
+app.get('/files/:id', async (req, res) => {
+  try {
+    const page = await prisma.page.findUnique({
+      where: { id: String(req.params.id) },
+    });
+    if (!page) return res.status(404).end();
+    res.setHeader('Content-Type', page.mimeType || 'application/octet-stream');
+    if (page.mimeType === 'image/svg+xml' && page.svgText) {
+      return res.send(page.svgText);
+    }
+    if (page.binary) {
+      return res.send(Buffer.from(page.binary));
+    }
+    return res.status(404).end();
+  } catch (e) {
+    return res.status(400).json({ error: String((e && e.message) || e) });
+  }
+});
+
+// Preview a specific day (HTML) based on DB pages
+app.get('/generations/:genId/day/:day/index.html', async (req, res) => {
+  try {
+    const genId = String(req.params.genId);
+    const day = Number(req.params.day);
+    if (!Number.isFinite(day))
+      return res.status(400).json({ error: 'invalid day' });
+    const files = await prisma.page.findMany({
+      where: { generationId: genId, day },
+      orderBy: { filename: 'asc' },
+      select: { id: true, filename: true },
+    });
+    const imgs = files
+      .map(
+        (f) =>
+          `    <img class=\"page\" src=\"/files/${f.id}\" alt=\"${f.filename}\" />`,
+      )
+      .join('\n');
+    const html = `<!doctype html>\n<html lang=\"ru\">\n<head>\n<meta charset=\"utf-8\" />\n<title>День ${day}</title>\n<style>\n  @page { size: A4 portrait; margin: 0; }\n  html, body { margin: 0; padding: 0; background: #fff; }\n  .page { display: block; width: 210mm; height: 297mm; object-fit: contain; page-break-after: always; }\n  .page:last-child { page-break-after: auto; }\n  @media screen { body { background: #777; } .page { margin: 8px auto; box-shadow: 0 0 8px rgba(0,0,0,.4); background: #fff; } }\n</style>\n</head>\n<body>\n${imgs}\n</body>\n</html>`;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(html);
+  } catch (e) {
+    return res.status(400).json({ error: String((e && e.message) || e) });
   }
 });
 

@@ -69,6 +69,7 @@
 - **Node.js** + **TypeScript** 5.6.2
 - **React** 19.0.0 + **Next.js** 15.0.0
 - **Express** 4.19.2 для API
+- **PostgreSQL** 15/16 + **Prisma** ORM для хранения результатов и auth
 - **Sharp** 0.33.4, **Potrace** 2.1.0 для обработки изображений
 - **pnpm** как пакетный менеджер
 
@@ -137,9 +138,17 @@ pnpm start:web
 
 - `GET /health` — health check
 - `GET /tasks` — available generator keys
-- `POST /generate/worksheets` — body: `{ days: number, tasks: string[], seed?: any }`
-  - Returns JSON with links to generated files under `/static/...`
-- Static files are served from `/static`.
+- `POST /generate/worksheets` — body: `{ days: number, tasks: string[], seed?: any, imageDots?: Row[] }`
+  - Returns JSON with same structure as before, but file links are DB-backed: `/files/:pageId`, and previews under `/generations/:genId/day/:day/index.html`. Anonymous mode is allowed (no token required) — such generations have no user.
+- `GET /files/:id` — streams a single generated page from DB (SVG/PNG/JPEG)
+- `GET /generations/:genId/day/:day/index.html` — simple preview HTML for a day
+- Auth (optional):
+  - `POST /auth/register` — `{ email, password }`
+  - `POST /auth/login` — `{ email, password }` → `{ token }` (send as `Authorization: Bearer <token>`)
+  - `GET /me` — returns current user or null
+
+Notes:
+- The backend now stores results in a PostgreSQL database and serves files via API. Static `/static` is kept for legacy assets but is not used for newly generated results.
 
 ## Project Notes
 
@@ -173,3 +182,11 @@ pnpm start:web
 - `packages/web`
   - dev: Next dev on port 3000
   - build/start: Next build and start (port 3000)
+
+
+
+## Local setup on Windows
+
+If you just cloned the repo on a Windows machine and want to start developing, follow:
+
+- LOCAL_SETUP_WINDOWS.md — step-by-step guide (PowerShell), including PostgreSQL, Prisma, env vars, and running dev servers.

@@ -1,0 +1,48 @@
+// Prisma schema for @wg/server
+// Database: PostgreSQL (recommended). Set DATABASE_URL in environment.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  generations  Generation[]
+}
+
+model Generation {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  seed      String?
+  tasks     Json
+  days      Int
+  createdAt DateTime @default(now()) @map("created_at")
+  pages     Page[]
+
+  @@index([userId])
+}
+
+model Page {
+  id            String     @id @default(uuid())
+  generationId  String     @map("generation_id")
+  generation    Generation @relation(fields: [generationId], references: [id])
+  day           Int
+  filename      String
+  mimeType      String     @map("mime_type")
+  svgText       String?    @map("svg_text")
+  binary        Bytes?     // for PNG/JPEG
+  sizeBytes     Int?       @map("size_bytes")
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  @@index([generationId])
+  @@index([generationId, day])
+}

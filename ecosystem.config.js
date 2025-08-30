@@ -9,6 +9,9 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: '4000',
+        // Set your production DB URL and JWT secret here or via PM2 ecosystem env
+        DATABASE_URL: 'postgresql://wg_user:wg_password@127.0.0.1:5432/wg?schema=public',
+        JWT_SECRET: 'change-me-in-production',
       },
       watch: false,
       max_restarts: 10,

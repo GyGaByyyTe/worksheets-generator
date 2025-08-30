@@ -9,11 +9,21 @@
     "build": "echo No build step for server",
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "test": "node -e \"console.log('server ok')\""
+    "test": "node -e \"console.log('server ok')\"",
+    "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:push": "prisma db push"
   },
   "dependencies": {
+    "@prisma/client": "^5.20.0",
     "@wg/core": "workspace:*",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0"
   }
 }

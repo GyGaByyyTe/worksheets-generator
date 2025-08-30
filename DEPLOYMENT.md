@@ -3,11 +3,11 @@
 Данный репозиторий — monorepo на pnpm с тремя пакетами:
 
 - `@wg/web` — фронтенд на Next.js (порт 3000);
-- `@wg/server` — бекенд на Express (порт 4000), генерирует задания и отдаёт статические файлы под `/static`;
+- `@wg/server` — бекенд на Express (порт 4000), генерирует задания, сохраняет результаты в PostgreSQL и отдаёт их через API (`/files/:id`, предпросмотр `/generations/:genId/day/:day/index.html`).
 - `@wg/core` — библиотека со скриптами генерации/обработки.
 
 Цель: рабочее приложение по адресу https://kids.does.cool/.
-Фронтенд запрашивает API по `NEXT_PUBLIC_API_URL`. Мы будем проксировать `/api/*` и `/static/*` на бекенд (порт 4000) через NGINX, остальное — на фронтенд (порт 3000).
+Фронтенд запрашивает API по `NEXT_PUBLIC_API_URL`. Мы будем проксировать `/api/*`, а также `/files/*` и `/generations/*` на бекенд (порт 4000) через NGINX, остальное — на фронтенд (порт 3000).
 
 Ниже — минимально необходимый, но полный и актуальный (на 2025 год) гайд.
 
@@ -153,6 +153,23 @@ NEXT_PUBLIC_API_URL=https://kids.does.cool/api
 - Переменная `NEXT_PUBLIC_*` читается как на сервере Next.js, так и в браузере.
 - На локальной разработке по умолчанию (без .env) фронтенд стучится на `http://localhost:4000` (см. `packages/web/app/lib/api.ts`).
 
+Переменные окружения для бекенда (@wg/server):
+
+- `DATABASE_URL` — строка подключения PostgreSQL, например:
+  - `postgresql://wg_user:wg_password@127.0.0.1:5432/wg?schema=public`
+- `JWT_SECRET` — секрет для подписи JWT (используется для опциональной аутентификации).
+- `PORT` — порт сервера (по умолчанию 4000).
+
+Инициализация БД (однократно после настройки `DATABASE_URL`):
+
+```
+# Сгенерировать клиент Prisma (выполняется и на postinstall)
+pnpm --filter @wg/server prisma:generate
+
+# Применить схему в базу (создать таблицы)
+pnpm --filter @wg/server prisma:push
+```
+
 Если нужно изменить порты:
 
 - Фронтенд по умолчанию: 3000 (см. `packages/web/package.json`), можно задать `PORT=3000` в PM2;
@@ -234,7 +251,33 @@ server {
         proxy_pass http://127.0.0.1:4000;
     }
 
-    # Статика, которую отдаёт Express (порт 4000)
+    # Доступ к файлам генераций из БД через API (порт 4000)
+    location /files/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    # Предпросмотр страниц генерации (HTML)
+    location /generations/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_pass http://127.0.0.1:4000;
+    }
+
+    # Наследуемая статика (если осталась)
     location /static/ {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -316,14 +359,14 @@ pm2 status
 curl -I https://kids.does.cool/
 ```
 
-3. Проверьте API и статик через домен (через NGINX):
+3. Проверьте API через домен (через NGINX):
 
 ```
 curl -s https://kids.does.cool/api/health | jq .
 # Ожидаемый ответ от @wg/server: { "ok": true, ... }
 ```
 
-4. Выберите задания на странице, сгенерируйте — должны появиться ссылки вида `/static/...`.
+4. На странице выберите задания и сгенерируйте — ссылки должны иметь вид `/files/<pageId>` и предпросмотр `/generations/<genId>/day/<n>/index.html`.
 
 ---
 

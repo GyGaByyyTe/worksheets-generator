@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { useT } from '../i18n/I18nProvider';
+import Checkbox from './ui/checkbox';
 
 export type TasksListProps = {
   tasks: string[];
@@ -21,10 +22,9 @@ export default function TasksList({
         <div className="tasks-list">
           {tasks.map((k) => (
             <label key={k} className="chk">
-              <input
+              <Checkbox
                 name="tasks"
                 value={k}
-                type="checkbox"
                 checked={selected.includes(k)}
                 onChange={() => onToggle(k)}
               />

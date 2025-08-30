@@ -2,6 +2,7 @@
 
 import { useFormStatus } from 'react-dom';
 import { useT } from '../../i18n/I18nProvider';
+import Button from '../ui/button';
 
 export default function LoadingButton({
   loadingLabel,
@@ -18,8 +19,8 @@ export default function LoadingButton({
   const idle = label ?? t('actions.generate');
 
   return (
-    <button disabled={pending} type="submit" {...props}>
+    <Button disabled={pending} loading={pending} type="submit" {...props}>
       {pending ? loading : idle}
-    </button>
+    </Button>
   );
 }

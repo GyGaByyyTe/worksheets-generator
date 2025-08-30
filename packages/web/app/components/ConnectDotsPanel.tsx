@@ -2,6 +2,7 @@
 import React from 'react';
 import ImageDotsTable, { ImageDotsParams } from './ImageDotsTable';
 import { useT } from '../i18n/I18nProvider';
+import Checkbox from './ui/checkbox';
 
 export type ConnectDotsPanelProps = {
   days: number;
@@ -25,10 +26,9 @@ export default function ConnectDotsPanel({
         <div className="panel">
           <div className="row">
             <label className="chk">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={lockToDays}
-                onChange={(e) => setLockToDays(e.target.checked)}
+                onChange={(e) => setLockToDays((e.target as HTMLInputElement).checked)}
               />{' '}
               {t('connectDots.lockLabel')}
             </label>

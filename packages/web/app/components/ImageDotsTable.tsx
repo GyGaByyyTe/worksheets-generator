@@ -1,6 +1,10 @@
 'use client';
 import React from 'react';
 import { useT } from '../i18n/I18nProvider';
+import Select from './ui/select';
+import Checkbox from './ui/checkbox';
+import Button from './ui/button';
+import Input from './ui/input';
 
 export type NumberingMode = 'continuous' | 'per-contour';
 export type PointsDistribution = 'proportional' | 'equal';
@@ -90,9 +94,9 @@ export default function ImageDotsTable({
         <div style={{ fontWeight: 600 }}>{t('imageDots.title')}</div>
         {lockedCount == null && (
           <div>
-            <button type="button" onClick={addRow} style={{ marginRight: 6 }}>
+            <Button type="button" onClick={addRow} style={{ marginRight: 6 }}>
               {t('imageDots.add')}
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -120,17 +124,17 @@ export default function ImageDotsTable({
               <tr key={i}>
                 <td style={tdCenter}>{i + 1}</td>
                 <td style={td}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][file]`}
                     type="file"
                     accept="image/*"
                     onChange={(e) =>
-                      update(i, { file: e.target.files?.[0] || null })
+                      update(i, { file: (e.target as HTMLInputElement).files?.[0] || null })
                     }
                   />
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][pointsCount]`}
                     type="number"
                     min={5}
@@ -138,13 +142,13 @@ export default function ImageDotsTable({
                     value={r.pointsCount}
                     onChange={(e) =>
                       update(i, {
-                        pointsCount: clampInt(e.target.value, 5, 1000),
+                        pointsCount: clampInt((e.target as HTMLInputElement).value, 5, 1000),
                       })
                     }
                   />
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][simplifyTolerance]`}
                     type="number"
                     step={0.1}
@@ -153,35 +157,34 @@ export default function ImageDotsTable({
                     value={r.simplifyTolerance}
                     onChange={(e) =>
                       update(i, {
-                        simplifyTolerance: clampFloat(e.target.value, 0.1, 10),
+                        simplifyTolerance: clampFloat((e.target as HTMLInputElement).value, 0.1, 10),
                       })
                     }
                   />
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][threshold]`}
                     type="number"
                     min={0}
                     max={255}
                     value={r.threshold}
                     onChange={(e) =>
-                      update(i, { threshold: clampInt(e.target.value, 0, 255) })
+                      update(i, { threshold: clampInt((e.target as HTMLInputElement).value, 0, 255) })
                     }
                   />
                 </td>
                 <td style={tdCenter}>
-                  <input
+                  <Checkbox
                     name={`imageDots[${i}][multiContours]`}
-                    type="checkbox"
                     checked={r.multiContours}
                     onChange={(e) =>
-                      update(i, { multiContours: e.target.checked })
+                      update(i, { multiContours: (e.target as HTMLInputElement).checked })
                     }
                   />
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][maxContours]`}
                     type="number"
                     min={1}
@@ -189,13 +192,13 @@ export default function ImageDotsTable({
                     value={r.maxContours}
                     onChange={(e) =>
                       update(i, {
-                        maxContours: clampInt(e.target.value, 1, 20),
+                        maxContours: clampInt((e.target as HTMLInputElement).value, 1, 20),
                       })
                     }
                   />
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][decorAreaRatio]`}
                     type="number"
                     step={0.01}
@@ -204,17 +207,17 @@ export default function ImageDotsTable({
                     value={r.decorAreaRatio}
                     onChange={(e) =>
                       update(i, {
-                        decorAreaRatio: clampFloat(e.target.value, 0, 0.9),
+                        decorAreaRatio: clampFloat((e.target as HTMLInputElement).value, 0, 0.9),
                       })
                     }
                   />
                 </td>
                 <td style={td}>
-                  <select
+                  <Select
                     name={`imageDots[${i}][numbering]`}
                     value={r.numbering}
                     onChange={(e) =>
-                      update(i, { numbering: e.target.value as NumberingMode })
+                      update(i, { numbering: (e.target as HTMLSelectElement).value as NumberingMode })
                     }
                   >
                     <option value="continuous">
@@ -223,16 +226,15 @@ export default function ImageDotsTable({
                     <option value="per-contour">
                       {t('numbering.perContour')}
                     </option>
-                  </select>
+                  </Select>
                 </td>
                 <td style={td}>
-                  <select
+                  <Select
                     name={`imageDots[${i}][pointsDistribution]`}
                     value={r.pointsDistribution}
                     onChange={(e) =>
                       update(i, {
-                        pointsDistribution: e.target
-                          .value as PointsDistribution,
+                        pointsDistribution: (e.target as HTMLSelectElement).value as PointsDistribution,
                       })
                     }
                   >
@@ -240,10 +242,10 @@ export default function ImageDotsTable({
                       {t('distribution.proportional')}
                     </option>
                     <option value="equal">{t('distribution.equal')}</option>
-                  </select>
+                  </Select>
                 </td>
                 <td style={tdNarrow}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][blurSigma]`}
                     type="number"
                     step={0.1}
@@ -252,27 +254,27 @@ export default function ImageDotsTable({
                     value={r.blurSigma}
                     onChange={(e) =>
                       update(i, {
-                        blurSigma: clampFloat(e.target.value, 0, 10),
+                        blurSigma: clampFloat((e.target as HTMLInputElement).value, 0, 10),
                       })
                     }
                   />
                 </td>
                 <td style={td}>
-                  <input
+                  <Input
                     name={`imageDots[${i}][targetContours]`}
                     type="text"
                     placeholder={t('imageDots.placeholder')}
                     value={r.targetContours || ''}
                     onChange={(e) =>
-                      update(i, { targetContours: e.target.value })
+                      update(i, { targetContours: (e.target as HTMLInputElement).value })
                     }
                   />
                 </td>
                 {lockedCount == null && (
                   <td style={tdCenter}>
-                    <button type="button" onClick={() => removeRow(i)}>
+                    <Button type="button" onClick={() => removeRow(i)}>
                       {t('buttons.remove')}
-                    </button>
+                    </Button>
                   </td>
                 )}
               </tr>

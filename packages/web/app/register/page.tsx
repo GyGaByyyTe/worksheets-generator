@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { absUrl } from '../lib/api';
 import { useAuth } from '../auth/AuthProvider';
 import { useT } from '../i18n/I18nProvider';
+import Input from '../components/ui/input';
+import Button from '../components/ui/button';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -49,15 +51,15 @@ export default function RegisterPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <label>
             {t('auth.email')}
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </label>
           <label>
             {t('auth.password')}
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </label>
           {error && <div style={{ color: 'red', fontSize: 12 }}>{String(error)}</div>}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
-            <button type="submit" disabled={loading}>{loading ? t('auth.registering') : t('auth.register_submit')}</button>
+            <Button type="submit" disabled={loading} loading={loading}>{loading ? t('auth.registering') : t('auth.register_submit')}</Button>
             <Link href="/">{t('auth.toHome')}</Link>
           </div>
         </div>

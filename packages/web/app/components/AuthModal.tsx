@@ -3,6 +3,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../auth/AuthProvider';
 import { useT } from '../i18n/I18nProvider';
+import Input from './ui/input';
+import Button from './ui/button';
 
 export default function AuthModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { login } = useAuth();
@@ -42,18 +44,18 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <label>
               {t('auth.email')}
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
             <label>
               {t('auth.password')}
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </label>
             {error && <div style={{ color: 'red', fontSize: 12 }}>{error}</div>}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
-              <button type="submit" disabled={loading}>{loading ? '...' : t('auth.login')}</button>
-              <button type="button" onClick={() => { onClose(); router.push('/register'); }}>
+              <Button type="submit" disabled={loading} loading={loading}>{loading ? '...' : t('auth.login')}</Button>
+              <Button type="button" variant="outline" onClick={() => { onClose(); router.push('/register'); }}>
                 {t('auth.toRegister')}
-              </button>
+              </Button>
             </div>
           </div>
         </form>

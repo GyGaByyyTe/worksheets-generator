@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../auth/AuthProvider';
 import AuthProvider from '../auth/AuthProvider';
 import AuthModal from './AuthModal';
+import Button from './ui/button';
 
 function LangSwitcher() {
   const { lang, setLang, t } = useI18n();
@@ -48,7 +49,7 @@ function Header() {
         {user ? (
           <span>{user.email}</span>
         ) : (
-          <button type="button" onClick={() => setOpen(true)}>{t('nav.login')}</button>
+          <Button type="button" variant="outline" onClick={() => setOpen(true)}>{t('nav.login')}</Button>
         )}
       </div>
       <AuthModal open={open} onClose={() => setOpen(false)} />

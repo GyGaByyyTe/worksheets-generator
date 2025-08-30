@@ -22,6 +22,7 @@ const {
   generateTasks,
 } = require('./generators/addition');
 const { generateMazePage } = require('./generate-maze');
+const { generateRoadMazePage } = require('./generate-road-maze');
 
 function buildDayIndexHtml(dir, files, day) {
   const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
@@ -57,8 +58,12 @@ const pageAddition = (pageNum) => renderAdditionPage(pageNum, generateTasks());
 // Обёртка для лабиринта с объектом опций
 const pageMaze = (pageNum, options) =>
   generateMazePage({ pageNum, ...(options || {}) });
+// Обёртка для дорожного лабиринта
+const pageRoadMaze = (pageNum, options) =>
+  generateRoadMazePage({ pageNum, ...(options || {}) });
 
 // Карта ключ -> функция генерации SVG страницы
+// Добавьте новые ключи, чтобы /tasks API и веб-форма их подхватили автоматически
 const GENERATORS = {
   clocks: pageClocks,
   weights: pageWeights,
@@ -68,6 +73,7 @@ const GENERATORS = {
   'spot-diff': pageSpotDifferences,
   addition: pageAddition,
   maze: pageMaze,
+  'road-maze': pageRoadMaze,
 };
 
 // Отображение функции -> короткое имя файла (для консистентных имён)
@@ -80,6 +86,7 @@ const NAME_BY_KEY = {
   'spot-diff': 'spot-diff',
   addition: 'addition',
   maze: 'maze',
+  'road-maze': 'road-maze',
 };
 
 function timestamp() {

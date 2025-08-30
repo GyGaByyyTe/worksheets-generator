@@ -4,6 +4,7 @@ export const metadata = {
 };
 
 import './globals.css';
+import AppShell from './components/AppShell';
 
 export default function RootLayout({
   children,
@@ -13,16 +14,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <header>
-          <h1>Worksheets Generator</h1>
-          <nav>
-            <a href="/">Home</a>
-          </nav>
-        </header>
-        <main>{children}</main>
-        <footer>
-          <small>© {new Date().getFullYear()} Worksheets Generator</small>
-        </footer>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

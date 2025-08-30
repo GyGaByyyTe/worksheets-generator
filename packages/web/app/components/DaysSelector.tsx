@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useT } from '../i18n/I18nProvider';
 
 export type DaysSelectorProps = {
   days: number;
@@ -14,9 +15,10 @@ export default function DaysSelector({
   min = 1,
   max = 7,
 }: DaysSelectorProps) {
+  const t = useT();
   return (
     <div className="row">
-      <label>Дней:</label>
+      <label>{t('days.label')}</label>
       <input
         name="days"
         type="number"

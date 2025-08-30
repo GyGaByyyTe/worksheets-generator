@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useT } from '../i18n/I18nProvider';
 
 export type NumberingMode = 'continuous' | 'per-contour';
 export type PointsDistribution = 'proportional' | 'equal';
@@ -46,6 +47,7 @@ export default function ImageDotsTable({
   setRows,
   lockedCount = null,
 }: ImageDotsTableProps) {
+  const t = useT();
   // Ensure row count matches lockedCount if provided
   React.useEffect(() => {
     if (lockedCount == null) return;
@@ -85,11 +87,11 @@ export default function ImageDotsTable({
           marginBottom: 8,
         }}
       >
-        <div style={{ fontWeight: 600 }}>Картинки для «Соедини по точкам»</div>
+        <div style={{ fontWeight: 600 }}>{t('imageDots.title')}</div>
         {lockedCount == null && (
           <div>
             <button type="button" onClick={addRow} style={{ marginRight: 6 }}>
-              Добавить картинку
+              {t('imageDots.add')}
             </button>
           </div>
         )}
@@ -98,19 +100,19 @@ export default function ImageDotsTable({
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={th}>#</th>
-              <th style={th}>Картинка</th>
-              <th style={th}>Точек</th>
-              <th style={th}>Упрощение</th>
-              <th style={th}>Порог</th>
-              <th style={th}>Мульти-контуры</th>
-              <th style={th}>Макс. контуров</th>
-              <th style={th}>Декор, доля</th>
-              <th style={th}>Нумерация</th>
-              <th style={th}>Распред.</th>
-              <th style={th}>Размытие</th>
-              <th style={th}>Целевые контуры</th>
-              {lockedCount == null && <th style={th}>Действия</th>}
+              <th style={th}>{t('table.#')}</th>
+              <th style={th}>{t('table.image')}</th>
+              <th style={th}>{t('table.points')}</th>
+              <th style={th}>{t('table.simplify')}</th>
+              <th style={th}>{t('table.threshold')}</th>
+              <th style={th}>{t('table.multiContours')}</th>
+              <th style={th}>{t('table.maxContours')}</th>
+              <th style={th}>{t('table.decorRatio')}</th>
+              <th style={th}>{t('table.numbering')}</th>
+              <th style={th}>{t('table.distribution')}</th>
+              <th style={th}>{t('table.blur')}</th>
+              <th style={th}>{t('table.targetContours')}</th>
+              {lockedCount == null && <th style={th}>{t('table.actions')}</th>}
             </tr>
           </thead>
           <tbody>
@@ -215,8 +217,12 @@ export default function ImageDotsTable({
                       update(i, { numbering: e.target.value as NumberingMode })
                     }
                   >
-                    <option value="continuous">Непрерывная</option>
-                    <option value="per-contour">По контурам</option>
+                    <option value="continuous">
+                      {t('numbering.continuous')}
+                    </option>
+                    <option value="per-contour">
+                      {t('numbering.perContour')}
+                    </option>
                   </select>
                 </td>
                 <td style={td}>
@@ -230,8 +236,10 @@ export default function ImageDotsTable({
                       })
                     }
                   >
-                    <option value="proportional">Пропорц.</option>
-                    <option value="equal">Поровну</option>
+                    <option value="proportional">
+                      {t('distribution.proportional')}
+                    </option>
+                    <option value="equal">{t('distribution.equal')}</option>
                   </select>
                 </td>
                 <td style={tdNarrow}>
@@ -253,7 +261,7 @@ export default function ImageDotsTable({
                   <input
                     name={`imageDots[${i}][targetContours]`}
                     type="text"
-                    placeholder="например: 0,2,5"
+                    placeholder={t('imageDots.placeholder')}
                     value={r.targetContours || ''}
                     onChange={(e) =>
                       update(i, { targetContours: e.target.value })
@@ -263,7 +271,7 @@ export default function ImageDotsTable({
                 {lockedCount == null && (
                   <td style={tdCenter}>
                     <button type="button" onClick={() => removeRow(i)}>
-                      Удалить
+                      {t('buttons.remove')}
                     </button>
                   </td>
                 )}
@@ -272,17 +280,14 @@ export default function ImageDotsTable({
             {rows.length === 0 && (
               <tr>
                 <td style={td} colSpan={lockedCount == null ? 13 : 12}>
-                  Нет картинок. Используйте кнопку выше, чтобы добавить.
+                  {t('imageDots.empty')}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      <div style={{ marginTop: 8, color: '#555' }}>
-        Подсказка: если включить привязку количества картинок к числу дней,
-        строк будет ровно столько, сколько выбрано дней.
-      </div>
+      <div style={{ marginTop: 8, color: '#555' }}>{t('imageDots.hint')}</div>
     </div>
   );
 }

@@ -10,8 +10,10 @@ import LoadingButton from './LoadingButton';
 import { generateWorksheets, refreshTasks } from '../actions';
 import type { GeneratorFormProps } from '../lib/types';
 import { getDefaultGeneratorState, getDefaultTaskState } from '../lib/const';
+import { useT } from '../i18n/I18nProvider';
 
 export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
+  const t = useT();
   const [selected, setSelected] = React.useState<string[]>([]);
   const [days, setDays] = React.useState<number>(1);
 
@@ -42,8 +44,8 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
       <div className="row">
         <form action={refreshAction}>
           <LoadingButton
-            loadingLabel="Обновление..."
-            label="Обновить список заданий"
+            loadingLabel={t('actions.refreshing')}
+            label={t('actions.refresh')}
           />
         </form>
       </div>
@@ -66,7 +68,7 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
         )}
 
         <div className="row">
-          <LoadingButton loadingLabel="Генерация..." label="Сгенерировать" />
+          <LoadingButton />
         </div>
       </form>
 

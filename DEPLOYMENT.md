@@ -1,6 +1,7 @@
 # Развёртывание worksheets-generator на VPS (Ubuntu 24 + Node.js + NGINX + SSL)
 
 Данный репозиторий — monorepo на pnpm с тремя пакетами:
+
 - `@wg/web` — фронтенд на Next.js (порт 3000);
 - `@wg/server` — бекенд на Express (порт 4000), генерирует задания и отдаёт статические файлы под `/static`;
 - `@wg/core` — библиотека со скриптами генерации/обработки.
@@ -17,13 +18,16 @@
 Предполагается чистый сервер Ubuntu 24.x LTS и доступ по SSH (пользователь с sudo, например `ubuntu` или `root`).
 
 ### 1.1. Обновление системы
+
 ```
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ca-certificates curl gnupg ufw
 ```
 
 ### 1.2. Брандмауэр (UFW)
+
 Разрешим только SSH, HTTP, HTTPS:
+
 ```
 sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
@@ -33,26 +37,32 @@ sudo ufw status
 ```
 
 ### 1.3. Node.js 22 LTS и pnpm
+
 Рекомендуем Node.js 22 LTS (совместимо с Next.js 15 и React 19). Установим через официальный репозиторий NodeSource:
+
 ```
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 node -v
 npm -v
 ```
+
 Установим pnpm глобально:
+
 ```
 sudo npm i -g pnpm@9
 pnpm -v
 ```
 
 ### 1.4. PM2 для процесс-менеджмента
+
 ```
 sudo npm i -g pm2@latest
 pm2 -v
 ```
 
 ### 1.5. NGINX
+
 ```
 sudo apt install -y nginx
 nginx -v
@@ -67,9 +77,11 @@ sudo systemctl status nginx --no-pager
 
 - Убедитесь, что домен `kids.does.cool` указывает A-запись на IP вашего сервера.
 - Проверьте распространение DNS, например, командой:
+
 ```
 dig +short kids.does.cool
 ```
+
 Она должна вернуть IP вашего сервера.
 
 ---
@@ -77,12 +89,15 @@ dig +short kids.does.cool
 ## 3. Получение кода на сервере
 
 Выберите директорию для приложений, например `/opt/apps`:
+
 ```
 sudo mkdir -p /opt/apps
 sudo chown -R $(whoami):$(whoami) /opt/apps
 cd /opt/apps
 ```
+
 Клонируйте репозиторий (замените на ваш реальный URL, если он приватный — настройте SSH-ключи):
+
 ```
 git clone https://github.com/<your-org-or-user>/worksheets-generator.git
 cd worksheets-generator
@@ -95,12 +110,15 @@ cd worksheets-generator
 ## 4. Установка зависимостей и сборка
 
 В проекте используется pnpm workspace. Команды есть на корне.
+
 ```
 cd /opt/apps/worksheets-generator
 pnpm install --frozen-lockfile
 pnpm build
 ```
+
 Сборка выполнит:
+
 - `@wg/web`: `next build`;
 - `@wg/server` и `@wg/core`: сборки не требуются (по пакетам прописаны заглушки).
 
@@ -109,25 +127,34 @@ pnpm build
 ## 5. Переменные окружения
 
 Фронтенду нужно знать публичный URL API. Мы будем проксировать API под `/api`. Поэтому:
+
 - на фронтенде установим: `NEXT_PUBLIC_API_URL=https://kids.does.cool/api`
 
 Создайте файл окружения для фронтенда:
+
 ```
 cp packages/web/.env.example packages/web/.env
 ```
+
 Откройте и при необходимости отредактируйте:
+
 ```
 nano packages/web/.env
 ```
+
 Содержимое по умолчанию:
+
 ```
 NEXT_PUBLIC_API_URL=https://kids.does.cool/api
 ```
+
 Примечания:
+
 - Переменная `NEXT_PUBLIC_*` читается как на сервере Next.js, так и в браузере.
 - На локальной разработке по умолчанию (без .env) фронтенд стучится на `http://localhost:4000` (см. `packages/web/app/lib/api.ts`).
 
 Если нужно изменить порты:
+
 - Фронтенд по умолчанию: 3000 (см. `packages/web/package.json`), можно задать `PORT=3000` в PM2;
 - Бекенд по умолчанию: 4000 (`PORT` читает из окружения в `packages/server/src/index.js`).
 
@@ -136,24 +163,30 @@ NEXT_PUBLIC_API_URL=https://kids.does.cool/api
 ## 6. PM2 конфигурация и запуск
 
 В корне проекта добавлен файл `ecosystem.config.js`, который поднимает два процесса:
+
 - `wg-web` (Next.js, порт 3000), с окружением `NEXT_PUBLIC_API_URL=https://kids.does.cool/api`;
 - `wg-server` (Express, порт 4000).
 
 Запуск:
+
 ```
 cd /opt/apps/worksheets-generator
 pm2 start ecosystem.config.js
 pm2 status
 pm2 logs --lines 100
 ```
+
 Автозапуск PM2 при перезагрузке сервера:
+
 ```
 pm2 startup systemd
 # PM2 выведет команду с sudo — выполните её, например:
 # sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u <your-user> --hp /home/<your-user>
 pm2 save
 ```
+
 Обновление приложения (деплой без простоя):
+
 ```
 cd /opt/apps/worksheets-generator
 git pull
@@ -167,10 +200,13 @@ pm2 reload ecosystem.config.js --update-env
 ## 7. Конфигурация NGINX (reverse proxy + SSL)
 
 Создайте конфиг для сайта:
+
 ```
 sudo nano /etc/nginx/sites-available/kids.does.cool
 ```
+
 Вставьте конфиг (HTTP, временно без SSL — нужен для выдачи сертификата):
+
 ```
 server {
     listen 80;
@@ -225,7 +261,9 @@ server {
     }
 }
 ```
+
 Активируйте сайт и проверьте синтаксис:
+
 ```
 sudo ln -s /etc/nginx/sites-available/kids.does.cool /etc/nginx/sites-enabled/kids.does.cool
 sudo nginx -t
@@ -233,22 +271,29 @@ sudo systemctl reload nginx
 ```
 
 ### 7.1. SSL (Let’s Encrypt, Certbot)
+
 Установите certbot и получите сертификат (режим веб-сервера NGINX):
+
 ```
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d kids.does.cool --redirect --hsts --staple-ocsp
 ```
+
 Certbot автоматически добавит SSL-конфигурацию и перенаправление на HTTPS. Проверьте:
+
 ```
 sudo nginx -t
 sudo systemctl reload nginx
 ```
+
 Сертификаты обновляются автоматом (systemd timer). Проверка таймера:
+
 ```
 systemctl status certbot.timer --no-pager
 ```
 
 При желании включите HTTP/2 и компрессию (обычно Certbot/NGINX уже включает). Можно добавить в серверный блок:
+
 ```
 # Пример компрессии
 gzip on;
@@ -259,20 +304,26 @@ gzip_types text/plain text/css application/json application/javascript text/xml 
 
 ## 8. Проверка работы
 
-1) Убедитесь, что процессы подняты:
+1. Убедитесь, что процессы подняты:
+
 ```
 pm2 status
 ```
-2) Проверьте, что фронтенд доступен:
+
+2. Проверьте, что фронтенд доступен:
+
 ```
 curl -I https://kids.does.cool/
 ```
-3) Проверьте API и статик через домен (через NGINX):
+
+3. Проверьте API и статик через домен (через NGINX):
+
 ```
 curl -s https://kids.does.cool/api/health | jq .
 # Ожидаемый ответ от @wg/server: { "ok": true, ... }
 ```
-4) Выберите задания на странице, сгенерируйте — должны появиться ссылки вида `/static/...`.
+
+4. Выберите задания на странице, сгенерируйте — должны появиться ссылки вида `/static/...`.
 
 ---
 
@@ -290,19 +341,26 @@ curl -s https://kids.does.cool/api/health | jq .
 ## 10. Команды обслуживания
 
 - Просмотр логов:
+
 ```
 pm2 logs wg-web --lines 200
 pm2 logs wg-server --lines 200
 ```
+
 - Перезапуск после обновления конфигов/ENV:
+
 ```
 pm2 reload ecosystem.config.js --update-env
 ```
+
 - Остановка:
+
 ```
 pm2 stop wg-web wg-server
 ```
+
 - Удаление из PM2:
+
 ```
 pm2 delete wg-web wg-server
 ```
@@ -320,13 +378,13 @@ pm2 delete wg-web wg-server
 
 ## 12. Быстрый чек-лист деплоя
 
-1) DNS указывает на сервер ✓
-2) Node.js 22 и pnpm установлены ✓  
-3) NGINX установлен и запущен ✓  
-4) Код в `/opt/apps/worksheets-generator`, зависимости поставлены, билд выполнен ✓  
-5) `.env` в `packages/web` с `NEXT_PUBLIC_API_URL=https://kids.does.cool/api` ✓  
-6) PM2 запустил `wg-web` и `wg-server` ✓  
-7) Certbot выпустил SSL-сертификат, NGINX перезагружен ✓  
-8) Открылась главная страница и API отвечает по `/api/health` ✓
+1. DNS указывает на сервер ✓
+2. Node.js 22 и pnpm установлены ✓
+3. NGINX установлен и запущен ✓
+4. Код в `/opt/apps/worksheets-generator`, зависимости поставлены, билд выполнен ✓
+5. `.env` в `packages/web` с `NEXT_PUBLIC_API_URL=https://kids.does.cool/api` ✓
+6. PM2 запустил `wg-web` и `wg-server` ✓
+7. Certbot выпустил SSL-сертификат, NGINX перезагружен ✓
+8. Открылась главная страница и API отвечает по `/api/health` ✓
 
 Готово! Приложение доступно на https://kids.does.cool/.

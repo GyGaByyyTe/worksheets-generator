@@ -29,12 +29,19 @@ function createRng(seedStr) {
     return t / 4294967296;
   };
 }
-function choice(arr, rnd) { return arr[Math.floor(rnd() * arr.length)]; }
+function choice(arr, rnd) {
+  return arr[Math.floor(rnd() * arr.length)];
+}
 
 // ---- Алгоритм лабиринта (как в generate-maze.js) ----
 function buildMaze(rows, cols, rnd) {
   const total = rows * cols;
-  const walls = Array.from({ length: total }, () => ({ N: true, E: true, S: true, W: true }));
+  const walls = Array.from({ length: total }, () => ({
+    N: true,
+    E: true,
+    S: true,
+    W: true,
+  }));
   const visited = new Array(total).fill(false);
   const index = (r, c) => r * cols + c;
   const neighbors = (r, c) => {
@@ -49,8 +56,13 @@ function buildMaze(rows, cols, rnd) {
   visited[index(0, 0)] = true;
   while (stack.length) {
     const [r, c] = stack[stack.length - 1];
-    const unvisited = neighbors(r, c).filter(([nr, nc]) => !visited[index(nr, nc)]);
-    if (!unvisited.length) { stack.pop(); continue; }
+    const unvisited = neighbors(r, c).filter(
+      ([nr, nc]) => !visited[index(nr, nc)],
+    );
+    if (!unvisited.length) {
+      stack.pop();
+      continue;
+    }
     const [nr, nc, dir, opposite] = choice(unvisited, rnd);
     walls[index(r, c)][dir] = false;
     walls[index(nr, nc)][opposite] = false;
@@ -87,22 +99,30 @@ function addCycles(maze, rnd, probability = 0.18) {
 
 // ---- Рисование простых иконок ----
 function drawHouse(x, y, size) {
-  const w = size, h = size * 0.6;
+  const w = size,
+    h = size * 0.6;
   const roofH = size * 0.45;
-  const rx = x + w / 2, by = y + h, topY = y - roofH + 2;
+  const rx = x + w / 2,
+    by = y + h,
+    topY = y - roofH + 2;
   const body = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#111" stroke-width="3"/>`;
   const roof = `<path d="M ${x - 4} ${y} L ${rx} ${topY} L ${x + w + 4} ${y}" fill="none" stroke="#111" stroke-width="3"/>`;
-  const doorW = w * 0.22, doorH = h * 0.5;
+  const doorW = w * 0.22,
+    doorH = h * 0.5;
   const door = `<rect x="${x + w * 0.07}" y="${y + h - doorH}" width="${doorW}" height="${doorH}" fill="none" stroke="#111" stroke-width="3"/>`;
-  const win = (cx, cy) => `<rect x="${cx}" y="${cy}" width="${w * 0.22}" height="${h * 0.28}" fill="none" stroke="#111" stroke-width="3"/>`;
+  const win = (cx, cy) =>
+    `<rect x="${cx}" y="${cy}" width="${w * 0.22}" height="${h * 0.28}" fill="none" stroke="#111" stroke-width="3"/>`;
   return `${roof}${body}${door}${win(x + w * 0.48, y + h * 0.18)}${win(x + w * 0.75, y + h * 0.18)}`;
 }
 function drawPine(x, y, size) {
-  const h = size, w = size * 0.65;
-  const trunkW = w * 0.18, trunkH = h * 0.22;
+  const h = size,
+    w = size * 0.65;
+  const trunkW = w * 0.18,
+    trunkH = h * 0.22;
   const trunk = `<rect x="${x + w / 2 - trunkW / 2}" y="${y + h - trunkH}" width="${trunkW}" height="${trunkH}" fill="none" stroke="#111" stroke-width="3"/>`;
-  const tri = (y0, s) => `<path d="M ${x} ${y0 + s} L ${x + w / 2} ${y0} L ${x + w} ${y0 + s}" fill="none" stroke="#111" stroke-width="3"/>`;
-  return `${tri(y, h * 0.38)}${tri(y + h * 0.20, h * 0.32)}${tri(y + h * 0.37, h * 0.26)}${trunk}`;
+  const tri = (y0, s) =>
+    `<path d="M ${x} ${y0 + s} L ${x + w / 2} ${y0} L ${x + w} ${y0 + s}" fill="none" stroke="#111" stroke-width="3"/>`;
+  return `${tri(y, h * 0.38)}${tri(y + h * 0.2, h * 0.32)}${tri(y + h * 0.37, h * 0.26)}${trunk}`;
 }
 function drawRoundTree(cx, cy, r) {
   const trunkH = r * 0.9;
@@ -132,17 +152,26 @@ function farthestCell(maze) {
       }
     }
   }
-  let maxI = 0, maxD = -1;
-  for (const [i, d] of dist.entries()) { if (d > maxD) { maxD = d; maxI = i; } }
+  let maxI = 0,
+    maxD = -1;
+  for (const [i, d] of dist.entries()) {
+    if (d > maxD) {
+      maxD = d;
+      maxI = i;
+    }
+  }
   return { r: Math.floor(maxI / cols), c: maxI % cols, distance: maxD };
 }
 
 // ---- Рендер дорог ----
 function renderRoadsSVG({ maze, x0, y0, width, height, margin }) {
-  const rows = maze.rows, cols = maze.cols, walls = maze.walls;
+  const rows = maze.rows,
+    cols = maze.cols,
+    walls = maze.walls;
   const cellW = Math.floor((width - margin * 2) / cols);
   const cellH = Math.floor((height - margin * 2) / rows);
-  const startX = x0 + margin, startY = y0 + margin;
+  const startX = x0 + margin,
+    startY = y0 + margin;
 
   const outerW = Math.round(Math.min(cellW, cellH) * 0.44); // внешний контур
   const innerW = outerW - 4; // собственно «полотно дороги»
@@ -179,7 +208,6 @@ function renderRoadsSVG({ maze, x0, y0, width, height, margin }) {
     }
   }
 
-
   const roads = `
   <g id="roads">
     <path d="${basePath.trim()}" fill="none" stroke="#111" stroke-width="${outerW}" stroke-linecap="round" stroke-linejoin="round"/>
@@ -190,14 +218,24 @@ function renderRoadsSVG({ maze, x0, y0, width, height, margin }) {
   return { roads, cellW, cellH, startX, startY, outerW, rows, cols, segments };
 }
 
-function renderDecorations({ rng, maze, cellW, cellH, startX, startY, outerW, segments }) {
+function renderDecorations({
+  rng,
+  maze,
+  cellW,
+  cellH,
+  startX,
+  startY,
+  outerW,
+  segments,
+}) {
   const { rows, cols, walls } = maze;
   const items = [];
   const totalCells = rows * cols;
   const decoCount = Math.max(10, Math.min(26, Math.round(totalCells * 0.18)));
 
   const safety = outerW * 0.5 + 6; // зазор: половина ширины дороги + небольшой буфер
-  const padX = cellW * 0.18, padY = cellH * 0.18;
+  const padX = cellW * 0.18,
+    padY = cellH * 0.18;
 
   function cellCenter(r, c) {
     return {
@@ -206,7 +244,8 @@ function renderDecorations({ rng, maze, cellW, cellH, startX, startY, outerW, se
     };
   }
   function cornerSlots(r, c) {
-    const x0 = startX + c * cellW, y0 = startY + r * cellH;
+    const x0 = startX + c * cellW,
+      y0 = startY + r * cellH;
     return [
       { x: x0 + padX, y: y0 + padY, name: 'tl' },
       { x: x0 + cellW - padX, y: y0 + padY, name: 'tr' },
@@ -215,13 +254,17 @@ function renderDecorations({ rng, maze, cellW, cellH, startX, startY, outerW, se
     ];
   }
   function pointSegDist(px, py, x1, y1, x2, y2) {
-    const vx = x2 - x1, vy = y2 - y1;
-    const wx = px - x1, wy = py - y1;
+    const vx = x2 - x1,
+      vy = y2 - y1;
+    const wx = px - x1,
+      wy = py - y1;
     const vv = vx * vx + vy * vy || 1; // avoid zero
     let t = (wx * vx + wy * vy) / vv;
     t = Math.max(0, Math.min(1, t));
-    const cx = x1 + t * vx, cy = y1 + t * vy;
-    const dx = px - cx, dy = py - cy;
+    const cx = x1 + t * vx,
+      cy = y1 + t * vy;
+    const dx = px - cx,
+      dy = py - cy;
     return Math.hypot(dx, dy);
   }
   function isSafe(r, c, pt, radius = 0) {
@@ -237,7 +280,8 @@ function renderDecorations({ rng, maze, cellW, cellH, startX, startY, outerW, se
     }
     // Глобальная проверка по всем сегментам дорог
     for (const s of segments) {
-      if (pointSegDist(pt.x, pt.y, s.x1, s.y1, s.x2, s.y2) < safety + radius) return false;
+      if (pointSegDist(pt.x, pt.y, s.x1, s.y1, s.x2, s.y2) < safety + radius)
+        return false;
     }
     return true;
   }
@@ -248,14 +292,18 @@ function renderDecorations({ rng, maze, cellW, cellH, startX, startY, outerW, se
     const slots = cornerSlots(r, c).filter((pt) => isSafe(r, c, pt));
     if (slots.length === 0) continue;
     const spot = slots[Math.floor(rng() * slots.length)];
-    const maxSize = Math.min(cellW, cellH) * 0.40; // слегка меньше
+    const maxSize = Math.min(cellW, cellH) * 0.4; // слегка меньше
     const size = maxSize * (0.8 + rng() * 0.3);
     // финальная проверка с учётом радиуса объекта
     const ok = isSafe(r, c, spot, size * 0.35);
     if (!ok) continue;
     const variant = rng();
-    if (variant < 0.45) items.push(drawHouse(spot.x - size * 0.5, spot.y - size * 0.45, size));
-    else if (variant < 0.78) items.push(drawPine(spot.x - (size * 0.65) / 2, spot.y - size * 0.6, size));
+    if (variant < 0.45)
+      items.push(drawHouse(spot.x - size * 0.5, spot.y - size * 0.45, size));
+    else if (variant < 0.78)
+      items.push(
+        drawPine(spot.x - (size * 0.65) / 2, spot.y - size * 0.6, size),
+      );
     else items.push(drawRoundTree(spot.x, spot.y - size * 0.15, size * 0.36));
   }
   return `<g id="decor">${items.join('\n')}</g>`;
@@ -305,9 +353,13 @@ function generateRoadMazePage(opts = {}) {
   const far = farthestCell(maze);
   const startCx = roadsInfo.startX + 0 * roadsInfo.cellW + roadsInfo.cellW / 2;
   const startCy = roadsInfo.startY + 0 * roadsInfo.cellH + roadsInfo.cellH / 2;
-  const finishCx = roadsInfo.startX + far.c * roadsInfo.cellW + roadsInfo.cellW / 2;
-  const finishCy = roadsInfo.startY + far.r * roadsInfo.cellH + roadsInfo.cellH / 2;
-  const iconSize = Math.floor(Math.min(roadsInfo.cellW, roadsInfo.cellH) * 0.72);
+  const finishCx =
+    roadsInfo.startX + far.c * roadsInfo.cellW + roadsInfo.cellW / 2;
+  const finishCy =
+    roadsInfo.startY + far.r * roadsInfo.cellH + roadsInfo.cellH / 2;
+  const iconSize = Math.floor(
+    Math.min(roadsInfo.cellW, roadsInfo.cellH) * 0.72,
+  );
   const labelSize = Math.max(14, Math.floor(iconSize * 0.28));
   const markers = `
   <g id="markers">

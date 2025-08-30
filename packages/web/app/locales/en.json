@@ -1,0 +1,54 @@
+{
+  "app.title": "Worksheets Generator",
+  "app.description": "UI for generating worksheets via REST API",
+  "nav.home": "Home",
+  "footer.copyright": "© {year} Worksheets Generator",
+
+  "actions.refresh": "Refresh tasks list",
+  "actions.refreshing": "Refreshing...",
+  "actions.generate": "Generate",
+  "actions.generating": "Generating...",
+
+  "days.label": "Days:",
+  "tasks.title": "Tasks:",
+  "tasks.loading": "Loading...",
+
+  "connectDots.lockLabel": "Tie pictures count to days count",
+  "connectDots.picturesCount": "Pictures: {days}",
+
+  "imageDots.title": "Images for 'Connect the Dots'",
+  "imageDots.add": "Add image",
+  "imageDots.placeholder": "e.g.: 0,2,5",
+  "imageDots.empty": "No images. Use the button above to add.",
+  "imageDots.hint": "Hint: if you tie pictures count to days count, rows will match selected days.",
+
+  "table.#": "#",
+  "table.image": "Image",
+  "table.points": "Points",
+  "table.simplify": "Simplify",
+  "table.threshold": "Threshold",
+  "table.multiContours": "Multi-contours",
+  "table.maxContours": "Max contours",
+  "table.decorRatio": "Decor, ratio",
+  "table.numbering": "Numbering",
+  "table.distribution": "Distribution",
+  "table.blur": "Blur",
+  "table.targetContours": "Target contours",
+  "table.actions": "Actions",
+
+  "numbering.continuous": "Continuous",
+  "numbering.perContour": "Per contour",
+  "distribution.proportional": "Proportional",
+  "distribution.equal": "Equal",
+
+  "buttons.remove": "Remove",
+
+  "errors.no_tasks": "Select at least one task type.",
+  "errors.load_tasks_title": "Load operation failed",
+  "errors.load_tasks_message": "Failed to load tasks.",
+  "errors.generate_failed": "Generation failed",
+
+  "lang.switch": "Language",
+  "lang.ru": "RU",
+  "lang.en": "EN"
+}

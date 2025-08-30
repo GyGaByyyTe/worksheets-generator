@@ -1,24 +1,90 @@
-# Worksheets Generator Monorepo
+# Генератор Учебных Заданий
 
-This repository is a pnpm workspace containing three packages:
+Это монорепозиторий на базе pnpm workspace для создания интерактивных учебных заданий
+и рабочих листов для детей. Проект генерирует SVG-страницы с различными типами заданий.
 
-- `@wg/core` — core generators and utilities (re-exporting existing logic from `scripts/`).
-- `@wg/server` — Express REST API server that uses `@wg/core` to generate worksheets and serves the outputs.
-- `@wg/web` — Next.js 15 (App Router, TypeScript) UI for requesting generations from the server and showing results.
+## Архитектура
 
-## Prerequisites
+Проект состоит из трех пакетов:
+
+- `@wg/core` — основная логика генерации заданий (реэкспорт из `scripts/`)
+- `@wg/server` — Express REST API сервер для генерации через HTTP
+- `@wg/web` — Next.js 15 веб-интерфейс на TypeScript с App Router
+
+## Типы заданий
+
+### Доступные генераторы заданий:
+
+**`clocks`** — Задания с часами и временем
+
+- Обучение определению времени по аналоговым часам
+- Различные варианты положения стрелок
+- Подходит для изучения часов и минут
+
+**`weights`** — Задания на взвешивание и сравнение
+
+- Сравнение предметов по весу с помощью весов
+- Логические задачи на определение более тяжелых/легких объектов
+- Развитие навыков анализа и сравнения
+
+**`connect-dots`** — Соединение точек по номерам
+
+- Классические задания "соедини точки"
+- Поддержка загрузки собственных изображений
+- Автоматическое преобразование картинок в точечные контуры
+- Настраиваемое количество точек и сложность
+
+**`find-parts`** — Поиск частей и фрагментов
+
+- Задания на поиск недостающих деталей
+- Развитие внимания и пространственного мышления
+- Работа с геометрическими формами
+
+**`postman`** — Упорядочивание чисел (почтальон)
+
+- Задания на сортировку чисел по возрастанию/убыванию
+- Обучение порядковому счету
+- Логические цепочки с числами
+
+**`spot-diff`** — Найди отличия между картинками
+
+- Классические задания на внимательность
+- Поиск различий между двумя похожими изображениями
+- Развитие зрительного восприятия
+
+**`addition`** — Примеры на сложение
+
+- Математические задачи для начальной школы
+- Различные уровни сложности
+- Визуальное представление примеров
+
+**`maze`** — Лабиринты различной сложности
+
+- Генерация лабиринтов разного размера
+- Настраиваемая сложность прохождения
+- Развитие логического мышления и планирования
+
+## Технологии
+
+- **Node.js** + **TypeScript** 5.6.2
+- **React** 19.0.0 + **Next.js** 15.0.0
+- **Express** 4.19.2 для API
+- **Sharp** 0.33.4, **Potrace** 2.1.0 для обработки изображений
+- **pnpm** как пакетный менеджер
+
+## Предварительные требования
 
 - Node.js 18+
-- pnpm 8+ (recommended to enable via Corepack)
+- pnpm 8+ (рекомендуется активировать через Corepack)
 
 ```powershell
 corepack enable
 corepack prepare pnpm@latest --activate
 ```
 
-## Install
+## Установка
 
-From the repo root:
+Из корневой директории:
 
 ```powershell
 pnpm install
@@ -82,16 +148,19 @@ pnpm start:web
 - Sample asset `base.jpg` is kept for local debug (`scripts/debug-dots.js`).
 - The `scripts/` directory remains because `@wg/core` re-exports gen logic from there (minimal-change refactor). A later step may move sources fully under `packages/core`.
 
-## Workspace Scripts (root)
+## Структура workspace
 
-- `pnpm dev` — run `@wg/server` and `@wg/web` in parallel
-- `pnpm dev:server` — run only server
-- `pnpm dev:web` — run only web
-- `pnpm build` — build all packages
-- `pnpm start` — start server and web in parallel (production)
-- `pnpm start:server` — start only server
-- `pnpm start:web` — start only web
-- `pnpm test` — run tests across packages
+### Скрипты корневого уровня
+
+- `pnpm dev` — запуск сервера и веб-приложения параллельно
+- `pnpm dev:server` — только сервер
+- `pnpm dev:web` — только веб-приложение
+- `pnpm build` — сборка всех пакетов
+- `pnpm start` — запуск в продакшне (параллельно)
+- `pnpm start:server` — только сервер в продакшне
+- `pnpm start:web` — только веб в продакшне
+- `pnpm test` — тесты для всех пакетов
+- `pnpm format` — форматирование кода с Prettier
 
 ## Packages
 

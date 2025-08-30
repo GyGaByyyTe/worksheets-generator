@@ -2,6 +2,7 @@
 import React from 'react';
 import { absUrl } from '../lib/api';
 import { GenerateResponse } from '../lib/types';
+import Image from 'next/image';
 
 export type ResultsViewProps = {
   result: GenerateResponse | null;
@@ -29,7 +30,7 @@ export default function ResultsView({ result }: ResultsViewProps) {
           <div className="images">
             {d.files.map((f, i) => (
               <a key={i} href={absUrl(f)} target="_blank" rel="noreferrer">
-                <img src={absUrl(f)} alt={`page ${i + 1}`} />
+                <Image src={absUrl(f)} alt={`page ${i + 1}`} width={1200} height={1600} sizes="100vw" style={{ width: '100%', height: 'auto' }} unoptimized />
               </a>
             ))}
           </div>

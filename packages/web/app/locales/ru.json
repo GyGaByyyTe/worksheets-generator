@@ -1,0 +1,54 @@
+{
+  "app.title": "Генератор рабочей тетради",
+  "app.description": "Интерфейс для генерации заданий через REST API",
+  "nav.home": "Главная",
+  "footer.copyright": "© {year} Генератор рабочей тетради",
+
+  "actions.refresh": "Обновить список заданий",
+  "actions.refreshing": "Обновление...",
+  "actions.generate": "Сгенерировать",
+  "actions.generating": "Генерация...",
+
+  "days.label": "Дней:",
+  "tasks.title": "Задания:",
+  "tasks.loading": "Загрузка...",
+
+  "connectDots.lockLabel": "Привязать число картинок к числу дней",
+  "connectDots.picturesCount": "Картинок: {days}",
+
+  "imageDots.title": "Картинки для «Соедини по точкам»",
+  "imageDots.add": "Добавить картинку",
+  "imageDots.placeholder": "например: 0,2,5",
+  "imageDots.empty": "Нет картинок. Используйте кнопку выше, чтобы добавить.",
+  "imageDots.hint": "Подсказка: если включить привязку количества картинок к числу дней, строк будет ровно столько, сколько выбрано дней.",
+
+  "table.#": "#",
+  "table.image": "Картинка",
+  "table.points": "Точек",
+  "table.simplify": "Упрощение",
+  "table.threshold": "Порог",
+  "table.multiContours": "Мульти-контуры",
+  "table.maxContours": "Макс. контуров",
+  "table.decorRatio": "Декор, доля",
+  "table.numbering": "Нумерация",
+  "table.distribution": "Распред.",
+  "table.blur": "Размытие",
+  "table.targetContours": "Целевые контуры",
+  "table.actions": "Действия",
+
+  "numbering.continuous": "Непрерывная",
+  "numbering.perContour": "По контурам",
+  "distribution.proportional": "Пропорциональное",
+  "distribution.equal": "Равномерное",
+
+  "buttons.remove": "Удалить",
+
+  "errors.no_tasks": "Выберите хотя бы один тип задания.",
+  "errors.load_tasks_title": "Ошибка загрузки",
+  "errors.load_tasks_message": "Не удалось загрузить список заданий.",
+  "errors.generate_failed": "Ошибка генерации",
+
+  "lang.switch": "Язык",
+  "lang.ru": "RU",
+  "lang.en": "EN"
+}

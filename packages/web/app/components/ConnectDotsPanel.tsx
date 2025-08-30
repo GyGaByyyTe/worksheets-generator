@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import ImageDotsTable, { ImageDotsParams } from './ImageDotsTable';
+import { useT } from '../i18n/I18nProvider';
 
 export type ConnectDotsPanelProps = {
   days: number;
@@ -17,6 +18,7 @@ export default function ConnectDotsPanel({
   dotsRows,
   setDotsRows,
 }: ConnectDotsPanelProps) {
+  const t = useT();
   return (
     <div className="row" style={{ width: '100%' }}>
       <div style={{ width: '100%' }}>
@@ -28,10 +30,12 @@ export default function ConnectDotsPanel({
                 checked={lockToDays}
                 onChange={(e) => setLockToDays(e.target.checked)}
               />{' '}
-              Привязать число картинок к числу дней
+              {t('connectDots.lockLabel')}
             </label>
             {lockToDays && (
-              <div style={{ color: '#555' }}>Картинок: {days}</div>
+              <div style={{ color: '#555' }}>
+                {t('connectDots.picturesCount', { days })}
+              </div>
             )}
           </div>
           <ImageDotsTable

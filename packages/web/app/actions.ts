@@ -12,15 +12,11 @@ export async function refreshTasks(
     const data = await r.json();
     const tasks = (data?.keys as string[]) || [];
     return { tasks, error: '', message: '' };
-  } catch (error) {
-    let errorMessage = 'Failed to load tasks.';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
+  } catch (_error) {
     return {
       tasks: prevState?.tasks || [],
-      error: 'Load operation failed',
-      message: errorMessage,
+      error: 'errors.load_tasks_title',
+      message: 'errors.load_tasks_message',
     };
   }
 }
@@ -65,8 +61,8 @@ export const generateWorksheets = async (
   if (selected.length === 0) {
     return {
       data: prevState.data,
-      error: 'There are no tasks.',
-      message: 'Выберите хотя бы один тип задания.',
+      error: 'errors.no_tasks',
+      message: 'errors.no_tasks',
     };
   }
 
@@ -107,19 +103,17 @@ export const generateWorksheets = async (
       body: JSON.stringify(payload),
     });
     const data = await r.json();
-    if (!r.ok)
-      throw new Error(
-        (data && (data.error || data.message)) || 'Ошибка генерации',
-      );
+    if (!r.ok) throw new Error('errors.generate_failed');
     return {
       data,
       error: '',
       message: '',
     };
-    // setResult(data as GenerateResponse);
-  } catch (e: any) {
-    // console.error(e);
-    // setError(e?.message || 'Ошибка запроса');
-    return { data: prevState.data, error: '', message: '' };
+  } catch (_e: any) {
+    return {
+      data: prevState.data,
+      error: 'errors.generate_failed',
+      message: 'errors.generate_failed',
+    };
   }
 };

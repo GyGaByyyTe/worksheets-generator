@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useT } from '../i18n/I18nProvider';
 
 export type TasksListProps = {
   tasks: string[];
@@ -12,10 +13,11 @@ export default function TasksList({
   selected,
   onToggle,
 }: TasksListProps) {
+  const t = useT();
   return (
     <div className="row">
       <div className="tasks">
-        <div className="tasks-title">Задания:</div>
+        <div className="tasks-title">{t('tasks.title')}</div>
         <div className="tasks-list">
           {tasks.map((k) => (
             <label key={k} className="chk">
@@ -29,7 +31,7 @@ export default function TasksList({
               {k}
             </label>
           ))}
-          {tasks.length === 0 && <div>Загрузка...</div>}
+          {tasks.length === 0 && <div>{t('tasks.loading')}</div>}
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
   "app.title": "Worksheets Generator",
   "app.description": "UI for generating worksheets via REST API",
   "nav.home": "Home",
+  "nav.login": "Login",
   "footer.copyright": "© {year} Worksheets Generator",
 
   "actions.refresh": "Refresh tasks list",
@@ -50,5 +51,16 @@
 
   "lang.switch": "Language",
   "lang.ru": "RU",
-  "lang.en": "EN"
+  "lang.en": "EN",
+
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.login": "Login",
+  "auth.toRegister": "Registration",
+  "auth.register": "Registration",
+  "auth.registering": "Registering...",
+  "auth.register_submit": "Register",
+  "auth.toHome": "To home",
+  "auth.haveAccount": "Already have an account?",
+  "auth.toLogin": "Login"
 }

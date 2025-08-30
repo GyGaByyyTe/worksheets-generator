@@ -2,6 +2,9 @@
 import React from 'react';
 import I18nProvider, { useI18n, useT } from '../i18n/I18nProvider';
 import Link from 'next/link';
+import { useAuth } from '../auth/AuthProvider';
+import AuthProvider from '../auth/AuthProvider';
+import AuthModal from './AuthModal';
 
 function LangSwitcher() {
   const { lang, setLang, t } = useI18n();
@@ -30,13 +33,25 @@ function LangSwitcher() {
 
 function Header() {
   const t = useT();
+  const { user } = useAuth();
+  const [open, setOpen] = React.useState(false);
   return (
-    <header>
-      <h1>{t('app.title')}</h1>
-      <nav>
-        <Link href="/">{t('nav.home')}</Link>
-      </nav>
-      <LangSwitcher />
+    <header style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <h1>{t('app.title')}</h1>
+        <nav>
+          <Link href="/">{t('nav.home')}</Link>
+        </nav>
+      </div>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <LangSwitcher />
+        {user ? (
+          <span>{user.email}</span>
+        ) : (
+          <button type="button" onClick={() => setOpen(true)}>{t('nav.login')}</button>
+        )}
+      </div>
+      <AuthModal open={open} onClose={() => setOpen(false)} />
     </header>
   );
 }
@@ -54,9 +69,11 @@ function Footer() {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
-      <Header />
-      <main>{children}</main>
-      <Footer />
+      <AuthProvider>
+        <Header />
+        <main>{children}</main>
+        <Footer />
+      </AuthProvider>
     </I18nProvider>
   );
 }

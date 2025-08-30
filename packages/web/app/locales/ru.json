@@ -2,6 +2,7 @@
   "app.title": "Генератор рабочей тетради",
   "app.description": "Интерфейс для генерации заданий через REST API",
   "nav.home": "Главная",
+  "nav.login": "Войти",
   "footer.copyright": "© {year} Генератор рабочей тетради",
 
   "actions.refresh": "Обновить список заданий",
@@ -50,5 +51,16 @@
 
   "lang.switch": "Язык",
   "lang.ru": "RU",
-  "lang.en": "EN"
+  "lang.en": "EN",
+
+  "auth.email": "Email",
+  "auth.password": "Пароль",
+  "auth.login": "Войти",
+  "auth.toRegister": "Регистрация",
+  "auth.register": "Регистрация",
+  "auth.registering": "Регистрация...",
+  "auth.register_submit": "Зарегистрироваться",
+  "auth.toHome": "На главную",
+  "auth.haveAccount": "Уже есть аккаунт?",
+  "auth.toLogin": "Войти"
 }

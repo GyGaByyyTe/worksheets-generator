@@ -6,6 +6,22 @@ const { paths } = require('../config');
 const { tsStamp, dataUrlToBuffer, tmpPath, buildDayIndexHtml } = require('../lib/utils');
 const { ingestGenerationToDb } = require('../services/ingest');
 
+function pickRandomConnectDotsAsset() {
+  try {
+    const dir = path.resolve(__dirname, '..', '..', 'assets', 'connect-dots');
+    const all = fs.readdirSync(dir);
+    const allowed = all.filter((f) => {
+      const low = f.toLowerCase();
+      return low.endsWith('.png') || low.endsWith('.jpg') || low.endsWith('.jpeg') || low.endsWith('.webp');
+    });
+    if (!allowed.length) return null;
+    const rnd = allowed[Math.floor(Math.random() * allowed.length)];
+    return path.join(dir, rnd);
+  } catch (e) {
+    return null;
+  }
+}
+
 async function generateWorksheets(req, res) {
   try {
     const { days = 1, tasks = [], seed, imageDots } = req.body || {};

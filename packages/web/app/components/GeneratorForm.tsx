@@ -39,9 +39,6 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
     [],
   );
 
-  // Map of task keys for quick lookup (not used for titles; titles come from i18n)
-  const taskKeys = React.useMemo(() => new Set(tasks.map((t) => t.key)), [tasks]);
-
   const [openConnectDots, setOpenConnectDots] = React.useState<boolean>(true);
 
   return (
@@ -54,34 +51,65 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
           />
         </form>
       </div>
-      <form
-        action={generatorAction}
-        encType="multipart/form-data"
-      >
+      <form action={generatorAction}>
         <div className="two-cols" style={{ alignItems: 'start' }}>
           <div className="panel">
             <DaysSelector days={days} onChange={setDays} />
             <TasksList tasks={tasks} selected={selected} onToggle={toggle} />
           </div>
-          <div style={{ minWidth: 320, display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 12 }}>
+          <div
+            style={{
+              minWidth: 320,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              position: 'sticky',
+              top: 12,
+            }}
+          >
             <div className="panel">
               <div className="tasks-title">{t('tasks.selected')}</div>
               <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
                 {selected.map((k) => (
-                  <span key={k} className="tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span
+                    key={k}
+                    className="tag"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
                     {t(`task.${k}.title`) || k}
-                    <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={() => toggle(k)}>×</button>
+                    <button
+                      type="button"
+                      className="ui-btn ui-btn--sm ui-btn--outline"
+                      onClick={() => toggle(k)}
+                    >
+                      ×
+                    </button>
                   </span>
                 ))}
-                {selected.length === 0 && <span className="muted">{t('tasks.nothing_selected')}</span>}
+                {selected.length === 0 && (
+                  <span className="muted">{t('tasks.nothing_selected')}</span>
+                )}
               </div>
             </div>
 
             {selected.includes('connect-dots') && (
               <div className="panel">
-                <div className="row" style={{ justifyContent: 'space-between', width: '100%' }}>
-                  <div style={{ fontWeight: 600 }}>Параметры: Соедини точки</div>
-                  <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={() => setOpenConnectDots((v) => !v)}>
+                <div
+                  className="row"
+                  style={{ justifyContent: 'space-between', width: '100%' }}
+                >
+                  <div style={{ fontWeight: 600 }}>
+                    Параметры: Соедини точки
+                  </div>
+                  <button
+                    type="button"
+                    className="ui-btn ui-btn--sm ui-btn--outline"
+                    onClick={() => setOpenConnectDots((v) => !v)}
+                  >
                     {openConnectDots ? 'Свернуть' : 'Развернуть'}
                   </button>
                 </div>

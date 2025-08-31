@@ -39,7 +39,7 @@ export default function TasksList({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Checkbox name="tasks" value={k} checked={checked} onChange={() => onToggle(k)} />
-                  {task.logo ? (
+                  {task.logo && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={task.logo}
@@ -48,8 +48,8 @@ export default function TasksList({
                       height={24}
                       style={{ borderRadius: 4, objectFit: 'contain', background: '#fff' }}
                     />
-                  ) : (
-                    <span
+                  )}
+                  {/*(<span
                       aria-hidden
                       style={{
                         width: 24,
@@ -65,7 +65,7 @@ export default function TasksList({
                     >
                       {(title || k).slice(0, 1).toUpperCase()}
                     </span>
-                  )}
+                  )*/}
                   <span style={{ fontWeight: 600 }}>{title}</span>
                   {cat && (<span className="tag" style={{ marginLeft: 'auto' }}>{cat}</span>)}
                 </label>

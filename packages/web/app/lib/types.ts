@@ -15,8 +15,14 @@ export type RefreshTasksState = {
   message?: string;
 };
 
+export type TaskInfo = {
+  key: string;
+  category?: string;
+  logo?: string;
+};
+
 export type GeneratorFormProps = {
-  tasks?: string[];
+  tasks?: TaskInfo[];
   // refreshAction: (
   //   prevState: RefreshTasksState,
   //   formData: FormData,

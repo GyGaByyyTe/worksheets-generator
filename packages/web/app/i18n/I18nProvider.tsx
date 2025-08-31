@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import en from '../locales/en.json';
-import ru from '../locales/ru.json';
+import en from './locales/en.json';
+import ru from './locales/ru.json';
 
 type Dict = Record<string, string>;
 const DICTS: Record<string, Dict> = { en, ru } as any;

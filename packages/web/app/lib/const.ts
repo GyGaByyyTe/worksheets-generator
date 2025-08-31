@@ -1,9 +1,9 @@
-import { GeneratorState, RefreshTasksState } from './types';
+import { GeneratorState, RefreshTasksState, TaskInfo } from './types';
 
 export const getDefaultTaskState = (
-  initialTasks: string[] = [],
+  initialTasks: (string | TaskInfo)[] = [],
 ): RefreshTasksState => ({
-  tasks: initialTasks,
+  tasks: initialTasks.map((t) => (typeof t === 'string' ? t : t.key)),
   error: '',
   message: '',
 });

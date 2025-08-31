@@ -38,7 +38,36 @@ app.get('/health', (_req, res) => {
 
 app.get('/tasks', (_req, res) => {
   const keys = Object.keys(GENERATORS);
-  res.json({ keys });
+  // Backend-side minimal configuration in English. Values are keys and simple metadata.
+  // Optional logo file paths are relative to the server public directory and exposed via /static.
+  const META = {
+    clocks: { category: 'logic' },
+    weights: { category: 'logic' },
+    'connect-dots': { category: 'art' },
+    'find-parts': { category: 'puzzles' },
+    postman: { category: 'math' },
+    'spot-diff': { category: 'memory' },
+    addition: { category: 'math' },
+    maze: { category: 'puzzles' },
+    'road-maze': { category: 'puzzles' },
+  };
+
+  const tasks = keys.map((k) => {
+    const meta = META[k] || {};
+    const out = { key: k };
+    if (meta.category && typeof meta.category === 'string')
+      out.category = meta.category;
+    if (meta.logo && typeof meta.logo === 'string') {
+      const abs = path.join(publicDir, meta.logo);
+      if (fs.existsSync(abs)) {
+        out.logo = `/static/${meta.logo.replace(/\\+/g, '/')}`;
+      }
+    }
+    return out;
+  });
+
+  // Provide both keys and tasks to keep backward compatibility.
+  res.json({ keys, tasks });
 });
 
 function tsStamp() {

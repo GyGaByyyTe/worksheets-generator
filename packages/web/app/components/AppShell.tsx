@@ -37,20 +37,27 @@ function Header() {
   const { user } = useAuth();
   const [open, setOpen] = React.useState(false);
   return (
-    <header style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <h1>{t('app.title')}</h1>
-        <nav>
-          <Link href="/">{t('nav.home')}</Link>
-        </nav>
-      </div>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <LangSwitcher />
-        {user ? (
-          <span>{user.email}</span>
-        ) : (
-          <Button type="button" variant="outline" onClick={() => setOpen(true)}>{t('nav.login')}</Button>
-        )}
+    <header className="app-header">
+      <div className="app-header__inner">
+        <div className="brand-nav">
+          <Link href="/" className="brand">{t('app.title')}</Link>
+          <nav className="main-nav">
+            <Link href="/">Главная</Link>
+            <Link href="/generator">Генерация</Link>
+            {/* <Link href="/mazes">Лабиринты</Link> */}
+            {/* <Link href="/gallery">Галерея</Link> */}
+            {/* <Link href="/my">Мои листы</Link> */}
+          </nav>
+        </div>
+        <div className="header-actions">
+          <LangSwitcher />
+          <Link href="/generator" className="ui-btn btn-gradient ui-btn--sm">Создать</Link>
+          {user ? (
+            <span className="user-email">{user.email}</span>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => setOpen(true)}>{t('nav.login')}</Button>
+          )}
+        </div>
       </div>
       <AuthModal open={open} onClose={() => setOpen(false)} />
     </header>
@@ -61,8 +68,10 @@ function Footer() {
   const t = useT();
   const year = new Date().getFullYear();
   return (
-    <footer>
-      <small>{t('footer.copyright', { year })}</small>
+    <footer className="app-footer">
+      <div className="container">
+        <small>{t('footer.copyright', { year })}</small>
+      </div>
     </footer>
   );
 }
@@ -72,7 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <I18nProvider>
       <AuthProvider>
         <Header />
-        <main>{children}</main>
+        <main className="app-main">{children}</main>
         <Footer />
       </AuthProvider>
     </I18nProvider>

@@ -39,6 +39,11 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
     [],
   );
 
+  // Map of task keys for quick lookup (not used for titles; titles come from i18n)
+  const taskKeys = React.useMemo(() => new Set(tasks.map((t) => t.key)), [tasks]);
+
+  const [openConnectDots, setOpenConnectDots] = React.useState<boolean>(true);
+
   return (
     <div className="container">
       <div className="row">
@@ -55,17 +60,46 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
         encType="multipart/form-data"
       >
         <DaysSelector days={days} onChange={setDays} />
-        <TasksList tasks={tasks} selected={selected} onToggle={toggle} />
 
-        {selected.includes('connect-dots') && (
-          <ConnectDotsPanel
-            days={days}
-            lockToDays={lockToDays}
-            setLockToDays={setLockToDays}
-            dotsRows={dotsRows}
-            setDotsRows={setDotsRows}
-          />
-        )}
+        <div className="two-cols" style={{ alignItems: 'start' }}>
+          <div>
+            <TasksList tasks={tasks} selected={selected} onToggle={toggle} />
+          </div>
+          <div>
+            <div className="panel">
+              <div className="tasks-title">{t('tasks.selected')}</div>
+              <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
+                {selected.map((k) => (
+                  <span key={k} className="tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    {t(`task.${k}.title`) || k}
+                    <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={() => toggle(k)}>×</button>
+                  </span>
+                ))}
+                {selected.length === 0 && <span className="muted">{t('tasks.nothing_selected')}</span>}
+              </div>
+            </div>
+
+            {selected.includes('connect-dots') && (
+              <div className="panel">
+                <div className="row" style={{ justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ fontWeight: 600 }}>Параметры: Соедини точки</div>
+                  <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={() => setOpenConnectDots((v) => !v)}>
+                    {openConnectDots ? 'Свернуть' : 'Развернуть'}
+                  </button>
+                </div>
+                {openConnectDots && (
+                  <ConnectDotsPanel
+                    days={days}
+                    lockToDays={lockToDays}
+                    setLockToDays={setLockToDays}
+                    dotsRows={dotsRows}
+                    setDotsRows={setDotsRows}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="row">
           <LoadingButton />

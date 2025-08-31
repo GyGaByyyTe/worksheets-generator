@@ -9,33 +9,38 @@ export type ResultsViewProps = {
 };
 
 export default function ResultsView({ result }: ResultsViewProps) {
-  if (!result) return null;
   return (
     <div className="results">
       <h2>Результаты</h2>
-      <div className="outdir">
-        Папка:{' '}
-        <a href={absUrl(result.outDir)} target="_blank" rel="noreferrer">
-          {absUrl(result.outDir)}
-        </a>
-      </div>
-      {result.days.map((d) => (
-        <div key={d.day} className="day">
-          <h3>
-            День {d.day} —{' '}
-            <a href={absUrl(d.indexHtml)} target="_blank" rel="noreferrer">
-              просмотр страниц
+      {!result ? (
+        <div className="muted">Ничего не сгенерировано</div>
+      ) : (
+        <>
+          <div className="outdir">
+            Папка:{' '}
+            <a href={absUrl(result.outDir)} target="_blank" rel="noreferrer">
+              {absUrl(result.outDir)}
             </a>
-          </h3>
-          <div className="images">
-            {d.files.map((f, i) => (
-              <a key={i} href={absUrl(f)} target="_blank" rel="noreferrer">
-                <Image src={absUrl(f)} alt={`page ${i + 1}`} width={1200} height={1600} sizes="100vw" style={{ width: '100%', height: 'auto' }} unoptimized />
-              </a>
-            ))}
           </div>
-        </div>
-      ))}
+          {result.days.map((d) => (
+            <div key={d.day} className="day">
+              <h3>
+                День {d.day} —{' '}
+                <a href={absUrl(d.indexHtml)} target="_blank" rel="noreferrer">
+                  просмотр страниц
+                </a>
+              </h3>
+              <div className="images">
+                {d.files.map((f, i) => (
+                  <a key={i} href={absUrl(f)} target="_blank" rel="noreferrer">
+                    <Image src={absUrl(f)} alt={`page ${i + 1}`} width={1200} height={1600} sizes="100vw" style={{ width: '100%', height: 'auto' }} unoptimized />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

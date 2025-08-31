@@ -56,16 +56,14 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
       </div>
       <form
         action={generatorAction}
-        className="panel"
         encType="multipart/form-data"
       >
-        <DaysSelector days={days} onChange={setDays} />
-
         <div className="two-cols" style={{ alignItems: 'start' }}>
-          <div>
+          <div className="panel">
+            <DaysSelector days={days} onChange={setDays} />
             <TasksList tasks={tasks} selected={selected} onToggle={toggle} />
           </div>
-          <div>
+          <div style={{ minWidth: 320, display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 12 }}>
             <div className="panel">
               <div className="tasks-title">{t('tasks.selected')}</div>
               <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
@@ -98,19 +96,24 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                 )}
               </div>
             )}
-          </div>
-        </div>
 
-        <div className="row">
-          <LoadingButton />
+            <div className="panel">
+              <div className="row">
+                <LoadingButton />
+              </div>
+            </div>
+
+            <div className="panel">
+              {/* Results on the right column */}
+              <ResultsView result={generatorState.data} />
+            </div>
+          </div>
         </div>
       </form>
 
       <ErrorAlert
         message={refreshState?.message || generatorState?.message || null}
       />
-
-      <ResultsView result={generatorState.data} />
     </div>
   );
 }

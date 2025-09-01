@@ -10,7 +10,7 @@ export default function Loading() {
       <div className="two-cols" style={{ alignItems: 'start' }}>
         <div className="panel">
           <div className="tasks-title">Загрузка типов…</div>
-          <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="tasks-grid">
             {new Array(6).fill(0).map((_, i) => (
               <div key={i} className="card" style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
                 …

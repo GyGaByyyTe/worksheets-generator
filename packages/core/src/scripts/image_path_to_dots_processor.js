@@ -22,6 +22,7 @@ async function preprocessToBW(
     .grayscale()
     .blur(blurSigma) // добавлено
     .threshold(threshold)
+    .png()
     .toFile(tmpPath);
 }
 

@@ -81,18 +81,24 @@ export const generateWorksheets = async (
         imageDots.map(async (r) => {
           try {
             let imageDataUrl: string | null = null;
+            const imageUrl: string = r.imageUrl ? String(r.imageUrl) : '';
             if (r.file) {
               imageDataUrl = await fileToDataUrl(r.file as File);
-            } else if ((r.source === 'random' || r.imageUrl) && r.imageUrl) {
-              imageDataUrl = await urlToDataUrl(String(r.imageUrl));
+            } else if ((r.source === 'random' || imageUrl) && imageUrl) {
+              try {
+                imageDataUrl = await urlToDataUrl(imageUrl);
+              } catch (_e) {
+                // keep imageDataUrl null; server can fetch via imageUrl
+              }
             }
-            if (!imageDataUrl) return null;
+            if (!imageDataUrl && !imageUrl) return null;
             const targetContoursArr = (r.targetContours || '')
               .split(',')
               .map((s: string) => Number((s || '').trim()))
               .filter((n: number) => Number.isFinite(n));
             return {
-              imageDataUrl,
+              imageDataUrl: imageDataUrl || undefined,
+              imageUrl: imageUrl || undefined,
               pointsCount: r.pointsCount,
               simplifyTolerance: r.simplifyTolerance,
               threshold: r.threshold,

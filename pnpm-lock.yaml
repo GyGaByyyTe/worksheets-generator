@@ -79,6 +79,9 @@ importers:
       puppeteer:
         specifier: ^22.10.0
         version: 22.15.0(typescript@5.9.2)
+      sharp:
+        specifier: ^0.33.4
+        version: 0.33.5
     devDependencies:
       prisma:
         specifier: ^5.20.0

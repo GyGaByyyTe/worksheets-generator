@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const sharp = require('sharp');
 const { generateCustom, imageToDots } = require('@wg/core');
 const prisma = require('../db/prisma');
 const { paths } = require('../config');
@@ -12,7 +13,8 @@ function pickRandomConnectDotsAsset() {
     const all = fs.readdirSync(dir);
     const allowed = all.filter((f) => {
       const low = f.toLowerCase();
-      return low.endsWith('.png') || low.endsWith('.jpg') || low.endsWith('.jpeg') || low.endsWith('.webp');
+      // Filter only widely supported raster formats to avoid Sharp decode issues on some platforms
+      return low.endsWith('.png') || low.endsWith('.jpg') || low.endsWith('.jpeg');
     });
     if (!allowed.length) return null;
     const rnd = allowed[Math.floor(Math.random() * allowed.length)];
@@ -39,8 +41,23 @@ async function generateWorksheets(req, res) {
       if (rows.length > 0) {
         for (let i = 0; i < Math.min(days, rows.length); i++) {
           const row = rows[i];
-          if (!row || !row.imageDataUrl) {
-            // Fallback for this day if row is missing or has no image
+          let buf = null;
+          if (row && row.imageDataUrl) {
+            buf = dataUrlToBuffer(row.imageDataUrl);
+          }
+          if ((!buf || buf.length === 0) && row && row.imageUrl && /^https?:/i.test(String(row.imageUrl))) {
+            try {
+              const r = await fetch(String(row.imageUrl));
+              if (r && r.ok) {
+                const ab = await r.arrayBuffer();
+                buf = Buffer.from(ab);
+              }
+            } catch (_) {
+              // ignore
+            }
+          }
+          if (!row || !buf || buf.length === 0) {
+            // Fallback for this day if row is missing or has no usable image
             const asset = pickRandomConnectDotsAsset();
             if (asset) {
               const dayObj = result.days[i];
@@ -58,16 +75,18 @@ async function generateWorksheets(req, res) {
               const opts = {
                 input: asset,
                 outSvg,
-                pointsCount: 50,
-                simplifyTolerance: 1.2,
-                threshold: 180,
-                multiContours: false,
-                maxContours: 6,
-                decorAreaRatio: 0.18,
-                numbering: 'continuous',
-                pointsDistribution: 'proportional',
-                blurSigma: 1.4,
-                targetContours: null,
+                pointsCount: row && Number(row.pointsCount) ? Number(row.pointsCount) : 50,
+                simplifyTolerance: row && Number(row.simplifyTolerance) ? Number(row.simplifyTolerance) : 1.2,
+                threshold: row && Number(row.threshold) ? Number(row.threshold) : 180,
+                multiContours: row ? !!row.multiContours : false,
+                maxContours: row && Number(row.maxContours) ? Math.max(1, Number(row.maxContours)) : 6,
+                decorAreaRatio: row && Number(row.decorAreaRatio) ? Math.max(0, Math.min(0.9, Number(row.decorAreaRatio))) : 0.18,
+                numbering: row && row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
+                pointsDistribution: row && row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+                blurSigma: row && Number(row.blurSigma) ? Number(row.blurSigma) : 1.4,
+                targetContours: row && Array.isArray(row.targetContours)
+                  ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
+                  : null,
               };
               await imageToDots(opts);
               if (idx < 0) dayObj.files.push(base);
@@ -76,13 +95,73 @@ async function generateWorksheets(req, res) {
             }
             continue;
           }
-          const buf = dataUrlToBuffer(row.imageDataUrl);
-          if (!buf) continue;
-          // determine ext by mime
-          const mime = (row.imageDataUrl.split(';')[0] || '').split(':')[1] || 'image/png';
-          const ext = mime.includes('jpeg') || mime.includes('jpg') ? '.jpg' : (mime.includes('png') ? '.png' : '.bin');
-          const inTmp = tmpPath(ext);
-          fs.writeFileSync(inTmp, buf);
+
+          // Validate that buffer is a decodable image; if not, try fetching imageUrl, then fallback to server asset
+          let ok = true;
+          try {
+            await sharp(buf).metadata();
+          } catch (e) {
+            ok = false;
+          }
+          if (!ok && row && row.imageUrl && /^https?:/i.test(String(row.imageUrl))) {
+            try {
+              const r2 = await fetch(String(row.imageUrl));
+              if (r2 && r2.ok) {
+                const ab2 = await r2.arrayBuffer();
+                buf = Buffer.from(ab2);
+                try {
+                  await sharp(buf).metadata();
+                  ok = true;
+                } catch (_) {
+                  ok = false;
+                }
+              }
+            } catch (_) {
+              // ignore
+            }
+          }
+          if (!ok) {
+            const asset = pickRandomConnectDotsAsset();
+            if (asset) {
+              const dayObj = result.days[i];
+              const dir = dayObj.dir;
+              if (!Array.isArray(dayObj.files)) dayObj.files = [];
+              const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+              let base;
+              if (idx >= 0) {
+                base = dayObj.files[idx];
+              } else {
+                const pageNum = (dayObj.files.length || 0) + 1;
+                base = `page-${String(pageNum).padStart(2, '0')}-connect-dots-image.svg`;
+              }
+              const outSvg = path.join(dir, base);
+              const opts = {
+                input: asset,
+                outSvg,
+                pointsCount: Number(row.pointsCount) || 50,
+                simplifyTolerance: Number(row.simplifyTolerance) || 1.2,
+                threshold: Number(row.threshold) || 180,
+                multiContours: !!row.multiContours,
+                maxContours: Math.max(1, Number(row.maxContours) || 6),
+                decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
+                numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
+                pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+                blurSigma: Number(row.blurSigma) || 1.4,
+                targetContours: Array.isArray(row.targetContours)
+                  ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
+                  : null,
+              };
+              await imageToDots(opts);
+              if (idx < 0) dayObj.files.push(base);
+              const filesAbs = dayObj.files.map((f) => path.join(dir, f));
+              buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+            }
+            continue;
+          }
+
+          // Save as PNG regardless of input mime to guarantee Sharp can read the tmp
+          const inTmp = tmpPath('.png');
+          await sharp(buf).png().toFile(inTmp);
           try {
             const dayObj = result.days[i];
             const dir = dayObj.dir;

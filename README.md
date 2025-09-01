@@ -228,3 +228,13 @@ Behavior:
   - GET /pictures/search?category=Animals&subcategory=Cats&type=silhouette — returns a list of candidate images from the upstream provider.
 
 Note: Local assets fallback for connect-dots (`packages\server\assets\connect-dots`) can still be used for random images if present, but the preferred way forward is via the external API.
+
+
+### Connect-dots payload (API)
+
+When calling POST /generate/worksheets you can provide optional imageDots rows to drive the "connect-dots" page generation.
+Each row may include either of the following image fields:
+- imageDataUrl — a data URL (preferred when uploading from the browser)
+- imageUrl — an http/https URL. The server will download and use this image if imageDataUrl is missing or invalid.
+
+The server falls back to a random local asset from packages\server\assets\connect-dots only if neither imageDataUrl nor imageUrl is usable.

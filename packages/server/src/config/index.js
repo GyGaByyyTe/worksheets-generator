@@ -22,6 +22,11 @@ function readRequired(key) {
   return val;
 }
 
+function readOptional(key) {
+  const val = process.env[key];
+  return (val === undefined || val === null) ? '' : String(val);
+}
+
 // Required envs
 const PORT_RAW = readRequired('PORT');
 const JWT_SECRET = readRequired('JWT_SECRET');
@@ -31,6 +36,15 @@ let PORT;
 if (PORT_RAW) {
   PORT = Number(PORT_RAW);
   if (!Number.isInteger(PORT) || PORT <= 0) invalid.push('PORT (must be a positive integer)');
+}
+
+// Optional picture API integration
+const PICTURE_API_KEY = readOptional('PICTURE_API_KEY');
+const PICTURE_API_URL = readOptional('PICTURE_API_URL');
+const IS_PICTURE_API_CONFIGURED = Boolean(PICTURE_API_KEY && PICTURE_API_KEY.trim() && PICTURE_API_URL && PICTURE_API_URL.trim());
+
+if (!IS_PICTURE_API_CONFIGURED) {
+  console.warn('[config] Picture API is not configured. Random image search will be disabled (routes will respond 501).');
 }
 
 if (missing.length || invalid.length) {
@@ -53,4 +67,9 @@ module.exports = {
   JWT_SECRET,
   DATABASE_URL,
   paths: { serverRoot, publicDir, generatedDir },
+  pictureApi: {
+    key: PICTURE_API_KEY,
+    url: PICTURE_API_URL,
+    enabled: IS_PICTURE_API_CONFIGURED,
+  },
 };

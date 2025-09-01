@@ -159,6 +159,12 @@ NEXT_PUBLIC_API_URL=https://kids.does.cool/api
   - `postgresql://wg_user:wg_password@127.0.0.1:5432/wg?schema=public`
 - `JWT_SECRET` — секрет для подписи JWT (используется для опциональной аутентификации).
 - `PORT` — порт сервера (по умолчанию 4000).
+- `PICTURE_API_URL` — (опционально) базовый URL провайдера картинок, напр. `https://pixabay.com/api/`.
+- `PICTURE_API_KEY` — (опционально) API-ключ провайдера картинок (Pixabay).
+
+Примечания:
+- Если `PICTURE_API_*` не заданы, маршрут `/pictures/search` вернёт `501 Not Implemented`, и веб‑интерфейс не сможет подбирать случайные изображения по категориям.
+- Ключ Pixabay можно получить здесь: https://pixabay.com/api/docs/ (зарегистрируйте аккаунт и создайте API key).
 
 Инициализация БД (однократно после настройки `DATABASE_URL`):
 

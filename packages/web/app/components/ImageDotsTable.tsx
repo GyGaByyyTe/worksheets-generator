@@ -5,12 +5,26 @@ import Select from './ui/select';
 import Checkbox from './ui/checkbox';
 import Button from './ui/button';
 import Input from './ui/input';
+import { apiBase } from '../lib/api';
+
+// Local category/subcategory mapping (should mirror server /pictures/categories)
+const CATEGORY_MAP: Record<string, string[]> = {
+  Animals: ['Cats', 'Dogs', 'Fish', 'Birds', 'Dinosaurs', 'Horses', 'Insects'],
+  Technics: ['Cars', 'Planes', 'Trains', 'Ships', 'Robots', 'Gadgets'],
+  Nature: ['Trees', 'Flowers', 'Mountains', 'Landscapes', 'Leaves'],
+};
 
 export type NumberingMode = 'continuous' | 'per-contour';
 export type PointsDistribution = 'proportional' | 'equal';
 
 export type ImageDotsParams = {
   file?: File | null;
+  // image source options
+  source?: 'upload' | 'random';
+  category?: string;
+  subcategory?: string;
+  imageUrl?: string; // when source=random, chosen image URL
+  previewUrl?: string; // UI-only preview
   // core params
   pointsCount: number;
   simplifyTolerance: number;
@@ -28,11 +42,18 @@ export type ImageDotsTableProps = {
   rows: ImageDotsParams[];
   setRows: (rows: ImageDotsParams[]) => void;
   lockedCount?: number | null; // when provided, force rows.length === lockedCount
+  baseIndex?: number; // optional index offset for naming
+  writeNames?: boolean; // whether to render name attributes for form submit
 };
 
 export function defaultParams(): ImageDotsParams {
   return {
     file: null,
+    source: 'upload',
+    category: 'Animals',
+    subcategory: 'Cats',
+    imageUrl: '',
+    previewUrl: '',
     pointsCount: 50,
     simplifyTolerance: 1.2,
     threshold: 180,
@@ -50,8 +71,13 @@ export default function ImageDotsTable({
   rows,
   setRows,
   lockedCount = null,
+  baseIndex = 0,
 }: ImageDotsTableProps) {
   const t = useT();
+  const nameFor = React.useCallback(
+    (rowIndex: number, field: string) => `imageDots[${(baseIndex ?? 0) + rowIndex}][${field}]`,
+    [baseIndex],
+  );
   // Ensure row count matches lockedCount if provided
   React.useEffect(() => {
     if (lockedCount == null) return;
@@ -124,18 +150,93 @@ export default function ImageDotsTable({
               <tr key={i}>
                 <td style={tdCenter}>{i + 1}</td>
                 <td style={td}>
-                  <Input
-                    name={`imageDots[${i}][file]`}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      update(i, { file: (e.target as HTMLInputElement).files?.[0] || null })
-                    }
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Select
+                        value={r.source || 'upload'}
+                        onChange={(e) => update(i, { source: (e.target as HTMLSelectElement).value as any })}
+                        name={nameFor(i, 'source')}
+                      >
+                        <option value="upload">{t('imageDots.source.upload') || 'Upload my image'}</option>
+                        <option value="random">{t('imageDots.source.random') || 'Random from server'}</option>
+                      </Select>
+                      {(!r.source || r.source === 'upload') && (
+                        <Input
+                          name={nameFor(i, 'file')}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => update(i, { file: (e.target as HTMLInputElement).files?.[0] || null })}
+                        />
+                      )}
+                      {r.source === 'random' && (
+                        <>
+                          <Select
+                            value={r.category || 'Animals'}
+                            onChange={(e) => {
+                              const cat = (e.target as HTMLSelectElement).value;
+                              const subs = CATEGORY_MAP[cat] || [];
+                              update(i, { category: cat, subcategory: subs[0] || '', imageUrl: '', previewUrl: '' });
+                            }}
+                            name={nameFor(i, 'category')}
+                          >
+                            {Object.keys(CATEGORY_MAP).map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </Select>
+                          <Select
+                            value={r.subcategory || (CATEGORY_MAP[r.category || 'Animals']?.[0] || '')}
+                            onChange={(e) => update(i, { subcategory: (e.target as HTMLSelectElement).value })}
+                            name={nameFor(i, 'subcategory')}
+                          >
+                            {(CATEGORY_MAP[r.category || 'Animals'] || []).map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </Select>
+                          <Button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                const base = apiBase();
+                                const params = new URLSearchParams({
+                                  category: String(r.category || 'Animals'),
+                                  subcategory: String(r.subcategory || ''),
+                                  type: 'silhouette',
+                                  per_page: '20',
+                                });
+                                const resp = await fetch(`${base}/pictures/search?${params.toString()}`);
+                                const data = await resp.json();
+                                const images = Array.isArray(data?.images) ? data.images : [];
+                                if (images.length > 0) {
+                                  const pick = images[Math.floor(Math.random() * images.length)];
+                                  update(i, { imageUrl: pick.url, previewUrl: pick.previewUrl });
+                                }
+                              } catch (_) {
+                                // ignore
+                              }
+                            }}
+                          >
+                            {t('imageDots.pickRandom') || 'Pick Random'}
+                          </Button>
+                          {/* Hidden to include selected URL in form */}
+                          <input type="hidden" name={nameFor(i, 'imageUrl')} value={r.imageUrl || ''} />
+                        </>
+                      )}
+                    </div>
+                    {r.previewUrl && r.source === 'random' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <img src={r.previewUrl} alt="preview" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
+                        <div className="muted" style={{ fontSize: 12 }}>{r.category} / {r.subcategory}</div>
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td style={tdNarrow}>
                   <Input
-                    name={`imageDots[${i}][pointsCount]`}
+                    name={nameFor(i, 'pointsCount')}
                     type="number"
                     min={5}
                     max={1000}
@@ -149,7 +250,7 @@ export default function ImageDotsTable({
                 </td>
                 <td style={tdNarrow}>
                   <Input
-                    name={`imageDots[${i}][simplifyTolerance]`}
+                    name={nameFor(i, 'simplifyTolerance')}
                     type="number"
                     step={0.1}
                     min={0.1}
@@ -164,7 +265,7 @@ export default function ImageDotsTable({
                 </td>
                 <td style={tdNarrow}>
                   <Input
-                    name={`imageDots[${i}][threshold]`}
+                    name={nameFor(i, 'threshold')}
                     type="number"
                     min={0}
                     max={255}
@@ -176,7 +277,7 @@ export default function ImageDotsTable({
                 </td>
                 <td style={tdCenter}>
                   <Checkbox
-                    name={`imageDots[${i}][multiContours]`}
+                    name={nameFor(i, 'multiContours')}
                     checked={r.multiContours}
                     onChange={(e) =>
                       update(i, { multiContours: (e.target as HTMLInputElement).checked })
@@ -185,7 +286,7 @@ export default function ImageDotsTable({
                 </td>
                 <td style={tdNarrow}>
                   <Input
-                    name={`imageDots[${i}][maxContours]`}
+                    name={nameFor(i, 'maxContours')}
                     type="number"
                     min={1}
                     max={20}
@@ -199,7 +300,7 @@ export default function ImageDotsTable({
                 </td>
                 <td style={tdNarrow}>
                   <Input
-                    name={`imageDots[${i}][decorAreaRatio]`}
+                    name={nameFor(i, 'decorAreaRatio')}
                     type="number"
                     step={0.01}
                     min={0}

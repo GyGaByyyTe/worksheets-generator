@@ -79,6 +79,16 @@ $env:DATABASE_URL = "postgresql://dev_user:dev_password@127.0.0.1:5433/wg_dev?sc
 $env:JWT_SECRET = "dev-secret-change-it"
 ```
 
+Optional: External pictures API (Pixabay) used by the random image picker in "connect-dots":
+
+```powershell
+# Optional: external pictures API (Pixabay)
+$env:PICTURE_API_URL = "https://pixabay.com/api/"
+$env:PICTURE_API_KEY = "<your-pixabay-key>"
+```
+
+If not set, the endpoint `/pictures/search` will respond 501 (feature disabled).
+
 Notes:
 - These env vars apply to the current PowerShell session. Re-run them in new terminals.
 - The web app by default points to http://localhost:4000, so you usually don’t need to set NEXT_PUBLIC_API_URL locally. If needed:

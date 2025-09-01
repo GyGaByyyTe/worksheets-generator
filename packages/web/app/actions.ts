@@ -28,6 +28,15 @@ const fileToDataUrl = async (file: File): Promise<string> => {
   return `data:${mime};base64,${base64}`;
 };
 
+const urlToDataUrl = async (url: string): Promise<string> => {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('failed_to_fetch_image');
+  const ab = await r.arrayBuffer();
+  const base64 = Buffer.from(ab).toString('base64');
+  const mime = r.headers.get('content-type') || 'image/jpeg';
+  return `data:${mime};base64,${base64}`;
+};
+
 export const generateWorksheets = async (
   prevState: GeneratorState,
   formData: FormData,
@@ -70,25 +79,34 @@ export const generateWorksheets = async (
     if (selected.includes('connect-dots') && imageDots?.length > 0) {
       const prepared = await Promise.all(
         imageDots.map(async (r) => {
-          if (!r.file) return null;
-          const imageDataUrl = await fileToDataUrl(r.file);
-          const targetContoursArr = (r.targetContours || '')
-            .split(',')
-            .map((s: string) => Number((s || '').trim()))
-            .filter((n: number) => Number.isFinite(n));
-          return {
-            imageDataUrl,
-            pointsCount: r.pointsCount,
-            simplifyTolerance: r.simplifyTolerance,
-            threshold: r.threshold,
-            multiContours: r.multiContours,
-            maxContours: r.maxContours,
-            decorAreaRatio: r.decorAreaRatio,
-            numbering: r.numbering,
-            pointsDistribution: r.pointsDistribution,
-            blurSigma: r.blurSigma,
-            targetContours: targetContoursArr,
-          };
+          try {
+            let imageDataUrl: string | null = null;
+            if (r.file) {
+              imageDataUrl = await fileToDataUrl(r.file as File);
+            } else if ((r.source === 'random' || r.imageUrl) && r.imageUrl) {
+              imageDataUrl = await urlToDataUrl(String(r.imageUrl));
+            }
+            if (!imageDataUrl) return null;
+            const targetContoursArr = (r.targetContours || '')
+              .split(',')
+              .map((s: string) => Number((s || '').trim()))
+              .filter((n: number) => Number.isFinite(n));
+            return {
+              imageDataUrl,
+              pointsCount: r.pointsCount,
+              simplifyTolerance: r.simplifyTolerance,
+              threshold: r.threshold,
+              multiContours: r.multiContours,
+              maxContours: r.maxContours,
+              decorAreaRatio: r.decorAreaRatio,
+              numbering: r.numbering,
+              pointsDistribution: r.pointsDistribution,
+              blurSigma: r.blurSigma,
+              targetContours: targetContoursArr,
+            };
+          } catch (_e) {
+            return null;
+          }
         }),
       );
       imageDots = prepared.filter(Boolean) as any[];

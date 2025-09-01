@@ -142,6 +142,9 @@ pnpm start:web
   - Returns JSON with same structure as before, but file links are DB-backed: `/files/:pageId`, and previews under `/generations/:genId/day/:day/index.html`. Anonymous mode is allowed (no token required) — such generations have no user.
 - `GET /files/:id` — streams a single generated page from DB (SVG/PNG/JPEG)
 - `GET /generations/:genId/day/:day/index.html` — simple preview HTML for a day
+- Pictures (optional feature):
+  - `GET /pictures/categories` — returns `{ categories: string[], subcategories: Record<string,string[]> }`
+  - `GET /pictures/search?category=Animals&subcategory=Cats&type=silhouette` — returns `{ count, images[] }` from the upstream provider. Requires PICTURE_API_* to be configured; otherwise returns HTTP 501.
 - Auth (optional):
   - `POST /auth/register` — `{ email, password }`
   - `POST /auth/login` — `{ email, password }` → `{ token }` (send as `Authorization: Bearer <token>`)
@@ -208,3 +211,20 @@ If you just cloned the repo on a Windows machine and want to start developing, f
   `YOU MAY WANT TO ADD PICTURES: place .png/.jpg/.jpeg/.webp files into ...`.
 - Папка может быть пустой из коробки — это нормально. Просто добавьте несколько изображений, чтобы включить случайную подстановку.
 - При загрузке через веб UI сервер использует загруженное изображение; если оно отсутствует или имеет неподдерживаемый формат, используется случайное изображение из ассетов (если есть).
+
+
+## Optional: External Picture API for "connect-dots"
+
+The web UI now supports picking a random image by category/subcategory for the "connect-dots" task. This feature uses an external image provider (Pixabay) via the backend.
+
+Environment variables (optional):
+- PICTURE_API_URL — default provider base URL, e.g., https://pixabay.com/api/
+- PICTURE_API_KEY — your Pixabay API key
+
+Behavior:
+- If these vars are not configured on the server, the endpoint `/pictures/search` will respond with 501 Not Implemented, and the UI may not be able to pick random images.
+- When configured, the server exposes:
+  - GET /pictures/categories — lists categories/subcategories for the UI
+  - GET /pictures/search?category=Animals&subcategory=Cats&type=silhouette — returns a list of candidate images from the upstream provider.
+
+Note: Local assets fallback for connect-dots (`packages\server\assets\connect-dots`) can still be used for random images if present, but the preferred way forward is via the external API.

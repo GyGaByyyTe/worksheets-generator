@@ -35,56 +35,130 @@ async function generateWorksheets(req, res) {
     // Optionally process image-based connect-dots if provided and task selected
     const hasConnectDots = tasks.includes('connect-dots');
     const rows = Array.isArray(imageDots) ? imageDots : [];
-    if (hasConnectDots && rows.length > 0) {
-      for (let i = 0; i < Math.min(days, rows.length); i++) {
-        const row = rows[i];
-        if (!row || !row.imageDataUrl) continue;
-        const buf = dataUrlToBuffer(row.imageDataUrl);
-        if (!buf) continue;
-        // determine ext by mime
-        const mime = (row.imageDataUrl.split(';')[0] || '').split(':')[1] || 'image/png';
-        const ext = mime.includes('jpeg') || mime.includes('jpg') ? '.jpg' : (mime.includes('png') ? '.png' : '.bin');
-        const inTmp = tmpPath(ext);
-        fs.writeFileSync(inTmp, buf);
-        try {
+    if (hasConnectDots) {
+      if (rows.length > 0) {
+        for (let i = 0; i < Math.min(days, rows.length); i++) {
+          const row = rows[i];
+          if (!row || !row.imageDataUrl) {
+            // Fallback for this day if row is missing or has no image
+            const asset = pickRandomConnectDotsAsset();
+            if (asset) {
+              const dayObj = result.days[i];
+              const dir = dayObj.dir;
+              if (!Array.isArray(dayObj.files)) dayObj.files = [];
+              const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+              let base;
+              if (idx >= 0) {
+                base = dayObj.files[idx];
+              } else {
+                const pageNum = (dayObj.files.length || 0) + 1;
+                base = `page-${String(pageNum).padStart(2, '0')}-connect-dots-image.svg`;
+              }
+              const outSvg = path.join(dir, base);
+              const opts = {
+                input: asset,
+                outSvg,
+                pointsCount: 50,
+                simplifyTolerance: 1.2,
+                threshold: 180,
+                multiContours: false,
+                maxContours: 6,
+                decorAreaRatio: 0.18,
+                numbering: 'continuous',
+                pointsDistribution: 'proportional',
+                blurSigma: 1.4,
+                targetContours: null,
+              };
+              await imageToDots(opts);
+              if (idx < 0) dayObj.files.push(base);
+              const filesAbs = dayObj.files.map((f) => path.join(dir, f));
+              buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+            }
+            continue;
+          }
+          const buf = dataUrlToBuffer(row.imageDataUrl);
+          if (!buf) continue;
+          // determine ext by mime
+          const mime = (row.imageDataUrl.split(';')[0] || '').split(':')[1] || 'image/png';
+          const ext = mime.includes('jpeg') || mime.includes('jpg') ? '.jpg' : (mime.includes('png') ? '.png' : '.bin');
+          const inTmp = tmpPath(ext);
+          fs.writeFileSync(inTmp, buf);
+          try {
+            const dayObj = result.days[i];
+            const dir = dayObj.dir;
+            if (!Array.isArray(dayObj.files)) dayObj.files = [];
+            // Try to find existing default connect-dots page and overwrite it
+            const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+            let base;
+            if (idx >= 0) {
+              base = dayObj.files[idx];
+            } else {
+              // Fallback: append as a new page
+              const pageNum = (dayObj.files.length || 0) + 1;
+              base = `page-${String(pageNum).padStart(2, '0')}-connect-dots-image.svg`;
+            }
+            const outSvg = path.join(dir, base);
+            const opts = {
+              input: inTmp,
+              outSvg,
+              pointsCount: Number(row.pointsCount) || 50,
+              simplifyTolerance: Number(row.simplifyTolerance) || 1.2,
+              threshold: Number(row.threshold) || 180,
+              multiContours: !!row.multiContours,
+              maxContours: Math.max(1, Number(row.maxContours) || 6),
+              decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
+              numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
+              pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+              blurSigma: Number(row.blurSigma) || 1.4,
+              targetContours: Array.isArray(row.targetContours)
+                ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
+                : null,
+            };
+            await imageToDots(opts);
+            // update files list (only push if we appended a new file)
+            if (idx < 0) dayObj.files.push(base);
+            // rebuild index.html with all files
+            const filesAbs = dayObj.files.map((f) => path.join(dir, f));
+            buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+          } finally {
+            try { fs.unlinkSync(inTmp); } catch (_) { /* ignore */ }
+          }
+        }
+      } else {
+        // No images provided by client: fallback to server-side assets
+        for (let i = 0; i < days; i++) {
+          const asset = pickRandomConnectDotsAsset();
+          if (!asset) continue;
           const dayObj = result.days[i];
           const dir = dayObj.dir;
           if (!Array.isArray(dayObj.files)) dayObj.files = [];
-          // Try to find existing default connect-dots page and overwrite it
           const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
           let base;
           if (idx >= 0) {
             base = dayObj.files[idx];
           } else {
-            // Fallback: append as a new page
             const pageNum = (dayObj.files.length || 0) + 1;
             base = `page-${String(pageNum).padStart(2, '0')}-connect-dots-image.svg`;
           }
           const outSvg = path.join(dir, base);
           const opts = {
-            input: inTmp,
+            input: asset,
             outSvg,
-            pointsCount: Number(row.pointsCount) || 50,
-            simplifyTolerance: Number(row.simplifyTolerance) || 1.2,
-            threshold: Number(row.threshold) || 180,
-            multiContours: !!row.multiContours,
-            maxContours: Math.max(1, Number(row.maxContours) || 6),
-            decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
-            numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
-            pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
-            blurSigma: Number(row.blurSigma) || 1.4,
-            targetContours: Array.isArray(row.targetContours)
-              ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
-              : null,
+            pointsCount: 50,
+            simplifyTolerance: 1.2,
+            threshold: 180,
+            multiContours: false,
+            maxContours: 6,
+            decorAreaRatio: 0.18,
+            numbering: 'continuous',
+            pointsDistribution: 'proportional',
+            blurSigma: 1.4,
+            targetContours: null,
           };
           await imageToDots(opts);
-          // update files list (only push if we appended a new file)
           if (idx < 0) dayObj.files.push(base);
-          // rebuild index.html with all files
           const filesAbs = dayObj.files.map((f) => path.join(dir, f));
           buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
-        } finally {
-          try { fs.unlinkSync(inTmp); } catch (_) { /* ignore */ }
         }
       }
     }

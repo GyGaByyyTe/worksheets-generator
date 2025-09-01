@@ -6,6 +6,7 @@ import Checkbox from './ui/checkbox';
 import Button from './ui/button';
 import Input from './ui/input';
 import { apiBase } from '../lib/api';
+import ImagePreview from './ui/image-preview';
 
 // Local category/subcategory mapping (should mirror server /pictures/categories)
 const CATEGORY_MAP: Record<string, string[]> = {
@@ -44,6 +45,7 @@ export type ImageDotsTableProps = {
   lockedCount?: number | null; // when provided, force rows.length === lockedCount
   baseIndex?: number; // optional index offset for naming
   writeNames?: boolean; // whether to render name attributes for form submit
+  renderFileInput?: boolean; // whether to render file input element
 };
 
 export function defaultParams(): ImageDotsParams {
@@ -72,6 +74,7 @@ export default function ImageDotsTable({
   setRows,
   lockedCount = null,
   baseIndex = 0,
+  renderFileInput = true,
 }: ImageDotsTableProps) {
   const t = useT();
   const nameFor = React.useCallback(
@@ -160,7 +163,7 @@ export default function ImageDotsTable({
                         <option value="upload">{t('imageDots.source.upload') || 'Upload my image'}</option>
                         <option value="random">{t('imageDots.source.random') || 'Random from server'}</option>
                       </Select>
-                      {(!r.source || r.source === 'upload') && (
+                      {renderFileInput && (!r.source || r.source === 'upload') && (
                         <Input
                           name={nameFor(i, 'file')}
                           type="file"
@@ -209,10 +212,9 @@ export default function ImageDotsTable({
                                 });
                                 const resp = await fetch(`${base}/pictures/search?${params.toString()}`);
                                 const data = await resp.json();
-                                const images = Array.isArray(data?.images) ? data.images : [];
-                                if (images.length > 0) {
-                                  const pick = images[Math.floor(Math.random() * images.length)];
-                                  update(i, { imageUrl: pick.url, previewUrl: pick.previewUrl });
+                                const image = data?.image;
+                                if (image && image.url) {
+                                  update(i, { imageUrl: image.url, previewUrl: image.previewUrl });
                                 }
                               } catch (_) {
                                 // ignore
@@ -228,8 +230,11 @@ export default function ImageDotsTable({
                     </div>
                     {r.previewUrl && r.source === 'random' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <img src={r.previewUrl} alt="preview" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
-                        <div className="muted" style={{ fontSize: 12 }}>{r.category} / {r.subcategory}</div>
+                        <ImagePreview
+                          url={r.previewUrl}
+                          note={<span className="muted" style={{ fontSize: 12 }}>{r.category} / {r.subcategory}</span>}
+                          onRemove={() => update(i, { imageUrl: '', previewUrl: '' })}
+                        />
                       </div>
                     )}
                   </div>

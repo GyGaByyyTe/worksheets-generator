@@ -47,7 +47,7 @@ router.get('/pictures/search', async (req, res) => {
       key,
       q,
       image_type: 'vector',
-      per_page: String(Math.max(1, Math.min(50, Number(req.query.per_page) || 20))),
+      per_page: '20',
       safesearch: 'true',
       editors_choice: 'false',
     });
@@ -77,7 +77,10 @@ router.get('/pictures/search', async (req, res) => {
       pageURL: h.pageURL || null,
     }));
 
-    res.json({ count: images.length, images });
+    // Pick single image on server
+    if (images.length === 0) return res.status(404).json({ error: 'No images found' });
+    const pick = images[Math.floor(Math.random() * images.length)];
+    res.json({ image: pick });
   } catch (err) {
     console.error('[pictures] search error', err);
     res.status(500).json({ error: 'Failed to search pictures' });

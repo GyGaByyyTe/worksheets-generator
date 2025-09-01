@@ -16,6 +16,9 @@ body {
     'Apple Color Emoji',
     'Segoe UI Emoji';
 }
+/* Remove underline from all links project-wide */
+a, a:hover, a:focus, a:active, a:visited { text-decoration: none; }
+
 /* Layout */
 .app-header { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid #e5e7eb; }
 .app-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 16px; }
@@ -133,7 +136,7 @@ body {
 .ui-btn--outline {
   background: linear-gradient(#ffffff, #ffffff) padding-box,
               linear-gradient(135deg, #60a5fa, #a78bfa) border-box;
-  /*border: 2px solid transparent;*/
+  border: 2px solid transparent;
   color: #1d4ed8;
 }
 .ui-btn--outline:hover {

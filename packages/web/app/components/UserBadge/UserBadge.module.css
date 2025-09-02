@@ -1,0 +1,15 @@
+.userMenu {
+  position: relative;
+  padding-top: 6px;
+}
+.userEmail {
+  position: relative;
+  z-index: 101;
+}
+.userPopover {
+  display: none;
+  margin-top: 0;
+}
+.userMenu:hover .userPopover {
+  display: block;
+}

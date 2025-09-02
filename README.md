@@ -149,6 +149,10 @@ pnpm start:web
   - `POST /auth/register` — `{ email, password }`
   - `POST /auth/login` — `{ email, password }` → `{ token }` (send as `Authorization: Bearer <token>`)
   - `GET /me` — returns current user or null
+  - Profile (basic demo for account page):
+    - `GET /profile` — returns current profile (requires token)
+    - `GET /profile/stats` — basic usage stats (requires token)
+    - `GET /profile/recent-generations` — last generated items (requires token)
 
 Notes:
 

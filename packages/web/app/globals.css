@@ -5,6 +5,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -63,8 +64,14 @@ a:visited {
   gap: 8px;
   align-items: center;
 }
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
 .app-main {
   padding: 16px;
+  flex: 1 0 auto;
 }
 .app-footer {
   padding: 16px;
@@ -541,6 +548,10 @@ a:visited {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
+.account-tabs{display:flex;gap:8px;padding:8px;border-bottom:1px solid #e5e7eb;background:#f9fafb;border-top-left-radius:12px;border-top-right-radius:12px}
+.tab{background:transparent;border:0;padding:8px 10px;border-radius:8px;cursor:pointer;color:#374151}
+.tab:hover{background:#eef2ff}
+.tab--active{background:#111827;color:#fff}
 /* --- Image preview --- */
 .ui-image-preview {
   display: inline-flex;

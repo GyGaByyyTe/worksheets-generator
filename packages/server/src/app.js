@@ -11,6 +11,7 @@ const authRouter = require('./routes/auth');
 const generationRouter = require('./routes/generation');
 const filesRouter = require('./routes/files');
 const picturesRouter = require('./routes/pictures');
+const profileRouter = require('./routes/profile');
 
 function ensureDirs() {
   for (const dir of [paths.publicDir, paths.generatedDir]) {
@@ -36,6 +37,7 @@ function createApp() {
   app.use(generationRouter);
   app.use(filesRouter);
   app.use(picturesRouter);
+  app.use(profileRouter);
 
   return app;
 }

@@ -15,38 +15,7 @@ const CATEGORY_MAP: Record<string, string[]> = {
   Nature: ['Trees', 'Flowers', 'Mountains', 'Landscapes', 'Leaves'],
 };
 
-export type NumberingMode = 'continuous' | 'per-contour';
-export type PointsDistribution = 'proportional' | 'equal';
-
-export type ImageDotsParams = {
-  file?: File | null;
-  // image source options
-  source?: 'upload' | 'random';
-  category?: string;
-  subcategory?: string;
-  imageUrl?: string; // when source=random, chosen image URL
-  previewUrl?: string; // UI-only preview
-  // core params
-  pointsCount: number;
-  simplifyTolerance: number;
-  threshold: number;
-  multiContours: boolean;
-  maxContours: number;
-  decorAreaRatio: number; // 0..0.9
-  numbering: NumberingMode;
-  pointsDistribution: PointsDistribution;
-  blurSigma: number;
-  targetContours?: string; // comma-separated indices; UI-friendly; optional
-};
-
-export type ImageDotsTableProps = {
-  rows: ImageDotsParams[];
-  setRows: (rows: ImageDotsParams[]) => void;
-  lockedCount?: number | null; // when provided, force rows.length === lockedCount
-  baseIndex?: number; // optional index offset for naming
-  writeNames?: boolean; // whether to render name attributes for form submit
-  renderFileInput?: boolean; // whether to render file input element
-};
+import type { NumberingMode, PointsDistribution, ImageDotsParams, ImageDotsTableProps } from 'lib/types';
 
 export function defaultParams(): ImageDotsParams {
   return {

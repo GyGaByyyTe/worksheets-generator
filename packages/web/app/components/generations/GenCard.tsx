@@ -2,13 +2,7 @@
 import React from 'react';
 import { useT } from '@/i18n/I18nProvider';
 import { absUrl } from 'lib/api';
-
-export type GenItem = {
-  id: string;
-  tags: string[];
-  previewUrl: string;
-  downloadUrl: string;
-};
+import type { GenItem } from 'lib/types';
 
 function useLocTask() {
   const t = useT();

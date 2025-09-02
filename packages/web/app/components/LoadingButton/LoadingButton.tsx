@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { useT } from '../../i18n/I18nProvider';
+import { useT } from '@/i18n/I18nProvider';
 import Button from '../ui/button';
 
 export default function LoadingButton({

@@ -1,8 +1,8 @@
-"use client";
-import React from "react";
-import Link from "next/link";
-import { absUrl } from "../lib/api";
-import { useT } from "../i18n/I18nProvider";
+'use client';
+import React from 'react';
+import Link from 'next/link';
+import { absUrl } from 'lib/api';
+import { useT } from '@/i18n/I18nProvider';
 
 type RecentItem = {
   id: string;
@@ -23,8 +23,8 @@ export default function RecentGenerations() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(absUrl("/generations/recent?limit=4"), {
-          cache: "no-store",
+        const res = await fetch(absUrl('/generations/recent?limit=4'), {
+          cache: 'no-store',
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
@@ -46,15 +46,15 @@ export default function RecentGenerations() {
     // try localized task name; fallback to raw
     const key = `task.${slug}.title`;
     const val = t(key as any);
-    if (val && typeof val === "string" && !val.startsWith("task.")) return val;
+    if (val && typeof val === 'string' && !val.startsWith('task.')) return val;
     // small mapping for known hyphenated slugs where translation keys may differ
     return slug;
   }
 
   function buildTitle(tags: string[]): string {
     const locs = tags.map((s) => locTask(s));
-    const joined = locs.join(", ");
-    const title = t("generation.title", { tasks: joined }) as string;
+    const joined = locs.join(', ');
+    const title = t('generation.title', { tasks: joined }) as string;
     return title || joined;
   }
 
@@ -105,13 +105,13 @@ export default function RecentGenerations() {
                 rel="noreferrer"
                 className="ui-btn ui-btn--secondary ui-btn--sm"
               >
-                {t("buttons.preview")}
+                {t('buttons.preview')}
               </a>
               <a
                 href={absUrl(i.downloadUrl)}
                 className="ui-btn ui-btn--outline ui-btn--sm"
               >
-                {t("buttons.downloadPdf")}
+                {t('buttons.downloadPdf')}
               </a>
             </div>
           </div>

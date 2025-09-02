@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../auth/AuthProvider';
-import { useT } from '../i18n/I18nProvider';
-import Input from './ui/input';
-import Button from './ui/button';
+import { useAuth } from '@/auth/AuthProvider';
+import { useT } from '@/i18n/I18nProvider';
+import Input from '@/components/ui/input';
+import Button from '@/components/ui/button';
 
 export default function AuthModal({
   open,

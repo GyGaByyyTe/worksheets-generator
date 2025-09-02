@@ -1,7 +1,7 @@
-"use client";
-import React from "react";
-import { useT } from "../../i18n/I18nProvider";
-import { absUrl } from "../../lib/api";
+'use client';
+import React from 'react';
+import { useT } from '@/i18n/I18nProvider';
+import { absUrl } from 'lib/api';
 
 export type GenItem = {
   id: string;
@@ -16,7 +16,7 @@ function useLocTask() {
     (slug: string): string => {
       const key = `task.${slug}.title` as any;
       const val = t(key);
-      if (val && typeof val === "string" && !String(val).startsWith("task.")) {
+      if (val && typeof val === 'string' && !String(val).startsWith('task.')) {
         return val as string;
       }
       return slug;
@@ -28,9 +28,10 @@ function useLocTask() {
 export default function GenCard({ item }: { item: GenItem }) {
   const t = useT();
   const locTask = useLocTask();
-  const title = (t("generation.title", {
-    tasks: item.tags.map(locTask).join(", "),
-  }) as string) || item.tags.map(locTask).join(", ");
+  const title =
+    (t('generation.title', {
+      tasks: item.tags.map(locTask).join(', '),
+    }) as string) || item.tags.map(locTask).join(', ');
 
   return (
     <div className="card gen">
@@ -50,10 +51,13 @@ export default function GenCard({ item }: { item: GenItem }) {
           rel="noreferrer"
           className="ui-btn ui-btn--secondary ui-btn--sm"
         >
-          {t("buttons.preview")}
+          {t('buttons.preview')}
         </a>
-        <a href={absUrl(item.downloadUrl)} className="ui-btn ui-btn--outline ui-btn--sm">
-          {t("buttons.downloadPdf")}
+        <a
+          href={absUrl(item.downloadUrl)}
+          className="ui-btn ui-btn--outline ui-btn--sm"
+        >
+          {t('buttons.downloadPdf')}
         </a>
       </div>
     </div>

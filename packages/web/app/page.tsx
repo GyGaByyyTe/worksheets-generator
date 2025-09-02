@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import Button from './components/ui/button';
 import RecentSection from './components/generations/RecentSection';
-import { getCategories, getPopular, getNewest, getTop } from './home-actions';
+import { getCategories, getPopular, getNewest, getTop } from 'actions';
 
 async function Hero() {
   return (

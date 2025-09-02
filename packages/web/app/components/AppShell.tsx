@@ -1,9 +1,9 @@
 'use client';
 import React from 'react';
-import I18nProvider, { useI18n, useT } from '../i18n/I18nProvider';
+import I18nProvider, { useI18n, useT } from '@/i18n/I18nProvider';
 import Link from 'next/link';
-import AuthProvider from '../auth/AuthProvider';
-import UserBadge from './UserBadge';
+import AuthProvider from '@/auth/AuthProvider';
+import UserBadge from '@/components/UserBadge';
 
 function LangSwitcher() {
   const { lang, setLang, t } = useI18n();

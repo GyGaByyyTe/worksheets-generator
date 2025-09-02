@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useT } from '../i18n/I18nProvider';
+import { useT } from '@/i18n/I18nProvider';
 
 export type ErrorAlertProps = { message: string | null };
 

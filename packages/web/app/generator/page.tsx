@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
-import GeneratorForm from '../components/GeneratorForm';
-import { getTasks } from './actions';
+import GeneratorForm from '@/components/GeneratorForm';
+import { getTasks } from 'actions';
 
 export const metadata = {
   title: 'Генерация — Worksheets Generator',

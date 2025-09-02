@@ -1,15 +1,14 @@
 'use client';
 import React from 'react';
-import { useAuth } from '../auth/AuthProvider';
-import { absUrl } from '../lib/api';
-import { useT } from '../i18n/I18nProvider';
-import type { GenItem as RecentItem } from '../components/generations/GenCard';
-import ProfileHeader from '../components/account/ProfileHeader';
-import TabsNav from '../components/account/TabsNav';
-import OverviewPanel from '../components/account/OverviewPanel';
-import UnauthorizedNotice from '../components/account/UnauthorizedNotice';
-import type { Profile, Stats, AccountTab } from './types';
-
+import { useAuth } from '@/auth/AuthProvider';
+import { absUrl } from 'lib/api';
+import { useT } from '@/i18n/I18nProvider';
+import type { GenItem as RecentItem } from '@/components/generations/GenCard';
+import ProfileHeader from '@/components/account/ProfileHeader';
+import TabsNav from '@/components/account/TabsNav';
+import OverviewPanel from '@/components/account/OverviewPanel';
+import UnauthorizedNotice from '@/components/account/UnauthorizedNotice';
+import type { Profile, Stats, AccountTab } from 'lib/types';
 
 function useProfileData() {
   const { token } = useAuth();
@@ -55,9 +54,6 @@ function useProfileData() {
   return { loading, profile, stats, recent };
 }
 
-
-
-
 export default function AccountPage() {
   const { user } = useAuth();
   const { loading, profile, stats, recent } = useProfileData();
@@ -85,7 +81,9 @@ export default function AccountPage() {
             <OverviewPanel profile={profile} stats={stats} recent={recent} />
           )}
           {!loading && tab !== 'overview' && (
-            <div className="muted">{t('account.sectionInDev', { tab: t(`account.tabs.${tab}`) })}</div>
+            <div className="muted">
+              {t('account.sectionInDev', { tab: t(`account.tabs.${tab}`) })}
+            </div>
           )}
         </div>
       </div>

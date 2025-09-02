@@ -1,9 +1,9 @@
 import Button from '../ui/button';
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '../../auth/AuthProvider';
+import { useAuth } from '@/auth/AuthProvider';
 import AuthModal from '../AuthModal';
-import { useT } from '../../i18n/I18nProvider';
+import { useT } from '@/i18n/I18nProvider';
 import cl from './UserBadge.module.css';
 
 function UserPopoverContent() {

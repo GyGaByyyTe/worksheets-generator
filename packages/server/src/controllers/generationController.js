@@ -377,14 +377,23 @@ async function generateWorksheets(req, res) {
 async function listRecentGenerations(req, res) {
   try {
     const limitRaw = req.query && req.query.limit ? Number(req.query.limit) : 4;
-    const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(50, limitRaw)) : 4;
+    const limit = Number.isFinite(limitRaw)
+      ? Math.max(1, Math.min(50, limitRaw))
+      : 4;
     const mine = (req.query && String(req.query.mine)) === '1';
-    const where = mine && req.user && req.user.sub ? { userId: req.user.sub } : {};
+    const where =
+      mine && req.user && req.user.sub ? { userId: req.user.sub } : {};
     const gens = await prisma.generation.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: limit,
-      select: { id: true, createdAt: true, tasks: true, days: true, userId: true },
+      select: {
+        id: true,
+        createdAt: true,
+        tasks: true,
+        days: true,
+        userId: true,
+      },
     });
 
     // Count downloads per generation in one query if possible
@@ -406,7 +415,9 @@ async function listRecentGenerations(req, res) {
     const items = gens.map((g) => {
       const tasks = Array.isArray(g.tasks) ? g.tasks : [];
       const tags = tasks.map((t) => String(t));
-      const title = tags.length ? `Рабочие листы: ${tags.join(', ')}` : 'Рабочие листы';
+      const title = tags.length
+        ? `Рабочие листы: ${tags.join(', ')}`
+        : 'Рабочие листы';
       return {
         id: g.id,
         title,

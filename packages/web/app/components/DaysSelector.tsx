@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import { useT } from '../i18n/I18nProvider';
-import Input from './ui/input';
+import { useT } from '@/i18n/I18nProvider';
+import Input from '@/components/ui/input';
 
 export type DaysSelectorProps = {
   days: number;

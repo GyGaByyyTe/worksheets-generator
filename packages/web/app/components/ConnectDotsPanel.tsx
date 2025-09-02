@@ -3,11 +3,11 @@ import React from 'react';
 import ImageDotsTable, {
   ImageDotsParams,
   defaultParams,
-} from './ImageDotsTable';
-import { useT } from '../i18n/I18nProvider';
-import Checkbox from './ui/checkbox';
-import DayConfigCard from './DayConfigCard';
-import DotsConfigForm from './DotsConfigForm';
+} from '@/components/ImageDotsTable';
+import { useT } from '@/i18n/I18nProvider';
+import Checkbox from '@/components/ui/checkbox';
+import DayConfigCard from '@/components/DayConfigCard';
+import DotsConfigForm from '@/components/DotsConfigForm';
 
 export type ConnectDotsPanelProps = {
   days: number;

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import { absUrl } from '../lib/api';
-import { GenerateResponse } from '../lib/types';
+import { absUrl } from 'lib/api';
+import { GenerateResponse } from 'lib/types';
 
 export type ResultsViewProps = {
   result: GenerateResponse | null;

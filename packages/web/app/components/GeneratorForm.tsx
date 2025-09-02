@@ -1,16 +1,16 @@
 'use client';
 import React, { useActionState, useCallback } from 'react';
-import type { ImageDotsParams } from './ImageDotsTable';
-import DaysSelector from './DaysSelector';
-import TasksList from './TasksList';
-import ConnectDotsPanel from './ConnectDotsPanel';
-import ErrorAlert from './ErrorAlert';
-import ResultsView from './ResultsView';
-import LoadingButton from './LoadingButton';
-import { generateWorksheets, refreshTasks } from '../actions';
-import type { GeneratorFormProps } from '../lib/types';
-import { getDefaultGeneratorState, getDefaultTaskState } from '../lib/const';
-import { useT } from '../i18n/I18nProvider';
+import type { ImageDotsParams } from '@/components/ImageDotsTable';
+import DaysSelector from '@/components/DaysSelector';
+import TasksList from '@/components/TasksList';
+import ConnectDotsPanel from '@/components/ConnectDotsPanel';
+import ErrorAlert from '@/components/ErrorAlert';
+import ResultsView from '@/components/ResultsView';
+import LoadingButton from '@/components/LoadingButton';
+import { generateWorksheets, refreshTasks } from 'actions';
+import type { GeneratorFormProps } from 'lib/types';
+import { getDefaultGeneratorState, getDefaultTaskState } from 'lib/const';
+import { useT } from '@/i18n/I18nProvider';
 
 export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
   const t = useT();

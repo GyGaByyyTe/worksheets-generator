@@ -2,11 +2,11 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { absUrl } from '../lib/api';
-import { useAuth } from '../auth/AuthProvider';
-import { useT } from '../i18n/I18nProvider';
-import Input from '../components/ui/input';
-import Button from '../components/ui/button';
+import { absUrl } from 'lib/api';
+import { useAuth } from '@/auth/AuthProvider';
+import { useT } from '@/i18n/I18nProvider';
+import Input from '@/components/ui/input';
+import Button from '@/components/ui/button';
 
 export default function RegisterPage() {
   const { login } = useAuth();

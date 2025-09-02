@@ -1,5 +1,8 @@
 const express = require('express');
-const { generateWorksheets, listRecentGenerations } = require('../controllers/generationController');
+const {
+  generateWorksheets,
+  listRecentGenerations,
+} = require('../controllers/generationController');
 const { optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();

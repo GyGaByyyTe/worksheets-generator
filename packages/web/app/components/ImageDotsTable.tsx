@@ -1,12 +1,12 @@
 'use client';
 import React from 'react';
-import { useT } from '../i18n/I18nProvider';
-import Select from './ui/select';
-import Checkbox from './ui/checkbox';
-import Button from './ui/button';
-import Input from './ui/input';
-import { apiBase } from '../lib/api';
-import ImagePreview from './ui/image-preview';
+import { useT } from '@/i18n/I18nProvider';
+import Select from '@/components/ui/select';
+import Checkbox from '@/components/ui/checkbox';
+import Button from '@/components/ui/button';
+import Input from '@/components/ui/input';
+import { apiBase } from 'lib/api';
+import ImagePreview from '@/components/ui/image-preview';
 
 // Local category/subcategory mapping (should mirror server /pictures/categories)
 const CATEGORY_MAP: Record<string, string[]> = {

@@ -1,6 +1,6 @@
-"use client";
-import React from "react";
-import GenCard, { GenItem } from "./GenCard";
+'use client';
+import React from 'react';
+import GenCard, { GenItem } from './GenCard';
 
 export default function GenGrid({ items }: { items: GenItem[] }) {
   if (!items || items.length === 0) return null;

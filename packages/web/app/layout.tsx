@@ -3,8 +3,8 @@ export const metadata = {
   description: 'UI for generating worksheets via REST API',
 };
 
-import './globals.css';
-import AppShell from './components/AppShell';
+import '@/globals.css';
+import AppShell from '@/components/AppShell';
 
 export default function RootLayout({
   children,

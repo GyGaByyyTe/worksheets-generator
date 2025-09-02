@@ -1,7 +1,7 @@
-import React from "react";
-import Link from "next/link";
-import GenGrid from "./GenGrid";
-import { getRecentGenerations } from "../../actions/generations";
+import React from 'react';
+import Link from 'next/link';
+import GenGrid from './GenGrid';
+import { getRecentGenerations } from 'actions/generations';
 
 export default async function RecentSection() {
   const items = await getRecentGenerations({ limit: 4 });

@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { absUrl } from '../lib/api';
+import { absUrl } from 'lib/api';
 
 export type AuthUser = { id: string; email: string };
 

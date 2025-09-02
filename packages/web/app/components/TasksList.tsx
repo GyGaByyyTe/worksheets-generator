@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
-import { useT } from '../i18n/I18nProvider';
-import type { TaskInfo } from '../lib/types';
-import TaskCard from './TaskCard';
+import { useT } from '@/i18n/I18nProvider';
+import type { TaskInfo } from 'lib/types';
+import TaskCard from '@/components/TaskCard';
 
 export type TasksListProps = {
   tasks: TaskInfo[];

@@ -1,17 +1,17 @@
 'use client';
 import React from 'react';
-import { useT } from '../i18n/I18nProvider';
+import { useT } from '@/i18n/I18nProvider';
 import type {
   ImageDotsParams,
   NumberingMode,
   PointsDistribution,
-} from './ImageDotsTable';
-import Slider from './ui/slider';
-import Select from './ui/select';
-import Switch from './ui/switch';
-import FilePicker from './ui/file-picker';
-import ImagePreview from './ui/image-preview';
-import { apiBase } from '../lib/api';
+} from '@/components/ImageDotsTable';
+import Slider from '@/components/ui/slider';
+import Select from '@/components/ui/select';
+import Switch from '@/components/ui/switch';
+import FilePicker from '@/components/ui/file-picker';
+import ImagePreview from '@/components/ui/image-preview';
+import { apiBase } from 'lib/api';
 
 // Local category/subcategory mapping (mirror ImageDotsTable)
 const CATEGORY_MAP: Record<string, string[]> = {

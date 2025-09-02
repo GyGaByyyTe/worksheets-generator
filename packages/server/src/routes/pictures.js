@@ -15,7 +15,12 @@ router.get('/pictures/categories', (_req, res) => {
 });
 
 function isConfigured() {
-  return !!(pictureApi && pictureApi.enabled && pictureApi.key && pictureApi.url);
+  return !!(
+    pictureApi &&
+    pictureApi.enabled &&
+    pictureApi.key &&
+    pictureApi.url
+  );
 }
 
 function mapCategoryToPixabay(cat) {
@@ -29,7 +34,9 @@ function mapCategoryToPixabay(cat) {
 
 router.get('/pictures/search', async (req, res) => {
   if (!isConfigured()) {
-    return res.status(501).json({ error: 'Picture API is not configured on the server.' });
+    return res
+      .status(501)
+      .json({ error: 'Picture API is not configured on the server.' });
   }
   try {
     const key = pictureApi.key;
@@ -61,7 +68,9 @@ router.get('/pictures/search', async (req, res) => {
     const url = `${baseUrl}/?${params.toString()}`;
     const r = await fetch(url);
     if (!r.ok) {
-      return res.status(502).json({ error: 'Upstream image API error', status: r.status });
+      return res
+        .status(502)
+        .json({ error: 'Upstream image API error', status: r.status });
     }
     const data = await r.json();
     const hits = Array.isArray(data?.hits) ? data.hits : [];
@@ -78,7 +87,8 @@ router.get('/pictures/search', async (req, res) => {
     }));
 
     // Pick single image on server
-    if (images.length === 0) return res.status(404).json({ error: 'No images found' });
+    if (images.length === 0)
+      return res.status(404).json({ error: 'No images found' });
     const pick = images[Math.floor(Math.random() * images.length)];
     res.json({ image: pick });
   } catch (err) {

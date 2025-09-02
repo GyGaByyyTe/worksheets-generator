@@ -1,5 +1,9 @@
 const express = require('express');
-const { getFile, previewDay, downloadGeneration } = require('../controllers/filesController');
+const {
+  getFile,
+  previewDay,
+  downloadGeneration,
+} = require('../controllers/filesController');
 
 const router = express.Router();
 

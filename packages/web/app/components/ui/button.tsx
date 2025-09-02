@@ -3,7 +3,8 @@ import * as React from 'react';
 export type ButtonVariant = 'default' | 'secondary' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -14,7 +15,18 @@ function cx(...classes: Array<string | undefined | false | null>) {
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'md', loading = false, disabled, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'default',
+      size = 'md',
+      loading = false,
+      disabled,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const isDisabled = disabled || loading;
     return (
       <button
@@ -29,11 +41,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         {...props}
       >
-        {loading ? <span className="ui-btn__spinner" aria-hidden>…</span> : null}
+        {loading ? (
+          <span className="ui-btn__spinner" aria-hidden>
+            …
+          </span>
+        ) : null}
         <span>{children}</span>
       </button>
     );
-  }
+  },
 );
 Button.displayName = 'Button';
 

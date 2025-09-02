@@ -4,7 +4,12 @@ const sharp = require('sharp');
 const { generateCustom, imageToDots } = require('@wg/core');
 const prisma = require('../db/prisma');
 const { paths } = require('../config');
-const { tsStamp, dataUrlToBuffer, tmpPath, buildDayIndexHtml } = require('../lib/utils');
+const {
+  tsStamp,
+  dataUrlToBuffer,
+  tmpPath,
+  buildDayIndexHtml,
+} = require('../lib/utils');
 const { ingestGenerationToDb } = require('../services/ingest');
 
 function pickRandomConnectDotsAsset() {
@@ -14,7 +19,9 @@ function pickRandomConnectDotsAsset() {
     const allowed = all.filter((f) => {
       const low = f.toLowerCase();
       // Filter only widely supported raster formats to avoid Sharp decode issues on some platforms
-      return low.endsWith('.png') || low.endsWith('.jpg') || low.endsWith('.jpeg');
+      return (
+        low.endsWith('.png') || low.endsWith('.jpg') || low.endsWith('.jpeg')
+      );
     });
     if (!allowed.length) return null;
     const rnd = allowed[Math.floor(Math.random() * allowed.length)];
@@ -28,7 +35,9 @@ async function generateWorksheets(req, res) {
   try {
     const { days = 1, tasks = [], seed, imageDots } = req.body || {};
     if (!Array.isArray(tasks) || tasks.length === 0) {
-      return res.status(400).json({ error: 'tasks array is required and must be non-empty' });
+      return res
+        .status(400)
+        .json({ error: 'tasks array is required and must be non-empty' });
     }
     const ts = tsStamp();
     const outAbs = path.join(paths.generatedDir, ts);
@@ -45,7 +54,12 @@ async function generateWorksheets(req, res) {
           if (row && row.imageDataUrl) {
             buf = dataUrlToBuffer(row.imageDataUrl);
           }
-          if ((!buf || buf.length === 0) && row && row.imageUrl && /^https?:/i.test(String(row.imageUrl))) {
+          if (
+            (!buf || buf.length === 0) &&
+            row &&
+            row.imageUrl &&
+            /^https?:/i.test(String(row.imageUrl))
+          ) {
             try {
               const r = await fetch(String(row.imageUrl));
               if (r && r.ok) {
@@ -63,7 +77,11 @@ async function generateWorksheets(req, res) {
               const dayObj = result.days[i];
               const dir = dayObj.dir;
               if (!Array.isArray(dayObj.files)) dayObj.files = [];
-              const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+              const idx = dayObj.files.findIndex(
+                (f) =>
+                  typeof f === 'string' &&
+                  f.toLowerCase().endsWith('-connect-dots.svg'),
+              );
               let base;
               if (idx >= 0) {
                 base = dayObj.files[idx];
@@ -75,23 +93,48 @@ async function generateWorksheets(req, res) {
               const opts = {
                 input: asset,
                 outSvg,
-                pointsCount: row && Number(row.pointsCount) ? Number(row.pointsCount) : 50,
-                simplifyTolerance: row && Number(row.simplifyTolerance) ? Number(row.simplifyTolerance) : 1.2,
-                threshold: row && Number(row.threshold) ? Number(row.threshold) : 180,
+                pointsCount:
+                  row && Number(row.pointsCount) ? Number(row.pointsCount) : 50,
+                simplifyTolerance:
+                  row && Number(row.simplifyTolerance)
+                    ? Number(row.simplifyTolerance)
+                    : 1.2,
+                threshold:
+                  row && Number(row.threshold) ? Number(row.threshold) : 180,
                 multiContours: row ? !!row.multiContours : false,
-                maxContours: row && Number(row.maxContours) ? Math.max(1, Number(row.maxContours)) : 6,
-                decorAreaRatio: row && Number(row.decorAreaRatio) ? Math.max(0, Math.min(0.9, Number(row.decorAreaRatio))) : 0.18,
-                numbering: row && row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
-                pointsDistribution: row && row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
-                blurSigma: row && Number(row.blurSigma) ? Number(row.blurSigma) : 1.4,
-                targetContours: row && Array.isArray(row.targetContours)
-                  ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
-                  : null,
+                maxContours:
+                  row && Number(row.maxContours)
+                    ? Math.max(1, Number(row.maxContours))
+                    : 6,
+                decorAreaRatio:
+                  row && Number(row.decorAreaRatio)
+                    ? Math.max(0, Math.min(0.9, Number(row.decorAreaRatio)))
+                    : 0.18,
+                numbering:
+                  row && row.numbering === 'per-contour'
+                    ? 'per-contour'
+                    : 'continuous',
+                pointsDistribution:
+                  row && row.pointsDistribution === 'equal'
+                    ? 'equal'
+                    : 'proportional',
+                blurSigma:
+                  row && Number(row.blurSigma) ? Number(row.blurSigma) : 1.4,
+                targetContours:
+                  row && Array.isArray(row.targetContours)
+                    ? row.targetContours
+                        .map((n) => Number(n))
+                        .filter((n) => Number.isFinite(n))
+                    : null,
               };
               await imageToDots(opts);
               if (idx < 0) dayObj.files.push(base);
               const filesAbs = dayObj.files.map((f) => path.join(dir, f));
-              buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+              buildDayIndexHtml(
+                dir,
+                filesAbs.map((f) => path.basename(f)),
+                dayObj.day,
+              );
             }
             continue;
           }
@@ -103,7 +146,12 @@ async function generateWorksheets(req, res) {
           } catch (e) {
             ok = false;
           }
-          if (!ok && row && row.imageUrl && /^https?:/i.test(String(row.imageUrl))) {
+          if (
+            !ok &&
+            row &&
+            row.imageUrl &&
+            /^https?:/i.test(String(row.imageUrl))
+          ) {
             try {
               const r2 = await fetch(String(row.imageUrl));
               if (r2 && r2.ok) {
@@ -126,7 +174,11 @@ async function generateWorksheets(req, res) {
               const dayObj = result.days[i];
               const dir = dayObj.dir;
               if (!Array.isArray(dayObj.files)) dayObj.files = [];
-              const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+              const idx = dayObj.files.findIndex(
+                (f) =>
+                  typeof f === 'string' &&
+                  f.toLowerCase().endsWith('-connect-dots.svg'),
+              );
               let base;
               if (idx >= 0) {
                 base = dayObj.files[idx];
@@ -143,18 +195,31 @@ async function generateWorksheets(req, res) {
                 threshold: Number(row.threshold) || 180,
                 multiContours: !!row.multiContours,
                 maxContours: Math.max(1, Number(row.maxContours) || 6),
-                decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
-                numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
-                pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+                decorAreaRatio: Math.max(
+                  0,
+                  Math.min(0.9, Number(row.decorAreaRatio) || 0.18),
+                ),
+                numbering:
+                  row.numbering === 'per-contour'
+                    ? 'per-contour'
+                    : 'continuous',
+                pointsDistribution:
+                  row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
                 blurSigma: Number(row.blurSigma) || 1.4,
                 targetContours: Array.isArray(row.targetContours)
-                  ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
+                  ? row.targetContours
+                      .map((n) => Number(n))
+                      .filter((n) => Number.isFinite(n))
                   : null,
               };
               await imageToDots(opts);
               if (idx < 0) dayObj.files.push(base);
               const filesAbs = dayObj.files.map((f) => path.join(dir, f));
-              buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+              buildDayIndexHtml(
+                dir,
+                filesAbs.map((f) => path.basename(f)),
+                dayObj.day,
+              );
             }
             continue;
           }
@@ -167,7 +232,11 @@ async function generateWorksheets(req, res) {
             const dir = dayObj.dir;
             if (!Array.isArray(dayObj.files)) dayObj.files = [];
             // Try to find existing default connect-dots page and overwrite it
-            const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+            const idx = dayObj.files.findIndex(
+              (f) =>
+                typeof f === 'string' &&
+                f.toLowerCase().endsWith('-connect-dots.svg'),
+            );
             let base;
             if (idx >= 0) {
               base = dayObj.files[idx];
@@ -185,12 +254,19 @@ async function generateWorksheets(req, res) {
               threshold: Number(row.threshold) || 180,
               multiContours: !!row.multiContours,
               maxContours: Math.max(1, Number(row.maxContours) || 6),
-              decorAreaRatio: Math.max(0, Math.min(0.9, Number(row.decorAreaRatio) || 0.18)),
-              numbering: row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
-              pointsDistribution: row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
+              decorAreaRatio: Math.max(
+                0,
+                Math.min(0.9, Number(row.decorAreaRatio) || 0.18),
+              ),
+              numbering:
+                row.numbering === 'per-contour' ? 'per-contour' : 'continuous',
+              pointsDistribution:
+                row.pointsDistribution === 'equal' ? 'equal' : 'proportional',
               blurSigma: Number(row.blurSigma) || 1.4,
               targetContours: Array.isArray(row.targetContours)
-                ? row.targetContours.map((n) => Number(n)).filter((n) => Number.isFinite(n))
+                ? row.targetContours
+                    .map((n) => Number(n))
+                    .filter((n) => Number.isFinite(n))
                 : null,
             };
             await imageToDots(opts);
@@ -198,9 +274,17 @@ async function generateWorksheets(req, res) {
             if (idx < 0) dayObj.files.push(base);
             // rebuild index.html with all files
             const filesAbs = dayObj.files.map((f) => path.join(dir, f));
-            buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+            buildDayIndexHtml(
+              dir,
+              filesAbs.map((f) => path.basename(f)),
+              dayObj.day,
+            );
           } finally {
-            try { fs.unlinkSync(inTmp); } catch (_) { /* ignore */ }
+            try {
+              fs.unlinkSync(inTmp);
+            } catch (_) {
+              /* ignore */
+            }
           }
         }
       } else {
@@ -211,7 +295,11 @@ async function generateWorksheets(req, res) {
           const dayObj = result.days[i];
           const dir = dayObj.dir;
           if (!Array.isArray(dayObj.files)) dayObj.files = [];
-          const idx = dayObj.files.findIndex((f) => typeof f === 'string' && f.toLowerCase().endsWith('-connect-dots.svg'));
+          const idx = dayObj.files.findIndex(
+            (f) =>
+              typeof f === 'string' &&
+              f.toLowerCase().endsWith('-connect-dots.svg'),
+          );
           let base;
           if (idx >= 0) {
             base = dayObj.files[idx];
@@ -237,7 +325,11 @@ async function generateWorksheets(req, res) {
           await imageToDots(opts);
           if (idx < 0) dayObj.files.push(base);
           const filesAbs = dayObj.files.map((f) => path.join(dir, f));
-          buildDayIndexHtml(dir, filesAbs.map((f) => path.basename(f)), dayObj.day);
+          buildDayIndexHtml(
+            dir,
+            filesAbs.map((f) => path.basename(f)),
+            dayObj.day,
+          );
         }
       }
     }
@@ -270,7 +362,9 @@ async function generateWorksheets(req, res) {
     });
 
     // Optionally cleanup FS directory
-    try { fs.rmSync(result.outDir, { recursive: true, force: true }); } catch (_) {}
+    try {
+      fs.rmSync(result.outDir, { recursive: true, force: true });
+    } catch (_) {}
 
     res.json({ outDir: `/generations/${gen.id}`, days: daysOut });
   } catch (err) {

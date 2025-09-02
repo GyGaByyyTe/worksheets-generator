@@ -20,7 +20,8 @@ function listTasks(_req, res) {
   const tasks = keys.map((k) => {
     const meta = META[k] || {};
     const out = { key: k };
-    if (meta.category && typeof meta.category === 'string') out.category = meta.category;
+    if (meta.category && typeof meta.category === 'string')
+      out.category = meta.category;
     if (meta.logo && typeof meta.logo === 'string') {
       const abs = path.join(paths.publicDir, meta.logo);
       if (fs.existsSync(abs)) {

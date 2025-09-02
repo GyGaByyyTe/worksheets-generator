@@ -9,7 +9,14 @@ export interface ImagePreviewProps {
   size?: number; // square px
 }
 
-export default function ImagePreview({ file, url, label, note, onRemove, size = 96 }: ImagePreviewProps) {
+export default function ImagePreview({
+  file,
+  url,
+  label,
+  note,
+  onRemove,
+  size = 96,
+}: ImagePreviewProps) {
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -22,16 +29,30 @@ export default function ImagePreview({ file, url, label, note, onRemove, size = 
     return undefined;
   }, [file]);
 
-  const src = file ? objectUrl : (url || null);
+  const src = file ? objectUrl : url || null;
   if (!src) return null;
 
   return (
     <div className="ui-image-preview">
-      {label && <div className="ui-field__label" style={{ marginBottom: 6 }}>{label}</div>}
-      <div className="ui-image-preview__body" style={{ width: size, height: size }}>
+      {label && (
+        <div className="ui-field__label" style={{ marginBottom: 6 }}>
+          {label}
+        </div>
+      )}
+      <div
+        className="ui-image-preview__body"
+        style={{ width: size, height: size }}
+      >
         <img src={src} alt="preview" className="ui-image-preview__img" />
         {onRemove && (
-          <button type="button" className="ui-image-preview__remove" onClick={onRemove} aria-label="Remove image">×</button>
+          <button
+            type="button"
+            className="ui-image-preview__remove"
+            onClick={onRemove}
+            aria-label="Remove image"
+          >
+            ×
+          </button>
         )}
       </div>
       {note && <div className="ui-image-preview__note">{note}</div>}

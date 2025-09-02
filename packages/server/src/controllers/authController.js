@@ -5,9 +5,11 @@ const { JWT_SECRET } = require('../config');
 
 async function register(req, res) {
   try {
-    const { email, password } = (req.body || {});
+    const { email, password } = req.body || {};
     if (!email || !password || String(password).length < 6) {
-      return res.status(400).json({ error: 'email and password (min 6 chars) required' });
+      return res
+        .status(400)
+        .json({ error: 'email and password (min 6 chars) required' });
     }
     const hash = await bcrypt.hash(String(password), 12);
     const user = await prisma.user.create({
@@ -25,13 +27,18 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
-    const { email, password } = (req.body || {});
-    if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-    const user = await prisma.user.findUnique({ where: { email: String(email).toLowerCase() } });
+    const { email, password } = req.body || {};
+    if (!email || !password)
+      return res.status(400).json({ error: 'email and password required' });
+    const user = await prisma.user.findUnique({
+      where: { email: String(email).toLowerCase() },
+    });
     if (!user) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(String(password), user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
     return res.json({ token });
   } catch (e) {
     return res.status(400).json({ error: String((e && e.message) || e) });

@@ -20,8 +20,19 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
 }
 
 const backdrop: React.CSSProperties = {
-  position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+  position: 'fixed',
+  inset: 0,
+  background: 'rgba(0,0,0,.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1000,
 };
 const dialog: React.CSSProperties = {
-  background: '#fff', padding: 16, borderRadius: 8, minWidth: 360, maxWidth: '90vw', boxShadow: '0 8px 24px rgba(0,0,0,.2)'
+  background: '#fff',
+  padding: 16,
+  borderRadius: 8,
+  minWidth: 360,
+  maxWidth: '90vw',
+  boxShadow: '0 8px 24px rgba(0,0,0,.2)',
 };

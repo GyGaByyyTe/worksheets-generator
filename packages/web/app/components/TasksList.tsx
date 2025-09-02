@@ -20,11 +20,25 @@ function groupByCategory(tasks: TaskInfo[]) {
   return groups;
 }
 
-export default function TasksList({ tasks, selected, onToggle }: TasksListProps) {
+export default function TasksList({
+  tasks,
+  selected,
+  onToggle,
+}: TasksListProps) {
   const t = useT();
   const groups = groupByCategory(tasks);
-  const order = ['math', 'logic', 'art', 'language', 'memory', 'puzzles', 'other'];
-  const keys = Object.keys(groups).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const order = [
+    'math',
+    'logic',
+    'art',
+    'language',
+    'memory',
+    'puzzles',
+    'other',
+  ];
+  const keys = Object.keys(groups).sort(
+    (a, b) => order.indexOf(a) - order.indexOf(b),
+  );
 
   return (
     <div className="row">
@@ -32,7 +46,9 @@ export default function TasksList({ tasks, selected, onToggle }: TasksListProps)
         <div className="tasks-title">{t('tasks.title')}</div>
         {keys.map((catKey) => (
           <div key={catKey} style={{ marginBottom: 10 }}>
-            <div className="tag" style={{ marginBottom: 8 }}>{t(`categories.${catKey}`)}</div>
+            <div className="tag" style={{ marginBottom: 8 }}>
+              {t(`categories.${catKey}`)}
+            </div>
             <div className="tasks-grid">
               {groups[catKey].map((task) => {
                 const k = task.key;

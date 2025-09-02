@@ -1,6 +1,7 @@
 'use server';
 
 import { apiBase } from './lib/api';
+import { cookies } from 'next/headers';
 import { GeneratorState, RefreshTasksState } from './lib/types';
 
 export async function refreshTasks(
@@ -121,9 +122,14 @@ export const generateWorksheets = async (
     const payload: any = { days, tasks: selected };
     if (imageDots && imageDots.length > 0) payload.imageDots = imageDots;
 
+    const cookieStore = await cookies();
+    const t = cookieStore.get('wg_token')?.value;
+    const headers: any = { 'Content-Type': 'application/json' };
+    if (t) (headers as any).Authorization = `Bearer ${t}`;
+
     const r = await fetch(`${apiBase()}/generate/worksheets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
     const data = await r.json();

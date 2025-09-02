@@ -144,13 +144,14 @@ pnpm start:web
 - `GET /generations/:genId/day/:day/index.html` — simple preview HTML for a day
 - Pictures (optional feature):
   - `GET /pictures/categories` — returns `{ categories: string[], subcategories: Record<string,string[]> }`
-  - `GET /pictures/search?category=Animals&subcategory=Cats&type=silhouette` — returns `{ count, images[] }` from the upstream provider. Requires PICTURE_API_* to be configured; otherwise returns HTTP 501.
+  - `GET /pictures/search?category=Animals&subcategory=Cats&type=silhouette` — returns `{ count, images[] }` from the upstream provider. Requires PICTURE*API*\* to be configured; otherwise returns HTTP 501.
 - Auth (optional):
   - `POST /auth/register` — `{ email, password }`
   - `POST /auth/login` — `{ email, password }` → `{ token }` (send as `Authorization: Bearer <token>`)
   - `GET /me` — returns current user or null
 
 Notes:
+
 - The backend now stores results in a PostgreSQL database and serves files via API. Static `/static` is kept for legacy assets but is not used for newly generated results.
 
 ## Project Notes
@@ -186,42 +187,43 @@ Notes:
   - dev: Next dev on port 3000
   - build/start: Next build and start (port 3000)
 
-
-
 ## Local setup on Windows
 
 If you just cloned the repo on a Windows machine and want to start developing, follow:
 
 - LOCAL_SETUP_WINDOWS.md — step-by-step guide (PowerShell), including PostgreSQL, Prisma, env vars, and running dev servers.
 
-
 ## Изображения для задания "connect-dots" (опционально)
 
 Для задания «соедини точки» можно:
+
 - загрузить своё изображение из веб‑интерфейса (PNG/JPG), либо
 - ничего не загружать — тогда сервер, если выбрано задание `connect-dots`, попытается взять случайную картинку из папки ассетов.
 
 Папка ассетов для этого задания:
+
 - `packages\server\assets\connect-dots`
 
 Поддерживаемые форматы файлов в этой папке: `.png`, `.jpg`, `.jpeg`, `.webp`.
 
 Примечания:
+
 - Если в папке ассетов нет подходящих картинок, при старте сервера вы увидите предупреждение в консоли:
   `YOU MAY WANT TO ADD PICTURES: place .png/.jpg/.jpeg/.webp files into ...`.
 - Папка может быть пустой из коробки — это нормально. Просто добавьте несколько изображений, чтобы включить случайную подстановку.
 - При загрузке через веб UI сервер использует загруженное изображение; если оно отсутствует или имеет неподдерживаемый формат, используется случайное изображение из ассетов (если есть).
-
 
 ## Optional: External Picture API for "connect-dots"
 
 The web UI now supports picking a random image by category/subcategory for the "connect-dots" task. This feature uses an external image provider (Pixabay) via the backend.
 
 Environment variables (optional):
+
 - PICTURE_API_URL — default provider base URL, e.g., https://pixabay.com/api/
 - PICTURE_API_KEY — your Pixabay API key
 
 Behavior:
+
 - If these vars are not configured on the server, the endpoint `/pictures/search` will respond with 501 Not Implemented, and the UI may not be able to pick random images.
 - When configured, the server exposes:
   - GET /pictures/categories — lists categories/subcategories for the UI
@@ -229,11 +231,11 @@ Behavior:
 
 Note: Local assets fallback for connect-dots (`packages\server\assets\connect-dots`) can still be used for random images if present, but the preferred way forward is via the external API.
 
-
 ### Connect-dots payload (API)
 
 When calling POST /generate/worksheets you can provide optional imageDots rows to drive the "connect-dots" page generation.
 Each row may include either of the following image fields:
+
 - imageDataUrl — a data URL (preferred when uploading from the browser)
 - imageUrl — an http/https URL. The server will download and use this image if imageDataUrl is missing or invalid.
 

@@ -6,7 +6,13 @@ import { useT } from '../i18n/I18nProvider';
 import Input from './ui/input';
 import Button from './ui/button';
 
-export default function AuthModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function AuthModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const { login } = useAuth();
   const t = useT();
   const router = useRouter();
@@ -44,16 +50,42 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <label>
               {t('auth.email')}
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </label>
             <label>
               {t('auth.password')}
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </label>
             {error && <div style={{ color: 'red', fontSize: 12 }}>{error}</div>}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
-              <Button type="submit" disabled={loading} loading={loading}>{loading ? '...' : t('auth.login')}</Button>
-              <Button type="button" variant="outline" onClick={() => { onClose(); router.push('/register'); }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Button type="submit" disabled={loading} loading={loading}>
+                {loading ? '...' : t('auth.login')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  onClose();
+                  router.push('/register');
+                }}
+              >
                 {t('auth.toRegister')}
               </Button>
             </div>
@@ -80,5 +112,5 @@ const modalStyle: React.CSSProperties = {
   borderRadius: 8,
   minWidth: 320,
   maxWidth: '90vw',
-  boxShadow: '0 8px 24px rgba(0,0,0,.2)'
+  boxShadow: '0 8px 24px rgba(0,0,0,.2)',
 };

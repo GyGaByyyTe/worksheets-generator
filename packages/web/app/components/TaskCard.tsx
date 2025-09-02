@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React from 'react';
 import Checkbox from './ui/checkbox';
 
@@ -10,15 +10,36 @@ export type TaskCardProps = {
   onToggle: (key: string) => void;
 };
 
-export default function TaskCard({ k, title, checked, logo, onToggle }: TaskCardProps) {
+export default function TaskCard({
+  k,
+  title,
+  checked,
+  logo,
+  onToggle,
+}: TaskCardProps) {
   return (
-    <div className="card" style={{ cursor: 'pointer' }} onClick={() => onToggle(k)}>
+    <div
+      className="card"
+      style={{ cursor: 'pointer' }}
+      onClick={() => onToggle(k)}
+    >
       <label
-        className="chk"
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10 }}
+        // className="chk"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          cursor: 'pointer',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <Checkbox name="tasks" value={k} checked={checked} onChange={() => onToggle(k)} />
+        <Checkbox
+          name="tasks"
+          value={k}
+          checked={checked}
+          onChange={() => onToggle(k)}
+        />
         {logo && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -26,7 +47,11 @@ export default function TaskCard({ k, title, checked, logo, onToggle }: TaskCard
             alt={title}
             width={24}
             height={24}
-            style={{ borderRadius: 4, objectFit: 'contain', background: '#fff' }}
+            style={{
+              borderRadius: 4,
+              objectFit: 'contain',
+              background: '#fff',
+            }}
           />
         )}
         <span style={{ fontWeight: 600 }}>{title}</span>

@@ -18,13 +18,14 @@ const invalid = [];
 
 function readRequired(key) {
   const val = process.env[key];
-  if (val === undefined || val === null || String(val).trim() === '') missing.push(key);
+  if (val === undefined || val === null || String(val).trim() === '')
+    missing.push(key);
   return val;
 }
 
 function readOptional(key) {
   const val = process.env[key];
-  return (val === undefined || val === null) ? '' : String(val);
+  return val === undefined || val === null ? '' : String(val);
 }
 
 // Required envs
@@ -35,16 +36,24 @@ const DATABASE_URL = readRequired('DATABASE_URL');
 let PORT;
 if (PORT_RAW) {
   PORT = Number(PORT_RAW);
-  if (!Number.isInteger(PORT) || PORT <= 0) invalid.push('PORT (must be a positive integer)');
+  if (!Number.isInteger(PORT) || PORT <= 0)
+    invalid.push('PORT (must be a positive integer)');
 }
 
 // Optional picture API integration
 const PICTURE_API_KEY = readOptional('PICTURE_API_KEY');
 const PICTURE_API_URL = readOptional('PICTURE_API_URL');
-const IS_PICTURE_API_CONFIGURED = Boolean(PICTURE_API_KEY && PICTURE_API_KEY.trim() && PICTURE_API_URL && PICTURE_API_URL.trim());
+const IS_PICTURE_API_CONFIGURED = Boolean(
+  PICTURE_API_KEY &&
+    PICTURE_API_KEY.trim() &&
+    PICTURE_API_URL &&
+    PICTURE_API_URL.trim(),
+);
 
 if (!IS_PICTURE_API_CONFIGURED) {
-  console.warn('[config] Picture API is not configured. Random image search will be disabled (routes will respond 501).');
+  console.warn(
+    '[config] Picture API is not configured. Random image search will be disabled (routes will respond 501).',
+  );
 }
 
 if (missing.length || invalid.length) {

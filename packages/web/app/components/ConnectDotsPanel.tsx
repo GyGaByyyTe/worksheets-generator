@@ -1,6 +1,9 @@
 'use client';
 import React from 'react';
-import ImageDotsTable, { ImageDotsParams, defaultParams } from './ImageDotsTable';
+import ImageDotsTable, {
+  ImageDotsParams,
+  defaultParams,
+} from './ImageDotsTable';
 import { useT } from '../i18n/I18nProvider';
 import Checkbox from './ui/checkbox';
 import DayConfigCard from './DayConfigCard';
@@ -40,7 +43,10 @@ export default function ConnectDotsPanel({
   return (
     <div className="row" style={{ width: '100%' }}>
       <div style={{ width: '100%' }}>
-        <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div
+          className="panel"
+          style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+        >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div className="tasks-title">{t('connectDots.section.title')}</div>
             <div className="muted">{t('connectDots.section.description')}</div>
@@ -50,7 +56,9 @@ export default function ConnectDotsPanel({
             <label className="chk">
               <Checkbox
                 checked={lockToDays}
-                onChange={(e) => setLockToDays((e.target as HTMLInputElement).checked)}
+                onChange={(e) =>
+                  setLockToDays((e.target as HTMLInputElement).checked)
+                }
               />{' '}
               {t('connectDots.lockLabel')}
             </label>
@@ -69,7 +77,11 @@ export default function ConnectDotsPanel({
               const title = t('connectDots.day.title', { n: i + 1 });
               let status = t('connectDots.day.status.randomPending');
               if (r?.file) status = t('connectDots.day.status.uploadSelected');
-              else if (r?.imageUrl) status = t('connectDots.day.status.randomSelected', { category: r?.category || '', subcategory: r?.subcategory || '' });
+              else if (r?.imageUrl)
+                status = t('connectDots.day.status.randomSelected', {
+                  category: r?.category || '',
+                  subcategory: r?.subcategory || '',
+                });
               return (
                 <DayConfigCard
                   key={i}
@@ -86,23 +98,39 @@ export default function ConnectDotsPanel({
           {/* Hidden inputs table to submit all days */}
           <div style={{ display: 'none' }}>
             {/* Persistent hidden file inputs (must stay mounted for form submit) */}
-            {Array.from({ length: lockToDays ? days : dotsRows.length }, (_, i) => (
-              <input
-                key={i}
-                type="file"
-                id={`imageDots_${i}_file`}
-                name={`imageDots[${i}][file]`}
-                accept="image/*"
-                onChange={(e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0] || null;
-                  const next = dotsRows.slice();
-                  const prev = next[i] || defaultParams();
-                  next[i] = { ...prev, file, source: file ? 'upload' : prev.source, imageUrl: file ? '' : prev.imageUrl, previewUrl: file ? '' : prev.previewUrl };
-                  setDotsRows(next);
-                }}
-              />
-            ))}
-            <ImageDotsTable rows={dotsRows} setRows={setDotsRows} lockedCount={lockToDays ? days : null} baseIndex={0} renderFileInput={false} />
+            {Array.from(
+              { length: lockToDays ? days : dotsRows.length },
+              (_, i) => (
+                <input
+                  key={i}
+                  type="file"
+                  id={`imageDots_${i}_file`}
+                  name={`imageDots[${i}][file]`}
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file =
+                      (e.target as HTMLInputElement).files?.[0] || null;
+                    const next = dotsRows.slice();
+                    const prev = next[i] || defaultParams();
+                    next[i] = {
+                      ...prev,
+                      file,
+                      source: file ? 'upload' : prev.source,
+                      imageUrl: file ? '' : prev.imageUrl,
+                      previewUrl: file ? '' : prev.previewUrl,
+                    };
+                    setDotsRows(next);
+                  }}
+                />
+              ),
+            )}
+            <ImageDotsTable
+              rows={dotsRows}
+              setRows={setDotsRows}
+              lockedCount={lockToDays ? days : null}
+              baseIndex={0}
+              renderFileInput={false}
+            />
           </div>
         </div>
       </div>
@@ -111,7 +139,9 @@ export default function ConnectDotsPanel({
       {openDay != null && (
         <div style={backdropStyle} onClick={() => setOpenDay(null)}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginTop: 0 }}>{t('connectDots.modal.title', { n: (openDay as number) + 1 })}</h3>
+            <h3 style={{ marginTop: 0 }}>
+              {t('connectDots.modal.title', { n: (openDay as number) + 1 })}
+            </h3>
             <DotsConfigForm
               value={dotsRows[openDay] || defaultParams()}
               onChange={(val) => {
@@ -122,8 +152,19 @@ export default function ConnectDotsPanel({
               fileInputName={`imageDots[${openDay}][file]`}
               fileInputId={`imageDots_${openDay}_file`}
             />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-              <button type="button" className="ui-btn ui-btn--outline" onClick={() => setOpenDay(null)}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 8,
+                marginTop: 12,
+              }}
+            >
+              <button
+                type="button"
+                className="ui-btn ui-btn--outline"
+                onClick={() => setOpenDay(null)}
+              >
                 {t('buttons.close') || t('buttons.cancel') || 'Close'}
               </button>
             </div>
@@ -150,5 +191,5 @@ const modalStyle: React.CSSProperties = {
   borderRadius: 8,
   minWidth: 360,
   maxWidth: '90vw',
-  boxShadow: '0 8px 24px rgba(0,0,0,.2)'
+  boxShadow: '0 8px 24px rgba(0,0,0,.2)',
 };

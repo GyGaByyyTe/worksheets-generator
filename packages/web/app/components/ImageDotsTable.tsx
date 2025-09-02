@@ -78,7 +78,8 @@ export default function ImageDotsTable({
 }: ImageDotsTableProps) {
   const t = useT();
   const nameFor = React.useCallback(
-    (rowIndex: number, field: string) => `imageDots[${(baseIndex ?? 0) + rowIndex}][${field}]`,
+    (rowIndex: number, field: string) =>
+      `imageDots[${(baseIndex ?? 0) + rowIndex}][${field}]`,
     [baseIndex],
   );
   // Ensure row count matches lockedCount if provided
@@ -153,24 +154,49 @@ export default function ImageDotsTable({
               <tr key={i}>
                 <td style={tdCenter}>{i + 1}</td>
                 <td style={td}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div
+                    style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 6,
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                      }}
+                    >
                       <Select
                         value={r.source || 'upload'}
-                        onChange={(e) => update(i, { source: (e.target as HTMLSelectElement).value as any })}
+                        onChange={(e) =>
+                          update(i, {
+                            source: (e.target as HTMLSelectElement)
+                              .value as any,
+                          })
+                        }
                         name={nameFor(i, 'source')}
                       >
-                        <option value="upload">{t('imageDots.source.upload') || 'Upload my image'}</option>
-                        <option value="random">{t('imageDots.source.random') || 'Random from server'}</option>
+                        <option value="upload">
+                          {t('imageDots.source.upload') || 'Upload my image'}
+                        </option>
+                        <option value="random">
+                          {t('imageDots.source.random') || 'Random from server'}
+                        </option>
                       </Select>
-                      {renderFileInput && (!r.source || r.source === 'upload') && (
-                        <Input
-                          name={nameFor(i, 'file')}
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => update(i, { file: (e.target as HTMLInputElement).files?.[0] || null })}
-                        />
-                      )}
+                      {renderFileInput &&
+                        (!r.source || r.source === 'upload') && (
+                          <Input
+                            name={nameFor(i, 'file')}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              update(i, {
+                                file:
+                                  (e.target as HTMLInputElement).files?.[0] ||
+                                  null,
+                              })
+                            }
+                          />
+                        )}
                       {r.source === 'random' && (
                         <>
                           <Select
@@ -178,7 +204,12 @@ export default function ImageDotsTable({
                             onChange={(e) => {
                               const cat = (e.target as HTMLSelectElement).value;
                               const subs = CATEGORY_MAP[cat] || [];
-                              update(i, { category: cat, subcategory: subs[0] || '', imageUrl: '', previewUrl: '' });
+                              update(i, {
+                                category: cat,
+                                subcategory: subs[0] || '',
+                                imageUrl: '',
+                                previewUrl: '',
+                              });
                             }}
                             name={nameFor(i, 'category')}
                           >
@@ -189,15 +220,26 @@ export default function ImageDotsTable({
                             ))}
                           </Select>
                           <Select
-                            value={r.subcategory || (CATEGORY_MAP[r.category || 'Animals']?.[0] || '')}
-                            onChange={(e) => update(i, { subcategory: (e.target as HTMLSelectElement).value })}
+                            value={
+                              r.subcategory ||
+                              CATEGORY_MAP[r.category || 'Animals']?.[0] ||
+                              ''
+                            }
+                            onChange={(e) =>
+                              update(i, {
+                                subcategory: (e.target as HTMLSelectElement)
+                                  .value,
+                              })
+                            }
                             name={nameFor(i, 'subcategory')}
                           >
-                            {(CATEGORY_MAP[r.category || 'Animals'] || []).map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
+                            {(CATEGORY_MAP[r.category || 'Animals'] || []).map(
+                              (s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ),
+                            )}
                           </Select>
                           <Button
                             type="button"
@@ -210,11 +252,16 @@ export default function ImageDotsTable({
                                   type: 'silhouette',
                                   per_page: '20',
                                 });
-                                const resp = await fetch(`${base}/pictures/search?${params.toString()}`);
+                                const resp = await fetch(
+                                  `${base}/pictures/search?${params.toString()}`,
+                                );
                                 const data = await resp.json();
                                 const image = data?.image;
                                 if (image && image.url) {
-                                  update(i, { imageUrl: image.url, previewUrl: image.previewUrl });
+                                  update(i, {
+                                    imageUrl: image.url,
+                                    previewUrl: image.previewUrl,
+                                  });
                                 }
                               } catch (_) {
                                 // ignore
@@ -224,16 +271,32 @@ export default function ImageDotsTable({
                             {t('imageDots.pickRandom') || 'Pick Random'}
                           </Button>
                           {/* Hidden to include selected URL in form */}
-                          <input type="hidden" name={nameFor(i, 'imageUrl')} value={r.imageUrl || ''} />
+                          <input
+                            type="hidden"
+                            name={nameFor(i, 'imageUrl')}
+                            value={r.imageUrl || ''}
+                          />
                         </>
                       )}
                     </div>
                     {r.previewUrl && r.source === 'random' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}
+                      >
                         <ImagePreview
                           url={r.previewUrl}
-                          note={<span className="muted" style={{ fontSize: 12 }}>{r.category} / {r.subcategory}</span>}
-                          onRemove={() => update(i, { imageUrl: '', previewUrl: '' })}
+                          note={
+                            <span className="muted" style={{ fontSize: 12 }}>
+                              {r.category} / {r.subcategory}
+                            </span>
+                          }
+                          onRemove={() =>
+                            update(i, { imageUrl: '', previewUrl: '' })
+                          }
                         />
                       </div>
                     )}
@@ -248,7 +311,11 @@ export default function ImageDotsTable({
                     value={r.pointsCount}
                     onChange={(e) =>
                       update(i, {
-                        pointsCount: clampInt((e.target as HTMLInputElement).value, 5, 1000),
+                        pointsCount: clampInt(
+                          (e.target as HTMLInputElement).value,
+                          5,
+                          1000,
+                        ),
                       })
                     }
                   />
@@ -263,7 +330,11 @@ export default function ImageDotsTable({
                     value={r.simplifyTolerance}
                     onChange={(e) =>
                       update(i, {
-                        simplifyTolerance: clampFloat((e.target as HTMLInputElement).value, 0.1, 10),
+                        simplifyTolerance: clampFloat(
+                          (e.target as HTMLInputElement).value,
+                          0.1,
+                          10,
+                        ),
                       })
                     }
                   />
@@ -276,7 +347,13 @@ export default function ImageDotsTable({
                     max={255}
                     value={r.threshold}
                     onChange={(e) =>
-                      update(i, { threshold: clampInt((e.target as HTMLInputElement).value, 0, 255) })
+                      update(i, {
+                        threshold: clampInt(
+                          (e.target as HTMLInputElement).value,
+                          0,
+                          255,
+                        ),
+                      })
                     }
                   />
                 </td>
@@ -285,7 +362,9 @@ export default function ImageDotsTable({
                     name={nameFor(i, 'multiContours')}
                     checked={r.multiContours}
                     onChange={(e) =>
-                      update(i, { multiContours: (e.target as HTMLInputElement).checked })
+                      update(i, {
+                        multiContours: (e.target as HTMLInputElement).checked,
+                      })
                     }
                   />
                 </td>
@@ -298,7 +377,11 @@ export default function ImageDotsTable({
                     value={r.maxContours}
                     onChange={(e) =>
                       update(i, {
-                        maxContours: clampInt((e.target as HTMLInputElement).value, 1, 20),
+                        maxContours: clampInt(
+                          (e.target as HTMLInputElement).value,
+                          1,
+                          20,
+                        ),
                       })
                     }
                   />
@@ -313,7 +396,11 @@ export default function ImageDotsTable({
                     value={r.decorAreaRatio}
                     onChange={(e) =>
                       update(i, {
-                        decorAreaRatio: clampFloat((e.target as HTMLInputElement).value, 0, 0.9),
+                        decorAreaRatio: clampFloat(
+                          (e.target as HTMLInputElement).value,
+                          0,
+                          0.9,
+                        ),
                       })
                     }
                   />
@@ -323,7 +410,10 @@ export default function ImageDotsTable({
                     name={`imageDots[${i}][numbering]`}
                     value={r.numbering}
                     onChange={(e) =>
-                      update(i, { numbering: (e.target as HTMLSelectElement).value as NumberingMode })
+                      update(i, {
+                        numbering: (e.target as HTMLSelectElement)
+                          .value as NumberingMode,
+                      })
                     }
                   >
                     <option value="continuous">
@@ -340,7 +430,8 @@ export default function ImageDotsTable({
                     value={r.pointsDistribution}
                     onChange={(e) =>
                       update(i, {
-                        pointsDistribution: (e.target as HTMLSelectElement).value as PointsDistribution,
+                        pointsDistribution: (e.target as HTMLSelectElement)
+                          .value as PointsDistribution,
                       })
                     }
                   >
@@ -360,7 +451,11 @@ export default function ImageDotsTable({
                     value={r.blurSigma}
                     onChange={(e) =>
                       update(i, {
-                        blurSigma: clampFloat((e.target as HTMLInputElement).value, 0, 10),
+                        blurSigma: clampFloat(
+                          (e.target as HTMLInputElement).value,
+                          0,
+                          10,
+                        ),
                       })
                     }
                   />
@@ -372,7 +467,9 @@ export default function ImageDotsTable({
                     placeholder={t('imageDots.placeholder')}
                     value={r.targetContours || ''}
                     onChange={(e) =>
-                      update(i, { targetContours: (e.target as HTMLInputElement).value })
+                      update(i, {
+                        targetContours: (e.target as HTMLInputElement).value,
+                      })
                     }
                   />
                 </td>

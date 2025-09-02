@@ -11,19 +11,17 @@ services:
       POSTGRES_PASSWORD: dev_password
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./packages/server/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - wg-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev_user -d wg_dev"]
+      test: ['CMD-SHELL', 'pg_isready -U dev_user -d wg_dev']
       interval: 10s
       timeout: 5s
       retries: 5
-
-
 
 volumes:
   postgres_data:

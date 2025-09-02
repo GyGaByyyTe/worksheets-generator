@@ -51,21 +51,45 @@ export default function RegisterPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <label>
             {t('auth.email')}
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </label>
           <label>
             {t('auth.password')}
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </label>
-          {error && <div style={{ color: 'red', fontSize: 12 }}>{String(error)}</div>}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
-            <Button type="submit" disabled={loading} loading={loading}>{loading ? t('auth.registering') : t('auth.register_submit')}</Button>
+          {error && (
+            <div style={{ color: 'red', fontSize: 12 }}>{String(error)}</div>
+          )}
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Button type="submit" disabled={loading} loading={loading}>
+              {loading ? t('auth.registering') : t('auth.register_submit')}
+            </Button>
             <Link href="/">{t('auth.toHome')}</Link>
           </div>
         </div>
       </form>
       <p style={{ marginTop: 16 }}>
-        {t('auth.haveAccount')} <Link href="/" prefetch={false}>{t('auth.toLogin')}</Link>
+        {t('auth.haveAccount')}{' '}
+        <Link href="/" prefetch={false}>
+          {t('auth.toLogin')}
+        </Link>
       </p>
     </div>
   );

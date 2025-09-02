@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface SliderProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: React.ReactNode;
   valueLabel?: string | number;
 }
@@ -14,7 +15,10 @@ export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     return (
       <div className={cx('ui-field', className)}>
         {label != null && (
-          <div className="ui-field__label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div
+            className="ui-field__label"
+            style={{ display: 'flex', justifyContent: 'space-between' }}
+          >
             <span>{label}</span>
             {valueLabel != null && <span>{valueLabel}</span>}
           </div>
@@ -22,7 +26,7 @@ export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         <input ref={ref} type="range" className="ui-slider" {...props} />
       </div>
     );
-  }
+  },
 );
 Slider.displayName = 'Slider';
 

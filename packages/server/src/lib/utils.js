@@ -17,7 +17,9 @@ function writeFileSafe(absPath, data, encoding) {
 
 function buildDayIndexHtml(dir, files, day) {
   const title = `День ${String(day).padStart(2, '0')} — Комплект заданий`;
-  const pages = files.map((f) => `    <img class="page" src="${f}" alt="${f}" />`).join('\n');
+  const pages = files
+    .map((f) => `    <img class="page" src="${f}" alt="${f}" />`)
+    .join('\n');
   const html = `<!doctype html>
 <html lang="ru">
 <head>

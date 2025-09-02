@@ -12,7 +12,11 @@ function warnIfConnectDotsAssetsEmpty() {
     const files = exists ? fs.readdirSync(dir) : [];
     const allowed = files.filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
     if (!allowed.length) {
-      console.warn('YOU MAY WANT TO ADD PICTURES: place .png/.jpg/.jpeg/.webp files into ' + dir + ' to enable random fallback for "connect-dots".');
+      console.warn(
+        'YOU MAY WANT TO ADD PICTURES: place .png/.jpg/.jpeg/.webp files into ' +
+          dir +
+          ' to enable random fallback for "connect-dots".',
+      );
     }
   } catch (e) {
     // ignore

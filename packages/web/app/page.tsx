@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import Button from './components/ui/button';
+import RecentSection from './components/generations/RecentSection';
 import { getCategories, getPopular, getNewest, getTop } from './home-actions';
 
 async function Hero() {
@@ -175,6 +176,9 @@ export default async function Page() {
       </Suspense>
       <Suspense fallback={<div className="container">Загрузка категорий…</div>}>
         <Categories />
+      </Suspense>
+      <Suspense fallback={<div className="container">Загрузка последних…</div>}>
+        <RecentSection />
       </Suspense>
       <Suspense
         fallback={<div className="container">Загрузка популярных…</div>}

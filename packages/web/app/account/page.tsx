@@ -3,6 +3,9 @@ import React from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { absUrl } from '../lib/api';
 import Link from 'next/link';
+import { useT } from '../i18n/I18nProvider';
+import GenGrid from '../components/generations/GenGrid';
+import type { GenItem as RecentItem } from '../components/generations/GenCard';
 
 // Types
 type Plan = { code: string; title: string; color?: string };
@@ -18,14 +21,7 @@ interface Stats {
   month: { used: number; limit: number };
   downloadsTotal: number;
   daysWithUs: number;
-  rating: number;
-}
-interface RecentItem {
-  id: string;
-  title: string;
-  type: string;
-  createdAt: string;
-  downloads: number;
+  rating: number | null;
 }
 
 function useProfileData() {
@@ -50,7 +46,7 @@ function useProfileData() {
           fetch(absUrl('/profile/stats'), {
             headers: { Authorization: `Bearer ${token}` },
           }).then((x) => x.json()),
-          fetch(absUrl('/profile/recent-generations'), {
+          fetch(absUrl('/generations/recent?mine=1&limit=5'), {
             headers: { Authorization: `Bearer ${token}` },
           }).then((x) => x.json()),
         ]);
@@ -118,6 +114,7 @@ function Overview({
   stats: Stats;
   recent: RecentItem[];
 }) {
+  const t = useT();
   return (
     <div className="account-overview">
       <div
@@ -126,56 +123,36 @@ function Overview({
       >
         <div className="card">
           <div style={{ color: '#6b7280', marginBottom: 8 }}>
-            Генерации в месяце
+            {t('account.stats.monthlyGenerations')}
           </div>
           <Progress used={stats.month.used} limit={stats.month.limit} />
         </div>
         <div className="card">
           <div style={{ color: '#6b7280', marginBottom: 8 }}>
-            Всего скачиваний
+            {t('account.stats.totalDownloads')}
           </div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>
             {stats.downloadsTotal}
           </div>
         </div>
         <div className="card">
-          <div style={{ color: '#6b7280', marginBottom: 8 }}>Дней с нами</div>
+          <div style={{ color: '#6b7280', marginBottom: 8 }}>{t('account.stats.daysWithUs')}</div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>
             {stats.daysWithUs}
           </div>
         </div>
         <div className="card">
-          <div style={{ color: '#6b7280', marginBottom: 8 }}>Рейтинг</div>
+          <div style={{ color: '#6b7280', marginBottom: 8 }}>{t('account.stats.rating')}</div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>{stats.rating}</div>
         </div>
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <h3 style={{ margin: '0 0 4px 0' }}>Последние генерации</h3>
+        <h3 style={{ margin: '0 0 4px 0' }}>{t('account.recent.title')}</h3>
         <p className="muted" style={{ marginTop: 0 }}>
-          Ваши последние созданные материалы
+          {t('account.recent.subtitle')}
         </p>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {recent.map((i) => (
-            <li
-              key={i.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '10px 0',
-                borderTop: '1px dashed #eee',
-              }}
-            >
-              <div>
-                <div style={{ fontWeight: 600 }}>{i.title}</div>
-                <div className="muted">
-                  {i.type} • {i.createdAt}
-                </div>
-              </div>
-              <div className="muted">{i.downloads} скачиваний</div>
-            </li>
-          ))}
-        </ul>
+        <GenGrid items={recent} />
       </div>
     </div>
   );
@@ -184,6 +161,7 @@ function Overview({
 export default function AccountPage() {
   const { user } = useAuth();
   const { loading, profile, stats, recent } = useProfileData();
+  const t = useT();
 
   const [tab, setTab] = React.useState<
     'overview' | 'generations' | 'subscription' | 'settings'
@@ -193,9 +171,9 @@ export default function AccountPage() {
     return (
       <div className="container">
         <div className="card" style={{ padding: 16 }}>
-          <p>Для доступа к аккаунту войдите в систему.</p>
+          <p>{t('account.unauthorized.message')}</p>
           <Link href="/" className="ui-btn ui-btn--secondary">
-            На главную
+            {t('auth.toHome')}
           </Link>
         </div>
       </div>
@@ -237,9 +215,9 @@ export default function AccountPage() {
         <div>
           {/* Контекстное поле переключения (плейсхолдер) */}
           <select className="ui-select">
-            <option>За последний месяц</option>
-            <option>За 3 месяца</option>
-            <option>За год</option>
+            <option>{t('account.range.lastMonth')}</option>
+            <option>{t('account.range.last3Months')}</option>
+            <option>{t('account.range.lastYear')}</option>
           </select>
         </div>
       </div>
@@ -250,34 +228,34 @@ export default function AccountPage() {
             className={tab === 'overview' ? 'tab tab--active' : 'tab'}
             onClick={() => setTab('overview')}
           >
-            Обзор
+            {t('account.tabs.overview')}
           </button>
           <button
             className={tab === 'generations' ? 'tab tab--active' : 'tab'}
             onClick={() => setTab('generations')}
           >
-            Генерации
+            {t('account.tabs.generations')}
           </button>
           <button
             className={tab === 'subscription' ? 'tab tab--active' : 'tab'}
             onClick={() => setTab('subscription')}
           >
-            Подписка
+            {t('account.tabs.subscription')}
           </button>
           <button
             className={tab === 'settings' ? 'tab tab--active' : 'tab'}
             onClick={() => setTab('settings')}
           >
-            Настройки
+            {t('account.tabs.settings')}
           </button>
         </div>
         <div style={{ padding: 12 }}>
-          {loading && <div>Загрузка…</div>}
+          {loading && <div>{t('tasks.loading')}</div>}
           {!loading && tab === 'overview' && profile && stats && (
             <Overview profile={profile} stats={stats} recent={recent} />
           )}
           {!loading && tab !== 'overview' && (
-            <div className="muted">Раздел «{tab}» в разработке</div>
+            <div className="muted">{t('account.sectionInDev', { tab: t(`account.tabs.${tab}`) })}</div>
           )}
         </div>
       </div>

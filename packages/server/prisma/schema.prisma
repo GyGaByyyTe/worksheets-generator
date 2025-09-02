@@ -46,3 +46,15 @@ model Page {
   @@index([generationId])
   @@index([generationId, day])
 }
+
+model GenerationDownload {
+  id           String      @id @default(uuid())
+  generationId String      @map("generation_id")
+  generation   Generation  @relation(fields: [generationId], references: [id])
+  userId       String?     @map("user_id")
+  user         User?       @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  @@index([generationId])
+  @@index([userId])
+}

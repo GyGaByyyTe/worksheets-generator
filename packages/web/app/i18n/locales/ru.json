@@ -46,6 +46,9 @@
   "connectDots.modal.title": "Настройка: День {n}",
   "buttons.close": "Закрыть",
   "buttons.cancel": "Отмена",
+  "buttons.preview": "Посмотреть",
+  "buttons.downloadPdf": "Скачать PDF",
+  "generation.title": "Рабочие листы: {tasks}",
 
   "imageDots.title": "Картинки для «Соедини по точкам»",
   "imageDots.add": "Добавить картинку",
@@ -96,5 +99,26 @@
   "auth.register_submit": "Зарегистрироваться",
   "auth.toHome": "На главную",
   "auth.haveAccount": "Уже есть аккаунт?",
-  "auth.toLogin": "Войти"
+  "auth.toLogin": "Войти",
+
+  "account.stats.monthlyGenerations": "Генерации в месяце",
+  "account.stats.totalDownloads": "Всего скачиваний",
+  "account.stats.daysWithUs": "Дней с нами",
+  "account.stats.rating": "Рейтинг",
+
+  "account.recent.title": "Последние генерации",
+  "account.recent.subtitle": "Ваши последние созданные материалы",
+  "account.recent.downloads": "{count} скачиваний",
+
+  "account.range.lastMonth": "За последний месяц",
+  "account.range.last3Months": "За 3 месяца",
+  "account.range.lastYear": "За год",
+
+  "account.tabs.overview": "Обзор",
+  "account.tabs.generations": "Генерации",
+  "account.tabs.subscription": "Подписка",
+  "account.tabs.settings": "Настройки",
+
+  "account.sectionInDev": "Раздел «{tab}» в разработке",
+  "account.unauthorized.message": "Для доступа к аккаунту войдите в систему."
 }

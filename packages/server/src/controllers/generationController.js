@@ -374,4 +374,55 @@ async function generateWorksheets(req, res) {
   }
 }
 
-module.exports = { generateWorksheets };
+async function listRecentGenerations(req, res) {
+  try {
+    const limitRaw = req.query && req.query.limit ? Number(req.query.limit) : 4;
+    const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(50, limitRaw)) : 4;
+    const mine = (req.query && String(req.query.mine)) === '1';
+    const where = mine && req.user && req.user.sub ? { userId: req.user.sub } : {};
+    const gens = await prisma.generation.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: { id: true, createdAt: true, tasks: true, days: true, userId: true },
+    });
+
+    // Count downloads per generation in one query if possible
+    const ids = gens.map((g) => g.id);
+    let downloadsByGen = {};
+    try {
+      const grouped = await prisma.generationDownload.groupBy({
+        by: ['generationId'],
+        where: { generationId: { in: ids } },
+        _count: { generationId: true },
+      });
+      downloadsByGen = Object.fromEntries(
+        grouped.map((r) => [r.generationId, r._count.generationId || 0]),
+      );
+    } catch (_) {
+      downloadsByGen = {};
+    }
+
+    const items = gens.map((g) => {
+      const tasks = Array.isArray(g.tasks) ? g.tasks : [];
+      const tags = tasks.map((t) => String(t));
+      const title = tags.length ? `Рабочие листы: ${tags.join(', ')}` : 'Рабочие листы';
+      return {
+        id: g.id,
+        title,
+        tags,
+        createdAt: g.createdAt,
+        days: g.days,
+        downloads: downloadsByGen[g.id] || 0,
+        previewUrl: `/generations/${g.id}/day/1/index.html`,
+        downloadUrl: `/generations/${g.id}/download`,
+      };
+    });
+
+    return res.json({ items });
+  } catch (e) {
+    return res.status(400).json({ error: String((e && e.message) || e) });
+  }
+}
+
+module.exports = { generateWorksheets, listRecentGenerations };

@@ -46,6 +46,9 @@
   "connectDots.modal.title": "Configure day {n}",
   "buttons.close": "Close",
   "buttons.cancel": "Cancel",
+  "buttons.preview": "Preview",
+  "buttons.downloadPdf": "Download PDF",
+  "generation.title": "Worksheets: {tasks}",
 
   "imageDots.title": "Images for 'Connect the Dots'",
   "imageDots.add": "Add image",
@@ -96,5 +99,26 @@
   "auth.register_submit": "Register",
   "auth.toHome": "To home",
   "auth.haveAccount": "Already have an account?",
-  "auth.toLogin": "Login"
+  "auth.toLogin": "Login",
+
+  "account.stats.monthlyGenerations": "Generations this month",
+  "account.stats.totalDownloads": "Total downloads",
+  "account.stats.daysWithUs": "Days with us",
+  "account.stats.rating": "Rating",
+
+  "account.recent.title": "Recent generations",
+  "account.recent.subtitle": "Your recently created materials",
+  "account.recent.downloads": "{count} downloads",
+
+  "account.range.lastMonth": "Last month",
+  "account.range.last3Months": "Last 3 months",
+  "account.range.lastYear": "Last year",
+
+  "account.tabs.overview": "Overview",
+  "account.tabs.generations": "Generations",
+  "account.tabs.subscription": "Subscription",
+  "account.tabs.settings": "Settings",
+
+  "account.sectionInDev": "Section \"{tab}\" is under development",
+  "account.unauthorized.message": "Please log in to access your account."
 }

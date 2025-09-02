@@ -1,5 +1,6 @@
 import Button from '../ui/button';
 import React from 'react';
+import Link from 'next/link';
 import { useAuth } from '../../auth/AuthProvider';
 import AuthModal from '../AuthModal';
 import { useT } from '../../i18n/I18nProvider';
@@ -38,6 +39,19 @@ export default function UserBadge() {
   const { user } = useAuth();
   const [open, setOpen] = React.useState(false);
 
+  const deriveName = React.useCallback(() => {
+    if (!user?.email) return '';
+    const local = user.email.split('@')[0] || '';
+    if (!local) return user.email;
+    // Replace dots/underscores with space and capitalize the first letter
+    const cleaned = local.replace(/[._-]+/g, ' ').trim();
+    const name = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    return name;
+  }, [user]);
+
+  const displayName = deriveName();
+  const initial = (displayName || user?.email || '?').charAt(0).toUpperCase();
+
   return (
     <>
       {user ? (
@@ -45,24 +59,14 @@ export default function UserBadge() {
           className={cl.userMenu}
           style={{ position: 'relative', display: 'inline-block' }}
         >
-          <span className={cl.userEmail} style={{ cursor: 'pointer' }}>
-            {user.email}
-          </span>
-          <div
-            className={cl.userPopover}
-            style={{
-              position: 'absolute',
-              top: '100%',
-              right: 0,
-              background: '#fff',
-              border: '1px solid #e5e7eb',
-              borderRadius: 8,
-              padding: 8,
-              minWidth: 160,
-              boxShadow: '0 8px 24px rgba(0,0,0,.12)',
-              zIndex: 100,
-            }}
-          >
+          <Link href="/account" className={cl.badge}>
+            <div className={cl.avatar}>{initial}</div>
+            <div className={cl.text}>
+              <div className={cl.name}>{displayName || user.email}</div>
+              <div className={cl.subtitle}>Базовый</div>
+            </div>
+          </Link>
+          <div className={cl.userPopover}>
             <UserPopoverContent />
           </div>
         </div>

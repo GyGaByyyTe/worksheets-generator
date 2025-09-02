@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { absUrl } from '../lib/api';
@@ -75,7 +75,14 @@ function useProfileData() {
 function Badge({ plan }: { plan: Plan }) {
   const bg = plan.color || '#16a34a';
   return (
-    <span className="tag" style={{ background: '#dcfce7', borderColor: '#bbf7d0', color: '#166534' }}>
+    <span
+      className="tag"
+      style={{
+        background: '#dcfce7',
+        borderColor: '#bbf7d0',
+        color: '#166534',
+      }}
+    >
       {plan.title}
     </span>
   );
@@ -85,29 +92,57 @@ function Progress({ used, limit }: { used: number; limit: number }) {
   const pct = Math.min(100, Math.round((used / Math.max(1, limit)) * 100));
   return (
     <div>
-      <div style={{ fontSize: 20, fontWeight: 700 }}>{used}/{limit}</div>
+      <div style={{ fontSize: 20, fontWeight: 700 }}>
+        {used}/{limit}
+      </div>
       <div style={{ height: 8, borderRadius: 999, background: '#e5e7eb' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: '#22c55e', borderRadius: 999 }} />
+        <div
+          style={{
+            width: `${pct}%`,
+            height: '100%',
+            background: '#22c55e',
+            borderRadius: 999,
+          }}
+        />
       </div>
     </div>
   );
 }
 
-function Overview({ profile, stats, recent }: { profile: Profile; stats: Stats; recent: RecentItem[] }) {
+function Overview({
+  profile,
+  stats,
+  recent,
+}: {
+  profile: Profile;
+  stats: Stats;
+  recent: RecentItem[];
+}) {
   return (
     <div className="account-overview">
-      <div className="grid-cards" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 8 }}>
+      <div
+        className="grid-cards"
+        style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 8 }}
+      >
         <div className="card">
-          <div style={{ color: '#6b7280', marginBottom: 8 }}>Генерации в месяце</div>
+          <div style={{ color: '#6b7280', marginBottom: 8 }}>
+            Генерации в месяце
+          </div>
           <Progress used={stats.month.used} limit={stats.month.limit} />
         </div>
         <div className="card">
-          <div style={{ color: '#6b7280', marginBottom: 8 }}>Всего скачиваний</div>
-          <div style={{ fontSize: 24, fontWeight: 700 }}>{stats.downloadsTotal}</div>
+          <div style={{ color: '#6b7280', marginBottom: 8 }}>
+            Всего скачиваний
+          </div>
+          <div style={{ fontSize: 24, fontWeight: 700 }}>
+            {stats.downloadsTotal}
+          </div>
         </div>
         <div className="card">
           <div style={{ color: '#6b7280', marginBottom: 8 }}>Дней с нами</div>
-          <div style={{ fontSize: 24, fontWeight: 700 }}>{stats.daysWithUs}</div>
+          <div style={{ fontSize: 24, fontWeight: 700 }}>
+            {stats.daysWithUs}
+          </div>
         </div>
         <div className="card">
           <div style={{ color: '#6b7280', marginBottom: 8 }}>Рейтинг</div>
@@ -117,13 +152,25 @@ function Overview({ profile, stats, recent }: { profile: Profile; stats: Stats; 
 
       <div className="card" style={{ marginTop: 16 }}>
         <h3 style={{ margin: '0 0 4px 0' }}>Последние генерации</h3>
-        <p className="muted" style={{ marginTop: 0 }}>Ваши последние созданные материалы</p>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Ваши последние созданные материалы
+        </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {recent.map((i) => (
-            <li key={i.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderTop: '1px dashed #eee' }}>
+            <li
+              key={i.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '10px 0',
+                borderTop: '1px dashed #eee',
+              }}
+            >
               <div>
                 <div style={{ fontWeight: 600 }}>{i.title}</div>
-                <div className="muted">{i.type} • {i.createdAt}</div>
+                <div className="muted">
+                  {i.type} • {i.createdAt}
+                </div>
               </div>
               <div className="muted">{i.downloads} скачиваний</div>
             </li>
@@ -138,14 +185,18 @@ export default function AccountPage() {
   const { user } = useAuth();
   const { loading, profile, stats, recent } = useProfileData();
 
-  const [tab, setTab] = React.useState<'overview' | 'generations' | 'subscription' | 'settings'>('overview');
+  const [tab, setTab] = React.useState<
+    'overview' | 'generations' | 'subscription' | 'settings'
+  >('overview');
 
   if (!user) {
     return (
       <div className="container">
         <div className="card" style={{ padding: 16 }}>
           <p>Для доступа к аккаунту войдите в систему.</p>
-          <Link href="/" className="ui-btn ui-btn--secondary">На главную</Link>
+          <Link href="/" className="ui-btn ui-btn--secondary">
+            На главную
+          </Link>
         </div>
       </div>
     );
@@ -153,12 +204,29 @@ export default function AccountPage() {
 
   return (
     <div className="container">
-      <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 22 }}>
+      <div
+        className="card"
+        style={{ display: 'flex', gap: 16, alignItems: 'center' }}
+      >
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            background: '#e5e7eb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: 22,
+          }}
+        >
           {profile?.name ? profile.name[0] : user.email[0]?.toUpperCase()}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>{profile?.name || user.email}</div>
+          <div style={{ fontSize: 22, fontWeight: 700 }}>
+            {profile?.name || user.email}
+          </div>
           <div className="muted">{user.email}</div>
           {profile?.plan && (
             <div style={{ marginTop: 6 }}>
@@ -178,10 +246,30 @@ export default function AccountPage() {
 
       <div className="card" style={{ marginTop: 12, padding: 0 }}>
         <div className="account-tabs" role="tablist">
-          <button className={tab === 'overview' ? 'tab tab--active' : 'tab'} onClick={() => setTab('overview')}>Обзор</button>
-          <button className={tab === 'generations' ? 'tab tab--active' : 'tab'} onClick={() => setTab('generations')}>Генерации</button>
-          <button className={tab === 'subscription' ? 'tab tab--active' : 'tab'} onClick={() => setTab('subscription')}>Подписка</button>
-          <button className={tab === 'settings' ? 'tab tab--active' : 'tab'} onClick={() => setTab('settings')}>Настройки</button>
+          <button
+            className={tab === 'overview' ? 'tab tab--active' : 'tab'}
+            onClick={() => setTab('overview')}
+          >
+            Обзор
+          </button>
+          <button
+            className={tab === 'generations' ? 'tab tab--active' : 'tab'}
+            onClick={() => setTab('generations')}
+          >
+            Генерации
+          </button>
+          <button
+            className={tab === 'subscription' ? 'tab tab--active' : 'tab'}
+            onClick={() => setTab('subscription')}
+          >
+            Подписка
+          </button>
+          <button
+            className={tab === 'settings' ? 'tab tab--active' : 'tab'}
+            onClick={() => setTab('settings')}
+          >
+            Настройки
+          </button>
         </div>
         <div style={{ padding: 12 }}>
           {loading && <div>Загрузка…</div>}

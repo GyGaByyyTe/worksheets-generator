@@ -42,7 +42,6 @@ function Header() {
           <nav className="main-nav">
             <Link href="/">Главная</Link>
             <Link href="/generator">Генерация</Link>
-            <Link href="/account">Аккаунт</Link>
             {/* <Link href="/mazes">Лабиринты</Link> */}
             {/* <Link href="/gallery">Галерея</Link> */}
             {/* <Link href="/my">Мои листы</Link> */}

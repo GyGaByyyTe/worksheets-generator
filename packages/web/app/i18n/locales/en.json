@@ -150,5 +150,30 @@
   "addition.modal.title": "Addition settings",
   "addition.summary.difficulty": "Difficulty",
   "addition.summary.count": "Examples per page",
-  "addition.summary.icons": "Icons"
+  "addition.summary.icons": "Icons",
+
+  "task.subtraction.title": "Subtraction",
+  "generator.params.subtraction": "Parameters: Subtraction",
+
+  "subtraction.form.difficulty": "Difficulty level",
+  "subtraction.form.count": "Examples per page:",
+  "subtraction.form.useIcons": "Use icons instead of numbers",
+  "subtraction.form.iconTheme": "Icon theme",
+
+  "subtraction.difficulty.1": "Subtraction up to 10",
+  "subtraction.difficulty.2": "Subtraction up to 20",
+  "subtraction.difficulty.3": "Subtraction up to 100 without borrow",
+  "subtraction.difficulty.4": "Subtraction up to 100 with borrow",
+  "subtraction.difficulty.5": "Subtraction up to 1000 without borrow",
+  "subtraction.difficulty.6": "Subtraction up to 1000 with borrow",
+
+  "subtraction.theme.fruits": "Fruits 🍎🍌",
+  "subtraction.theme.hearts": "Hearts ❤️",
+  "subtraction.theme.animals": "Animals 🐱🐟",
+  "subtraction.theme.shapes": "Shapes 🔷🔺",
+
+  "subtraction.modal.title": "Subtraction settings",
+  "subtraction.summary.difficulty": "Difficulty",
+  "subtraction.summary.count": "Examples per page",
+  "subtraction.summary.icons": "Icons"
 }

@@ -21,6 +21,10 @@ const {
   renderPage: renderAdditionPage,
   generateAdditionTasks,
 } = require('./generators/addition');
+const {
+  renderPage: renderSubtractionPage,
+  generateSubtractionTasks,
+} = require('./generators/subtraction');
 const { generateMazePage } = require('./generate-maze');
 const { generateRoadMazePage } = require('./generate-road-maze');
 
@@ -79,6 +83,31 @@ const pageAddition = (pageNum, options) => {
     iconTheme,
   });
 };
+// Обёртка для страницы вычитания с опциями сложности и иконок
+const pageSubtraction = (pageNum, options) => {
+  const difficulty =
+    options && Number(options.difficulty) ? Number(options.difficulty) : 3;
+  const useIcons = options
+    ? String(options.useIcons).toLowerCase() === 'true' ||
+      String(options.useIcons) === '1' ||
+      options.useIcons === true
+    : false;
+  let count = options && Number(options.count) ? Number(options.count) : 15;
+  if (!Number.isFinite(count)) count = 15;
+  if (count < 1) count = 1;
+  if (count > 15) count = 15;
+  const iconTheme =
+    options && typeof options.iconTheme === 'string'
+      ? String(options.iconTheme)
+      : undefined;
+  if (useIcons && difficulty === 1 && count > 4) count = 4;
+  const tasks = generateSubtractionTasks({ difficulty, count, useIcons });
+  return renderSubtractionPage(pageNum, tasks, {
+    difficulty,
+    useIcons,
+    iconTheme,
+  });
+};
 // Обёртка для лабиринта с объектом опций
 const pageMaze = (pageNum, options) =>
   generateMazePage({ pageNum, ...(options || {}) });
@@ -96,6 +125,7 @@ const GENERATORS = {
   postman: pageOrderNumbers,
   'spot-diff': pageSpotDifferences,
   addition: pageAddition,
+  subtraction: pageSubtraction,
   maze: pageMaze,
   'road-maze': pageRoadMaze,
 };
@@ -109,6 +139,7 @@ const NAME_BY_KEY = {
   postman: 'postman',
   'spot-diff': 'spot-diff',
   addition: 'addition',
+  subtraction: 'subtraction',
   maze: 'maze',
   'road-maze': 'road-maze',
 };

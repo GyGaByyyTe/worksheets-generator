@@ -4,6 +4,7 @@ import DaysSelector from '@/components/DaysSelector';
 import TasksList from '@/components/TasksList';
 import ConnectDotsPanel from '@/components/ConnectDotsPanel';
 import AdditionPanel from '@/components/AdditionPanel';
+import SubtractionPanel from '@/components/SubtractionPanel';
 import ErrorAlert from '@/components/ErrorAlert';
 import ResultsView from '@/components/ResultsView';
 import LoadingButton from '@/components/LoadingButton';
@@ -41,6 +42,7 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
 
   const [openConnectDots, setOpenConnectDots] = React.useState<boolean>(true);
   const [openAddition, setOpenAddition] = React.useState<boolean>(false);
+  const [openSubtraction, setOpenSubtraction] = React.useState<boolean>(false);
 
   return (
     <div className="container">
@@ -160,6 +162,30 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
               <AdditionPanel
                 open={openAddition}
                 onClose={() => setOpenAddition(false)}
+              />
+            </div>
+          )}
+
+          {selected.includes('subtraction') && (
+            <div className="panel">
+              <div
+                className="row"
+                style={{ justifyContent: 'space-between', width: '100%' }}
+              >
+                <div style={{ fontWeight: 600 }}>
+                  {t('generator.params.subtraction')}
+                </div>
+                <button
+                  type="button"
+                  className="ui-btn ui-btn--sm ui-btn--outline"
+                  onClick={() => setOpenSubtraction(true)}
+                >
+                  {t('buttons.configure') || t('connectDots.day.configure')}
+                </button>
+              </div>
+              <SubtractionPanel
+                open={openSubtraction}
+                onClose={() => setOpenSubtraction(false)}
               />
             </div>
           )}

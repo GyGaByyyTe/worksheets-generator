@@ -13,6 +13,7 @@ function listTasks(_req, res) {
     postman: { category: 'math' },
     'spot-diff': { category: 'memory' },
     addition: { category: 'math' },
+    subtraction: { category: 'math' },
     maze: { category: 'puzzles' },
     'road-maze': { category: 'puzzles' },
   };

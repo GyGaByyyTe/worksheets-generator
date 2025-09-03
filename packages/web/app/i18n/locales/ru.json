@@ -150,5 +150,30 @@
   "addition.modal.title": "Настройки сложения",
   "addition.summary.difficulty": "Сложность",
   "addition.summary.count": "Примеров на странице",
-  "addition.summary.icons": "Иконки"
+  "addition.summary.icons": "Иконки",
+
+  "task.subtraction.title": "Вычитание",
+  "generator.params.subtraction": "Параметры: Вычитание",
+
+  "subtraction.form.difficulty": "Уровень сложности",
+  "subtraction.form.count": "Количество примеров:",
+  "subtraction.form.useIcons": "Использовать иконки вместо цифр",
+  "subtraction.form.iconTheme": "Тема иконок",
+
+  "subtraction.difficulty.1": "Вычитание до 10",
+  "subtraction.difficulty.2": "Вычитание до 20",
+  "subtraction.difficulty.3": "Вычитание до 100 без займов",
+  "subtraction.difficulty.4": "Вычитание до 100 с займом",
+  "subtraction.difficulty.5": "Вычитание до 1000 без займов",
+  "subtraction.difficulty.6": "Вычитание до 1000 с займом",
+
+  "subtraction.theme.fruits": "Фрукты 🍎🍌",
+  "subtraction.theme.hearts": "Сердечки ❤️",
+  "subtraction.theme.animals": "Животные 🐱🐟",
+  "subtraction.theme.shapes": "Фигуры 🔷🔺",
+
+  "subtraction.modal.title": "Настройки вычитания",
+  "subtraction.summary.difficulty": "Сложность",
+  "subtraction.summary.count": "Примеров на странице",
+  "subtraction.summary.icons": "Иконки"
 }

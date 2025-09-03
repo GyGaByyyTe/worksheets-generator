@@ -45,10 +45,21 @@ export default function TasksList({
   return (
     <div className="row">
       <div className="tasks">
-        <div className="row" style={{ alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div
+          className="row"
+          style={{
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 8,
+          }}
+        >
           <div className="tasks-title">{t('tasks.title')}</div>
           {onSelectAll && (
-            <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={onSelectAll}>
+            <button
+              type="button"
+              className="ui-btn ui-btn--sm ui-btn--outline"
+              onClick={onSelectAll}
+            >
               {t('actions.selectAll')}
             </button>
           )}

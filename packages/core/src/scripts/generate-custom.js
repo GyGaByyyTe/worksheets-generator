@@ -55,12 +55,29 @@ ${pages}
 
 // Обёртка для страницы сложения с опциями сложности и иконок
 const pageAddition = (pageNum, options) => {
-  const difficulty = options && Number(options.difficulty) ? Number(options.difficulty) : 3;
+  const difficulty =
+    options && Number(options.difficulty) ? Number(options.difficulty) : 3;
   const useIcons = options
-    ? (String(options.useIcons).toLowerCase() === 'true' || String(options.useIcons) === '1' || options.useIcons === true)
+    ? String(options.useIcons).toLowerCase() === 'true' ||
+      String(options.useIcons) === '1' ||
+      options.useIcons === true
     : false;
-  const tasks = generateAdditionTasks({ difficulty, count: 15 });
-  return renderAdditionPage(pageNum, tasks, { difficulty, useIcons });
+  let count = options && Number(options.count) ? Number(options.count) : 15;
+  if (!Number.isFinite(count)) count = 15;
+  if (count < 1) count = 1;
+  if (count > 15) count = 15;
+  const iconTheme =
+    options && typeof options.iconTheme === 'string'
+      ? String(options.iconTheme)
+      : undefined;
+  // Icon mode uses a vertical 4-row layout; clamp per-page count to 4
+  if (useIcons && difficulty === 1 && count > 4) count = 4;
+  const tasks = generateAdditionTasks({ difficulty, count, useIcons });
+  return renderAdditionPage(pageNum, tasks, {
+    difficulty,
+    useIcons,
+    iconTheme,
+  });
 };
 // Обёртка для лабиринта с объектом опций
 const pageMaze = (pageNum, options) =>
@@ -102,7 +119,13 @@ function timestamp() {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
-function generateCustom({ days = 1, tasks = [], outRoot, seed, taskOptions } = {}) {
+function generateCustom({
+  days = 1,
+  tasks = [],
+  outRoot,
+  seed,
+  taskOptions,
+} = {}) {
   if (!Array.isArray(tasks) || tasks.length === 0) {
     throw new Error('Не выбрано ни одного вида задания.');
   }
@@ -133,7 +156,11 @@ function generateCustom({ days = 1, tasks = [], outRoot, seed, taskOptions } = {
 
     for (const key of tasks) {
       const fn = GENERATORS[key];
-      const opt = Object.assign({}, seed ? { seed } : {}, (taskOptions && taskOptions[key]) || {});
+      const opt = Object.assign(
+        {},
+        seed ? { seed } : {},
+        (taskOptions && taskOptions[key]) || {},
+      );
       const svg = fn(pageNum, opt);
       const base = `page-${String(pageNum).padStart(2, '0')}-${NAME_BY_KEY[key]}.svg`;
       const file = path.join(dir, base);

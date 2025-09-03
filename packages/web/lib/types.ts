@@ -58,13 +58,16 @@ export type AccountTab =
 // ========= UI component props/types =========
 export type ButtonVariant = 'default' | 'secondary' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
 }
-export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-export interface FilePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface CheckboxProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface FilePickerProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: React.ReactNode;
   onFile?: (file: File | null) => void;
   browseTarget?: () => HTMLInputElement | null;
@@ -77,19 +80,23 @@ export interface ImagePreviewProps {
   onRemove?: () => void;
   size?: number; // square px
 }
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 export interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: React.ReactNode;
   children?: React.ReactNode;
 }
-export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
-export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface SelectProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {}
+export interface SliderProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: React.ReactNode;
   valueLabel?: string | number;
 }
-export interface SwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface SwitchProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: React.ReactNode;
 }
 

@@ -120,5 +120,35 @@
   "account.tabs.settings": "Настройки",
 
   "account.sectionInDev": "Раздел «{tab}» в разработке",
-  "account.unauthorized.message": "Для доступа к аккаунту войдите в систему."
+  "account.unauthorized.message": "Для доступа к аккаунту войдите в систему.",
+
+  "buttons.apply": "Применить",
+  "buttons.configure": "Настроить",
+  "buttons.collapse": "Свернуть",
+  "buttons.expand": "Развернуть",
+
+  "generator.params.connectDots": "Параметры: Соедини точки",
+  "generator.params.addition": "Параметры: Сложение",
+
+  "addition.form.difficulty": "Уровень сложности",
+  "addition.form.count": "Количество примеров:",
+  "addition.form.useIcons": "Использовать иконки вместо цифр",
+  "addition.form.iconTheme": "Тема иконок",
+
+  "addition.difficulty.1": "Сложение до 10",
+  "addition.difficulty.2": "Сложение до 20",
+  "addition.difficulty.3": "Сложение до 100 без переходов",
+  "addition.difficulty.4": "Сложение до 100 с переходом",
+  "addition.difficulty.5": "Сложение до 1000 без переходов",
+  "addition.difficulty.6": "Сложение до 1000 с переходом",
+
+  "addition.theme.fruits": "Фрукты 🍎🍌",
+  "addition.theme.hearts": "Сердечки ❤️",
+  "addition.theme.animals": "Животные 🐱🐟",
+  "addition.theme.shapes": "Фигуры 🔷🔺",
+
+  "addition.modal.title": "Настройки сложения",
+  "addition.summary.difficulty": "Сложность",
+  "addition.summary.count": "Примеров на странице",
+  "addition.summary.icons": "Иконки"
 }

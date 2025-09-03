@@ -120,5 +120,35 @@
   "account.tabs.settings": "Settings",
 
   "account.sectionInDev": "Section \"{tab}\" is under development",
-  "account.unauthorized.message": "Please log in to access your account."
+  "account.unauthorized.message": "Please log in to access your account.",
+
+  "buttons.apply": "Apply",
+  "buttons.configure": "Configure",
+  "buttons.collapse": "Collapse",
+  "buttons.expand": "Expand",
+
+  "generator.params.connectDots": "Parameters: Connect the Dots",
+  "generator.params.addition": "Parameters: Addition",
+
+  "addition.form.difficulty": "Difficulty level",
+  "addition.form.count": "Examples per page:",
+  "addition.form.useIcons": "Use icons instead of numbers",
+  "addition.form.iconTheme": "Icon theme",
+
+  "addition.difficulty.1": "Addition up to 10",
+  "addition.difficulty.2": "Addition up to 20",
+  "addition.difficulty.3": "Addition up to 100 without carry",
+  "addition.difficulty.4": "Addition up to 100 with carry",
+  "addition.difficulty.5": "Addition up to 1000 without carry",
+  "addition.difficulty.6": "Addition up to 1000 with carry",
+
+  "addition.theme.fruits": "Fruits 🍎🍌",
+  "addition.theme.hearts": "Hearts ❤️",
+  "addition.theme.animals": "Animals 🐱🐟",
+  "addition.theme.shapes": "Shapes 🔷🔺",
+
+  "addition.modal.title": "Addition settings",
+  "addition.summary.difficulty": "Difficulty",
+  "addition.summary.count": "Examples per page",
+  "addition.summary.icons": "Icons"
 }

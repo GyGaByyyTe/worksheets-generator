@@ -40,7 +40,7 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
   );
 
   const [openConnectDots, setOpenConnectDots] = React.useState<boolean>(true);
-  const [openAddition, setOpenAddition] = React.useState<boolean>(true);
+  const [openAddition, setOpenAddition] = React.useState<boolean>(false);
 
   return (
     <div className="container">
@@ -114,13 +114,17 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                 className="row"
                 style={{ justifyContent: 'space-between', width: '100%' }}
               >
-                <div style={{ fontWeight: 600 }}>Параметры: Соедини точки</div>
+                <div style={{ fontWeight: 600 }}>
+                  {t('generator.params.connectDots')}
+                </div>
                 <button
                   type="button"
                   className="ui-btn ui-btn--sm ui-btn--outline"
                   onClick={() => setOpenConnectDots((v) => !v)}
                 >
-                  {openConnectDots ? 'Свернуть' : 'Развернуть'}
+                  {openConnectDots
+                    ? t('buttons.collapse')
+                    : t('buttons.expand')}
                 </button>
               </div>
               {openConnectDots && (
@@ -141,16 +145,22 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                 className="row"
                 style={{ justifyContent: 'space-between', width: '100%' }}
               >
-                <div style={{ fontWeight: 600 }}>Параметры: Сложение</div>
+                <div style={{ fontWeight: 600 }}>
+                  {t('generator.params.addition')}
+                </div>
                 <button
                   type="button"
                   className="ui-btn ui-btn--sm ui-btn--outline"
-                  onClick={() => setOpenAddition((v) => !v)}
+                  onClick={() => setOpenAddition(true)}
                 >
-                  {openAddition ? 'Свернуть' : 'Развернуть'}
+                  {t('buttons.configure') || t('connectDots.day.configure')}
                 </button>
               </div>
-              {openAddition && <AdditionPanel />}
+              {/* Keep component mounted for hidden inputs; modal visibility is controlled by openAddition */}
+              <AdditionPanel
+                open={openAddition}
+                onClose={() => setOpenAddition(false)}
+              />
             </div>
           )}
 

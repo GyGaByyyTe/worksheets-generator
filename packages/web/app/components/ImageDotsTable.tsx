@@ -15,7 +15,12 @@ const CATEGORY_MAP: Record<string, string[]> = {
   Nature: ['Trees', 'Flowers', 'Mountains', 'Landscapes', 'Leaves'],
 };
 
-import type { NumberingMode, PointsDistribution, ImageDotsParams, ImageDotsTableProps } from 'lib/types';
+import type {
+  NumberingMode,
+  PointsDistribution,
+  ImageDotsParams,
+  ImageDotsTableProps,
+} from 'lib/types';
 
 export function defaultParams(): ImageDotsParams {
   return {

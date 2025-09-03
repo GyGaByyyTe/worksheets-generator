@@ -3,7 +3,7 @@ import React from 'react';
 import { useT } from '@/i18n/I18nProvider';
 import UsageProgress from './UsageProgress';
 import GenGrid from '@/components/generations/GenGrid';
-import type { Profile, Stats,GenItem } from 'lib/types';
+import type { Profile, Stats, GenItem } from 'lib/types';
 
 export default function OverviewPanel({
   profile,

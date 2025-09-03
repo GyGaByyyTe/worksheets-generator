@@ -22,7 +22,11 @@ test('difficulty 1: operands are single-digit and sum ≤ 10, no carry', () => {
     assert.ok(t.a >= 0 && t.a <= 9, `a=${t.a} is not single-digit`);
     assert.ok(t.b >= 0 && t.b <= 9, `b=${t.b} is not single-digit`);
     assert.ok(t.a + t.b <= 10, `sum=${t.a + t.b} exceeds 10`);
-    assert.equal(hasAnyCarry(t.a, t.b), false, `carry detected for ${t.a}+${t.b}`);
+    assert.equal(
+      hasAnyCarry(t.a, t.b),
+      false,
+      `carry detected for ${t.a}+${t.b}`,
+    );
   }
 });
 

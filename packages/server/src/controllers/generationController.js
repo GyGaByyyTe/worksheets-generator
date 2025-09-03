@@ -33,7 +33,7 @@ function pickRandomConnectDotsAsset() {
 
 async function generateWorksheets(req, res) {
   try {
-    const { days = 1, tasks = [], seed, imageDots } = req.body || {};
+    const { days = 1, tasks = [], seed, imageDots, taskOptions } = req.body || {};
     if (!Array.isArray(tasks) || tasks.length === 0) {
       return res
         .status(400)
@@ -41,7 +41,7 @@ async function generateWorksheets(req, res) {
     }
     const ts = tsStamp();
     const outAbs = path.join(paths.generatedDir, ts);
-    const result = generateCustom({ days, tasks, outRoot: outAbs, seed });
+    const result = generateCustom({ days, tasks, outRoot: outAbs, seed, taskOptions });
 
     // Optionally process image-based connect-dots if provided and task selected
     const hasConnectDots = tasks.includes('connect-dots');

@@ -4,6 +4,7 @@ import type { ImageDotsParams } from '@/components/ImageDotsTable';
 import DaysSelector from '@/components/DaysSelector';
 import TasksList from '@/components/TasksList';
 import ConnectDotsPanel from '@/components/ConnectDotsPanel';
+import AdditionPanel from '@/components/AdditionPanel';
 import ErrorAlert from '@/components/ErrorAlert';
 import ResultsView from '@/components/ResultsView';
 import LoadingButton from '@/components/LoadingButton';
@@ -40,6 +41,7 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
   );
 
   const [openConnectDots, setOpenConnectDots] = React.useState<boolean>(true);
+  const [openAddition, setOpenAddition] = React.useState<boolean>(true);
 
   return (
     <div className="container">
@@ -122,6 +124,25 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                     setDotsRows={setDotsRows}
                   />
                 )}
+              </div>
+            )}
+
+            {selected.includes('addition') && (
+              <div className="panel">
+                <div
+                  className="row"
+                  style={{ justifyContent: 'space-between', width: '100%' }}
+                >
+                  <div style={{ fontWeight: 600 }}>Параметры: Сложение</div>
+                  <button
+                    type="button"
+                    className="ui-btn ui-btn--sm ui-btn--outline"
+                    onClick={() => setOpenAddition((v) => !v)}
+                  >
+                    {openAddition ? 'Свернуть' : 'Развернуть'}
+                  </button>
+                </div>
+                {openAddition && <AdditionPanel />}
               </div>
             )}
 

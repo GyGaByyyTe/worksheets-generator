@@ -47,6 +47,8 @@ export const generateWorksheets = async (
   let days = Number(formData.get('days') || 1);
   if (!Number.isFinite(days) || days < 1) days = 1;
 
+  const taskOptions: any = {};
+
   // Parse fields
   for (const [key, value] of formData.entries()) {
     if (key === 'tasks' && typeof value === 'string') {
@@ -64,6 +66,15 @@ export const generateWorksheets = async (
       } else {
         imageDots[idx][field] = String(value);
       }
+      continue;
+    }
+
+    const tOpt = key.match(/^taskOptions\[(.+)\]\[(.+)\]$/);
+    if (tOpt) {
+      const gKey = tOpt[1];
+      const field = tOpt[2];
+      if (!taskOptions[gKey]) taskOptions[gKey] = {};
+      (taskOptions[gKey] as any)[field] = String(value);
       continue;
     }
   }
@@ -121,6 +132,8 @@ export const generateWorksheets = async (
 
     const payload: any = { days, tasks: selected };
     if (imageDots && imageDots.length > 0) payload.imageDots = imageDots;
+    if (taskOptions && Object.keys(taskOptions).length > 0)
+      payload.taskOptions = taskOptions;
 
     const cookieStore = await cookies();
     const t = cookieStore.get('wg_token')?.value;

@@ -1,6 +1,7 @@
-/* Генератор листов сложения без переноса (до 100) */
+/* Генератор листов сложения с уровнями сложности и опциональными иконками */
 const fs = require('fs');
 const path = require('path');
+const { ICONS } = require('./images');
 
 // Настройки страницы (приблизительно формат A4 по пропорциям)
 const WIDTH = 1000;
@@ -21,48 +22,106 @@ const CELL_HEIGHT = Math.floor((GRID_HEIGHT - (ROWS - 1) * CELL_GAP_Y) / ROWS);
 
 // Утилиты
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const choice = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-/**
- * Генерация пары двузначных чисел без переноса через десяток и суммой < 100
- */
-function generatePair() {
-  while (true) {
-    const a = randInt(10, 99);
-    const b = randInt(10, 99);
-    const onesOK = (a % 10) + (b % 10) < 10;
-    const sum = a + b;
-    if (a >= 10 && b >= 10 && onesOK && sum < 100) {
-      return [a, b];
-    }
+// Проверки переноса
+const hasAnyCarry = (a, b) => {
+  let x = a;
+  let y = b;
+  while (x > 0 || y > 0) {
+    if ((x % 10) + (y % 10) >= 10) return true;
+    x = Math.floor(x / 10);
+    y = Math.floor(y / 10);
+  }
+  return false;
+};
+
+const hasNoCarry = (a, b) => !hasAnyCarry(a, b);
+
+// Диапазоны по уровням
+function rangeByDifficulty(d) {
+  switch (d) {
+    case 1: // сумма до 10 (только однозначные числа)
+      return { min: 0, max: 9, sumMax: 10, requireCarry: false, forbidCarry: true };
+    case 2: // сумма до 20 (разрешён перенос), хотя бы один операнд однозначный — проверим ниже
+      return { min: 0, max: 20, sumMax: 20, requireCarry: false, forbidCarry: false };
+    case 3: // до 100 без переноса (двузначные тоже допустимы с однозначными)
+      return { min: 0, max: 99, sumMax: 100, requireCarry: false, forbidCarry: true };
+    case 4: // до 100 с переносом
+      return { min: 0, max: 99, sumMax: 100, requireCarry: true, forbidCarry: false };
+    case 5: // до 1000 без переносов на любых разрядах
+      return { min: 0, max: 999, sumMax: 1000, requireCarry: false, forbidCarry: true };
+    case 6: // до 1000 с переносом
+      return { min: 0, max: 999, sumMax: 1000, requireCarry: true, forbidCarry: false };
+    default:
+      return rangeByDifficulty(3);
   }
 }
 
-/**
- * Сгенерировать 15 уникальных задач для листа
- */
-function generateTasks() {
+function pickPair({ difficulty = 3 } = {}) {
+  const d = Number(difficulty) || 3;
+  const cfg = rangeByDifficulty(d);
+  let tries = 0;
+  while (tries++ < 100000) {
+    const a = randInt(cfg.min, cfg.max);
+    const b = randInt(cfg.min, cfg.max);
+    const sum = a + b;
+    if (sum > cfg.sumMax) continue;
+    const carry = hasAnyCarry(a, b);
+    if (cfg.forbidCarry && carry) continue;
+    if (cfg.requireCarry && !carry) continue;
+    // d2: гарантируем что хотя бы одно число однозначное
+    if (d === 2 && a > 9 && b > 9) continue;
+    // избегаем тривиальных 0 + x, кроме уровня 1 где это норм
+    if (d >= 2 && (a === 0 || b === 0)) continue;
+    // избегаем равных перестановок — уникальность решим выше
+    return [a, b];
+  }
+  // fallback
+  return [1, 2];
+}
+
+function generateAdditionTasks({ difficulty = 3, count = 15 } = {}) {
+  const d = Number(difficulty) || 3;
   const tasks = [];
-  const seen = new Set();
-  while (tasks.length < 15) {
-    const [a, b] = generatePair();
-    const key = [Math.min(a, b), Math.max(a, b)].join('+');
-    if (!seen.has(key)) {
-      seen.add(key);
-      tasks.push({ a, b, sum: a + b });
-    }
+  while (tasks.length < count) {
+    const [a, b] = pickPair({ difficulty: d });
+    const sum = a + b;
+    tasks.push({ a, b, sum });
   }
   return tasks;
 }
 
-function renderHeader(pageNum) {
+function headerByDifficulty(difficulty) {
+  switch (difficulty) {
+    case 1:
+      return { title: 'СЛОЖЕНИЕ ДО 10', subtitle: 'иногда с иконками' };
+    case 2:
+      return { title: 'СЛОЖЕНИЕ ДО 20', subtitle: '' };
+    case 3:
+      return { title: 'СЛОЖЕНИЕ ДО 100', subtitle: 'без перехода через десяток' };
+    case 4:
+      return { title: 'СЛОЖЕНИЕ ДО 100', subtitle: 'с переходом через десяток' };
+    case 5:
+      return { title: 'СЛОЖЕНИЕ ДО 1000', subtitle: 'без переносов' };
+    case 6:
+      return { title: 'СЛОЖЕНИЕ ДО 1000', subtitle: 'с переносом' };
+    default:
+      return { title: 'СЛОЖЕНИЕ', subtitle: '' };
+  }
+}
+
+function renderHeader(pageNum, options = {}) {
+  const { difficulty = 3 } = options || {};
+  const h = headerByDifficulty(difficulty);
   return `
     <rect x="16" y="16" width="${WIDTH - 32}" height="${HEIGHT - 32}" rx="18" ry="18" fill="none" stroke="#222" stroke-width="3"/>
     <text x="${MARGIN_X}" y="60" font-family="Arial, sans-serif" font-size="28" fill="#000">Имя: ____________________________</text>
     <text x="${WIDTH - MARGIN_X - 360}" y="60" font-family="Arial, sans-serif" font-size="28" fill="#000">Дата: _______________</text>
 
-    <text x="${MARGIN_X}" y="110" font-family="Arial Black, Arial, sans-serif" font-size="44" fill="#000">СЛОЖЕНИЕ ДО 100 — ЛЕГКО!</text>
-    <text x="${MARGIN_X}" y="150" font-family="Arial, sans-serif" font-size="24" fill="#444">без перехода через десяток</text>
-    <text x="${MARGIN_X}" y="180" font-family="Arial, sans-serif" font-size="20" fill="#444">Запиши ответы в пустые окошки.</text>
+    <text x="${MARGIN_X}" y="110" font-family="Arial Black, Arial, sans-serif" font-size="44" fill="#000">${h.title} — ЛЕГКО!</text>
+    ${h.subtitle ? `<text x="${MARGIN_X}" y="150" font-family="Arial, sans-serif" font-size="24" fill="#444">${h.subtitle}</text>` : ''}
+    <text x="${MARGIN_X}" y="${h.subtitle ? 180 : 150}" font-family="Arial, sans-serif" font-size="20" fill="#444">Запиши ответы в пустые окошки.</text>
 
     <g>
       <circle cx="${WIDTH - 36}" cy="36" r="22" fill="#000"/>
@@ -71,11 +130,27 @@ function renderHeader(pageNum) {
   `;
 }
 
-function renderCell(x, y, idx, a, b) {
+function repeatIcon(icon, n) {
+  return Array.from({ length: n }, () => icon).join('');
+}
+
+function pickIcon() {
+  const sets = [];
+  if (ICONS.fruits) sets.push(ICONS.fruits);
+  if (ICONS.animals) sets.push(ICONS.animals);
+  if (ICONS.shapes) sets.push(ICONS.shapes);
+  const set = sets.length ? choice(sets) : ['🍎', '🍌', '🍇', '🍓'];
+  return choice(set);
+}
+
+function renderCell(x, y, idx, item, options = {}) {
+  const { a, b } = item;
+  const { useIcons = false, difficulty = 3 } = options || {};
   const rx = 14;
   const padding = 18;
 
   const numFont = 42;
+  const iconFont = 38;
   const helperFont = 30;
   const answerBoxHeight = 54;
 
@@ -85,6 +160,19 @@ function renderCell(x, y, idx, a, b) {
 
   const rightX = x + padding * 10;
 
+  const canIconA = useIcons && a >= 0 && a <= 10 && difficulty === 1;
+  const canIconB = useIcons && b >= 0 && b <= 10 && difficulty === 1;
+  const doIconA = canIconA && Math.random() < 0.5;
+  const doIconB = canIconB && Math.random() < 0.5;
+  const iconA = doIconA ? pickIcon() : null;
+  const iconB = doIconB ? pickIcon() : null;
+
+  const aDisplay = doIconA ? repeatIcon(iconA, a) : String(a);
+  const bDisplay = doIconB ? repeatIcon(iconB, b) : String(b);
+
+  const aFont = doIconA ? iconFont : numFont;
+  const bFont = doIconB ? iconFont : numFont;
+
   return `
     <g>
       <rect x="${x}" y="${y}" width="${CELL_WIDTH}" height="${CELL_HEIGHT}" rx="${rx}" ry="${rx}" fill="none" stroke="#222" stroke-width="2"/>
@@ -92,11 +180,11 @@ function renderCell(x, y, idx, a, b) {
       <circle cx="${x + 22}" cy="${y + 22}" r="16" fill="#000"/>
       <text x="${x + 22}" y="${y + 28}" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#fff">${idx}</text>
 
-      <!-- Числа в столбик -->
-      <text x="${rightX}" y="${line1Y}" font-family="Courier New, monospace" font-size="${numFont}" fill="#000" text-anchor="end">${a}</text>
+      <!-- Числа в столбик / иконки -->
+      <text x="${rightX}" y="${line1Y}" font-family="Courier New, monospace" font-size="${aFont}" fill="#000" text-anchor="end">${aDisplay}</text>
 
       <text x="${x + padding}" y="${line1Y + 29}" font-family="Arial, sans-serif" font-size="${helperFont}" fill="#000">+</text>
-      <text x="${rightX}" y="${line2Y}" font-family="Courier New, monospace" font-size="${numFont}" fill="#000" text-anchor="end">${b}</text>
+      <text x="${rightX}" y="${line2Y}" font-family="Courier New, monospace" font-size="${bFont}" fill="#000" text-anchor="end">${bDisplay}</text>
 
       <!-- Окошко для ответа -->
       <rect x="${x + padding}" y="${answerY}" width="${CELL_WIDTH - padding * 2}" height="${answerBoxHeight}" rx="10" ry="10" fill="none" stroke="#888" stroke-width="2"/>
@@ -104,7 +192,7 @@ function renderCell(x, y, idx, a, b) {
   `;
 }
 
-function renderPage(pageNum, tasks) {
+function renderPage(pageNum, tasks, options = {}) {
   // Координаты ячеек
   let svgCells = '';
   for (let r = 0; r < ROWS; r++) {
@@ -112,8 +200,8 @@ function renderPage(pageNum, tasks) {
       const idx = r * COLS + c;
       const x = MARGIN_X + c * (CELL_WIDTH + CELL_GAP_X);
       const y = GRID_TOP + r * (CELL_HEIGHT + CELL_GAP_Y);
-      const { a, b } = tasks[idx];
-      svgCells += renderCell(x, y, idx + 1, a, b);
+      const item = tasks[idx];
+      svgCells += renderCell(x, y, idx + 1, item, options);
     }
   }
 
@@ -125,7 +213,7 @@ function renderPage(pageNum, tasks) {
         </style>
       </defs>
       <rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="#fff"/>
-      ${renderHeader(pageNum)}
+      ${renderHeader(pageNum, options)}
       ${svgCells}
     </svg>
   `;
@@ -135,22 +223,36 @@ function renderPage(pageNum, tasks) {
 function generateAdditionWorksheets({
   count = 10,
   outDir = 'worksheets',
+  difficulty = 3,
+  useIcons = false,
 } = {}) {
   const out = path.resolve(process.cwd(), outDir);
   if (!fs.existsSync(out)) fs.mkdirSync(out, { recursive: true });
 
   for (let i = 1; i <= count; i++) {
-    const tasks = generateTasks();
-    const svg = renderPage(i, tasks);
-    const fileName = `addition-no-carry-ru-${String(i).padStart(2, '0')}.svg`;
+    const tasks = generateAdditionTasks({ difficulty, count: 15 });
+    const svg = renderPage(i, tasks, { difficulty, useIcons });
+    const suffix =
+      difficulty === 3
+        ? 'no-carry-ru'
+        : difficulty === 4
+        ? 'carry-ru'
+        : 'ru';
+    const fileName = `addition-${suffix}-${String(i).padStart(2, '0')}.svg`;
     fs.writeFileSync(path.join(out, fileName), svg, 'utf8');
     console.log(`✓ Лист ${i} сохранён: ${path.join('worksheets', fileName)}`);
   }
   console.log('Готово! Откройте SVG-файлы в браузере или распечатайте.');
 }
 
+// Backward-compat exports
+function generateTasks() {
+  return generateAdditionTasks({ difficulty: 3, count: 15 });
+}
+
 module.exports = {
   generateAdditionWorksheets,
   renderPage,
   generateTasks,
+  generateAdditionTasks,
 };

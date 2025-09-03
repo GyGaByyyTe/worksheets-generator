@@ -19,7 +19,7 @@ const {
 } = require('./generators/weekpack/spot-differences');
 const {
   renderPage: renderAdditionPage,
-  generateTasks,
+  generateAdditionTasks,
 } = require('./generators/addition');
 const { generateMazePage } = require('./generate-maze');
 const { generateRoadMazePage } = require('./generate-road-maze');
@@ -53,8 +53,15 @@ ${pages}
   fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
 }
 
-// Обёртка для страницы сложения, аналогичная недельному генератору
-const pageAddition = (pageNum) => renderAdditionPage(pageNum, generateTasks());
+// Обёртка для страницы сложения с опциями сложности и иконок
+const pageAddition = (pageNum, options) => {
+  const difficulty = options && Number(options.difficulty) ? Number(options.difficulty) : 3;
+  const useIcons = options
+    ? (String(options.useIcons).toLowerCase() === 'true' || String(options.useIcons) === '1' || options.useIcons === true)
+    : false;
+  const tasks = generateAdditionTasks({ difficulty, count: 15 });
+  return renderAdditionPage(pageNum, tasks, { difficulty, useIcons });
+};
 // Обёртка для лабиринта с объектом опций
 const pageMaze = (pageNum, options) =>
   generateMazePage({ pageNum, ...(options || {}) });
@@ -95,7 +102,7 @@ function timestamp() {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
-function generateCustom({ days = 1, tasks = [], outRoot, seed } = {}) {
+function generateCustom({ days = 1, tasks = [], outRoot, seed, taskOptions } = {}) {
   if (!Array.isArray(tasks) || tasks.length === 0) {
     throw new Error('Не выбрано ни одного вида задания.');
   }
@@ -126,7 +133,8 @@ function generateCustom({ days = 1, tasks = [], outRoot, seed } = {}) {
 
     for (const key of tasks) {
       const fn = GENERATORS[key];
-      const svg = fn(pageNum, seed ? { seed } : undefined);
+      const opt = Object.assign({}, seed ? { seed } : {}, (taskOptions && taskOptions[key]) || {});
+      const svg = fn(pageNum, opt);
       const base = `page-${String(pageNum).padStart(2, '0')}-${NAME_BY_KEY[key]}.svg`;
       const file = path.join(dir, base);
       fs.writeFileSync(file, svg, 'utf8');

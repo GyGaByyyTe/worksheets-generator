@@ -175,5 +175,25 @@
   "subtraction.modal.title": "Subtraction settings",
   "subtraction.summary.difficulty": "Difficulty",
   "subtraction.summary.count": "Examples per page",
-  "subtraction.summary.icons": "Icons"
+  "subtraction.summary.icons": "Icons",
+
+  "generator.params.findParts": "Parameters: Find the Parts",
+
+  "findParts.form.difficulty": "Field difficulty",
+  "findParts.difficulty.1": "Small field (easy)",
+  "findParts.difficulty.2": "Medium field",
+  "findParts.difficulty.3": "Large field (hard)",
+  "findParts.form.gridType": "Grid type",
+  "findParts.gridType.icons": "Icons",
+  "findParts.gridType.letters": "Letters",
+  "findParts.gridType.digits": "Digits",
+  "findParts.form.modeSingle": "Single large field with multiple targets",
+  "findParts.form.words": "Words/sequences (comma-separated)",
+  "findParts.form.words.placeholder": "e.g.: CAT, TREE, SUN",
+  "findParts.form.targetsCount": "Targets count",
+  "findParts.summary.difficulty": "Difficulty",
+  "findParts.summary.gridType": "Grid type",
+  "findParts.summary.singleField": "Single large field",
+  "findParts.summary.words": "Words",
+  "findParts.summary.targetsCount": "Targets"
 }

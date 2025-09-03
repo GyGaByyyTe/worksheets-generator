@@ -175,5 +175,25 @@
   "subtraction.modal.title": "Настройки вычитания",
   "subtraction.summary.difficulty": "Сложность",
   "subtraction.summary.count": "Примеров на странице",
-  "subtraction.summary.icons": "Иконки"
+  "subtraction.summary.icons": "Иконки",
+
+  "generator.params.findParts": "Параметры: Найди части",
+
+  "findParts.form.difficulty": "Сложность поля",
+  "findParts.difficulty.1": "Маленькое поле (легко)",
+  "findParts.difficulty.2": "Среднее поле",
+  "findParts.difficulty.3": "Большое поле (сложно)",
+  "findParts.form.gridType": "Тип поля",
+  "findParts.gridType.icons": "Иконки",
+  "findParts.gridType.letters": "Буквы",
+  "findParts.gridType.digits": "Цифры",
+  "findParts.form.modeSingle": "Одно большое поле с несколькими целями",
+  "findParts.form.words": "Слова/последовательности (через запятую)",
+  "findParts.form.words.placeholder": "например: КОТ, ЛИСА, САД",
+  "findParts.form.targetsCount": "Количество целей",
+  "findParts.summary.difficulty": "Сложность",
+  "findParts.summary.gridType": "Тип поля",
+  "findParts.summary.singleField": "Одно большое поле",
+  "findParts.summary.words": "Слова",
+  "findParts.summary.targetsCount": "Целей"
 }

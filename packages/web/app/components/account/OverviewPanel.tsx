@@ -51,7 +51,7 @@ export default function OverviewPanel({
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 16 }}>
+      <div className="" style={{ marginTop: 16 }}>
         <h3 style={{ margin: '0 0 4px 0' }}>{t('account.recent.title')}</h3>
         <p className="muted" style={{ marginTop: 0 }}>
           {t('account.recent.subtitle')}

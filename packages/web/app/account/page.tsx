@@ -3,12 +3,16 @@ import React from 'react';
 import { useAuth } from '@/auth/AuthProvider';
 import { absUrl } from 'lib/api';
 import { useT } from '@/i18n/I18nProvider';
-import type { GenItem as RecentItem } from '@/components/generations/GenCard';
 import ProfileHeader from '@/components/account/ProfileHeader';
 import TabsNav from '@/components/account/TabsNav';
 import OverviewPanel from '@/components/account/OverviewPanel';
 import UnauthorizedNotice from '@/components/account/UnauthorizedNotice';
-import type { Profile, Stats, AccountTab } from 'lib/types';
+import type {
+  Profile,
+  Stats,
+  AccountTab,
+  GenItem as RecentItem,
+} from 'lib/types';
 
 function useProfileData() {
   const { token } = useAuth();

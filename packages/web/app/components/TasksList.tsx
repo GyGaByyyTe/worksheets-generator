@@ -8,6 +8,7 @@ export type TasksListProps = {
   tasks: TaskInfo[];
   selected: string[];
   onToggle: (key: string) => void;
+  onSelectAll?: () => void;
 };
 
 function groupByCategory(tasks: TaskInfo[]) {
@@ -24,6 +25,7 @@ export default function TasksList({
   tasks,
   selected,
   onToggle,
+  onSelectAll,
 }: TasksListProps) {
   const t = useT();
   const groups = groupByCategory(tasks);
@@ -43,7 +45,14 @@ export default function TasksList({
   return (
     <div className="row">
       <div className="tasks">
-        <div className="tasks-title">{t('tasks.title')}</div>
+        <div className="row" style={{ alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div className="tasks-title">{t('tasks.title')}</div>
+          {onSelectAll && (
+            <button type="button" className="ui-btn ui-btn--sm ui-btn--outline" onClick={onSelectAll}>
+              {t('actions.selectAll')}
+            </button>
+          )}
+        </div>
         {keys.map((catKey) => (
           <div key={catKey} style={{ marginBottom: 10 }}>
             <div className="tag" style={{ marginBottom: 8 }}>

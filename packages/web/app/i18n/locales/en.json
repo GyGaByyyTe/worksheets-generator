@@ -9,6 +9,7 @@
   "actions.refreshing": "Refreshing...",
   "actions.generate": "Generate",
   "actions.generating": "Generating...",
+  "actions.selectAll": "Select all",
 
   "days.label": "Days:",
   "tasks.title": "Tasks:",
@@ -36,7 +37,6 @@
 
   "connectDots.lockLabel": "Tie pictures count to days count",
   "connectDots.picturesCount": "Pictures: {days}",
-  "connectDots.section.title": "Connect-the-dots settings",
   "connectDots.section.description": "Configure generation parameters per day (up to 1 image per day).",
   "connectDots.day.title": "Day {n}",
   "connectDots.day.configure": "Configure",

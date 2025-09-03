@@ -9,6 +9,7 @@
   "actions.refreshing": "Обновление...",
   "actions.generate": "Сгенерировать",
   "actions.generating": "Генерация...",
+  "actions.selectAll": "Выбрать все",
 
   "days.label": "Дней:",
   "tasks.title": "Задания:",
@@ -36,7 +37,6 @@
 
   "connectDots.lockLabel": "Привязать число картинок к числу дней",
   "connectDots.picturesCount": "Картинок: {days}",
-  "connectDots.section.title": "Настройки рисунков по точкам",
   "connectDots.section.description": "Настройте параметры генерации рисунков по точкам для каждого дня (до 1 изображения на день)",
   "connectDots.day.title": "День {n}",
   "connectDots.day.configure": "Настроить",

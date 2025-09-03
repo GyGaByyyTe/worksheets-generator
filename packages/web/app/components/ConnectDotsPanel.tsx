@@ -1,13 +1,11 @@
 'use client';
 import React from 'react';
-import ImageDotsTable, {
-  ImageDotsParams,
-  defaultParams,
-} from '@/components/ImageDotsTable';
+import ImageDotsTable, { defaultParams } from '@/components/ImageDotsTable';
 import { useT } from '@/i18n/I18nProvider';
 import Checkbox from '@/components/ui/checkbox';
 import DayConfigCard from '@/components/DayConfigCard';
 import DotsConfigForm from '@/components/DotsConfigForm';
+import type { ImageDotsParams } from 'lib/types';
 
 export type ConnectDotsPanelProps = {
   days: number;
@@ -35,7 +33,6 @@ export default function ConnectDotsPanel({
     while (next.length < days) next.push(defaultParams());
     if (next.length > days) next.length = days;
     if (next.length !== dotsRows.length) setDotsRows(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, lockToDays]);
 
   const dayCards = Array.from({ length: days }, (_, i) => i);
@@ -43,16 +40,12 @@ export default function ConnectDotsPanel({
   return (
     <div className="row" style={{ width: '100%' }}>
       <div style={{ width: '100%' }}>
-        <div
-          className="panel"
-          style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div className="tasks-title">{t('connectDots.section.title')}</div>
             <div className="muted">{t('connectDots.section.description')}</div>
           </div>
 
-          <div className="row">
+          {/* <div className="row">
             <label className="chk">
               <Checkbox
                 checked={lockToDays}
@@ -67,7 +60,7 @@ export default function ConnectDotsPanel({
                 {t('connectDots.picturesCount', { days })}
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Day cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

@@ -5,7 +5,7 @@ import type {
   ImageDotsParams,
   NumberingMode,
   PointsDistribution,
-} from '@/components/ImageDotsTable';
+} from 'lib/types';
 import Slider from '@/components/ui/slider';
 import Select from '@/components/ui/select';
 import Switch from '@/components/ui/switch';

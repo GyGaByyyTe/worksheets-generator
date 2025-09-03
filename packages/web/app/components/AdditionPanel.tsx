@@ -1,5 +1,5 @@
-"use client";
-import React from 'react';
+'use client';
+import React, { useEffect } from 'react';
 import Checkbox from '@/components/ui/checkbox';
 
 export type AdditionPanelProps = {
@@ -14,12 +14,18 @@ export default function AdditionPanel({
   const [difficulty, setDifficulty] = React.useState<number>(defaultDifficulty);
   const [useIcons, setUseIcons] = React.useState<boolean>(defaultUseIcons);
 
+  useEffect(() => {
+    if (difficulty !== 1) {
+      setUseIcons(false);
+    }
+  }, [difficulty]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div className="tasks-title">Параметры: Сложение</div>
         <div className="muted">
-          Выберите уровень сложности и включите иконки для примеров в пределах 10.
+          Выберите уровень сложности и включите иконки для примеров в пределах
+          10.
         </div>
       </div>
 
@@ -40,13 +46,17 @@ export default function AdditionPanel({
         </select>
       </div>
 
-      <label className="chk">
-        <Checkbox
-          checked={useIcons}
-          onChange={(e) => setUseIcons((e.target as HTMLInputElement).checked)}
-        />{' '}
-        Использовать иконки для примеров ≤ 10 (уровень 1)
-      </label>
+      {difficulty === 1 && (
+        <label className="chk">
+          <Checkbox
+            checked={useIcons}
+            onChange={(e) =>
+              setUseIcons((e.target as HTMLInputElement).checked)
+            }
+          />
+          Использовать иконки вместо цифр
+        </label>
+      )}
 
       {/* Hidden input mirrors checkbox boolean as string for server */}
       <input

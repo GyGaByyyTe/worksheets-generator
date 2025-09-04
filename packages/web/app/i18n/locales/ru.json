@@ -195,5 +195,25 @@
   "findParts.summary.gridType": "Тип поля",
   "findParts.summary.singleField": "Одно большое поле",
   "findParts.summary.words": "Слова",
-  "findParts.summary.targetsCount": "Целей"
+  "findParts.summary.targetsCount": "Целей",
+
+  "generator.params.weights": "Параметры: Весы",
+
+  "weights.modal.title": "Настройки генератора весов",
+  "weights.form.difficulty": "Уровень сложности",
+  "weights.form.type": "Тип задач",
+  "weights.form.count": "Количество задач:",
+  "weights.form.useIcons": "Использовать иконки",
+  "weights.difficulty.1": "Лёгкий",
+  "weights.difficulty.2": "Средний",
+  "weights.difficulty.3": "Сложный",
+  "weights.type.regular": "Обычные весы",
+  "weights.type.classic": "Классические весы",
+  "weights.type.multiple": "Множественные (mock)",
+  "weights.type.inequalities": "Неравенства (mock)",
+  "weights.type.sequences": "Последовательности (mock)",
+  "weights.summary.difficulty": "Сложность",
+  "weights.summary.type": "Тип",
+  "weights.summary.count": "Задач на странице",
+  "weights.summary.icons": "Иконки"
 }

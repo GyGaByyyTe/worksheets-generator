@@ -195,5 +195,25 @@
   "findParts.summary.gridType": "Grid type",
   "findParts.summary.singleField": "Single large field",
   "findParts.summary.words": "Words",
-  "findParts.summary.targetsCount": "Targets"
+  "findParts.summary.targetsCount": "Targets",
+
+  "generator.params.weights": "Parameters: Weights",
+
+  "weights.modal.title": "Weights generator settings",
+  "weights.form.difficulty": "Difficulty level",
+  "weights.form.type": "Task type",
+  "weights.form.count": "Tasks count:",
+  "weights.form.useIcons": "Use icons",
+  "weights.difficulty.1": "Easy",
+  "weights.difficulty.2": "Medium",
+  "weights.difficulty.3": "Hard",
+  "weights.type.regular": "Regular",
+  "weights.type.classic": "Classic scales",
+  "weights.type.multiple": "Multiple (mock)",
+  "weights.type.inequalities": "Inequalities (mock)",
+  "weights.type.sequences": "Sequences (mock)",
+  "weights.summary.difficulty": "Difficulty",
+  "weights.summary.type": "Type",
+  "weights.summary.count": "Tasks per page",
+  "weights.summary.icons": "Icons"
 }

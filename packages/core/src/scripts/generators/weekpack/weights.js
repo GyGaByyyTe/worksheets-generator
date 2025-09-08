@@ -88,19 +88,21 @@ function pageWeights(pageNum, options = {}) {
         <text x="${x}" y="${y + 5}" text-anchor="middle" font-size="22" fill="#3f7bf6">?</text>
       </g>`;
 
-    // layout two items per side horizontally
+    // layout items per side horizontally without overlap; center around centerX
     const renderSide = (centerX, items, withUnknown) => {
       let g = '';
-      const offset = items.length > 1 || withUnknown ? 28 : 0;
-      let x1 = centerX - offset;
-      items.forEach((it, idx) => {
-        const x = items.length === 1 && !withUnknown ? centerX : x1 + idx * 56;
-        g += tile(x, barY - 42, it.emoji, it.w);
+      const entries = [...items.map((it) => ({ type: 'known', it })), ...(withUnknown ? [{ type: 'unknown' }] : [])];
+      const slotGap = 64; // 56px tile + 8px gap
+      const total = entries.length;
+      const startX = centerX - ((total - 1) * slotGap) / 2;
+      entries.forEach((e, idx) => {
+        const x = total === 1 ? centerX : startX + idx * slotGap;
+        if (e.type === 'unknown') {
+          g += unknownTile(x, barY - 42);
+        } else {
+          g += tile(x, barY - 42, e.it.emoji, e.it.w);
+        }
       });
-      if (withUnknown) {
-        const x = items.length === 0 ? centerX : centerX + offset;
-        g += unknownTile(x, barY - 42);
-      }
       return g;
     };
 
@@ -125,17 +127,51 @@ function pageWeights(pageNum, options = {}) {
     const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
     const topC = 300;
     const dyC = 260;
-    for (let i = 0; i < tasksCount; i++) {
-      const cx = i % 2 === 0 ? sx - 220 : sx + 220;
-      const cy = topC + Math.floor(i / 2) * dyC;
-      // pick 2-3 different animals
-      const idxs = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, rndInt(2, 3));
-      const items = idxs.map((j) => animals[j]);
-      // left: 1-2 items, right: 1 item known
-      const leftCount = items.length === 2 ? 2 : rndInt(1, 2);
-      const leftItems = items.slice(0, leftCount);
-      const rightItems = items.slice(leftCount, leftCount + 1);
-      content += classicScaleSVG(cx, cy, leftItems, rightItems, true);
+
+    // Difficulty handling similar spirit to 'regular' mode
+    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    // For classic mode, vary counts of known items on each side and the side of unknown
+    // Each entry: [leftKnownMin, leftKnownMax, rightKnownMin, rightKnownMax, unknownOnRightProbability]
+    const profileByDiff = {
+      1: [1, 2, 1, 1, 1.0], // easy: 1–2 left vs 1 right, unknown always on right
+      2: [2, 2, 1, 2, 0.7], // medium: 2 left vs 1–2 right, mostly unknown on right
+      3: [2, 3, 2, 2, 0.5], // hard: 2–3 left vs 2 right, unknown side random
+    };
+    const [lMin, lMax, rMin, rMax, pRight] = profileByDiff[difficulty] || profileByDiff[2];
+
+    function genTaskItems() {
+      // choose 2–4 available animals to diversify, allow repetitions via sampling later
+      const poolIdxs = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, rndInt(2, 4));
+      const pool = poolIdxs.map((j) => animals[j]);
+      const leftCount = rndInt(lMin, lMax);
+      const rightCount = rndInt(rMin, rMax);
+      const unknownOnRight = Math.random() < pRight;
+      // sample with possible repetition from pool
+      const pickFromPool = () => pool[rndInt(0, pool.length - 1)];
+      const leftItems = Array.from({ length: leftCount }, () => pickFromPool());
+      const rightItems = Array.from({ length: rightCount }, () => pickFromPool());
+      return { leftItems, rightItems, unknownOnRight };
+    }
+
+    // ensure solvable (unknown positive and reasonable bound)
+    function isValid(leftItems, rightItems, unknownOnRight) {
+      const sum = (arr) => arr.reduce((s, it) => s + (it ? it.w : 0), 0);
+      const leftSum = sum(leftItems);
+      const rightSum = sum(rightItems);
+      const unknown = unknownOnRight ? leftSum - rightSum : rightSum - leftSum;
+      return Number.isFinite(unknown) && unknown > 0 && unknown <= 20; // cap to keep numbers kid-friendly
+    }
+
+    let produced = 0;
+    let guardAll = 0;
+    while (produced < tasksCount && guardAll < tasksCount * 50) {
+      guardAll++;
+      const { leftItems, rightItems, unknownOnRight } = genTaskItems();
+      if (!isValid(leftItems, rightItems, unknownOnRight)) continue;
+      const cx = produced % 2 === 0 ? sx - 220 : sx + 220;
+      const cy = topC + Math.floor(produced / 2) * dyC;
+      content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight);
+      produced++;
     }
   } else {
     // REGULAR

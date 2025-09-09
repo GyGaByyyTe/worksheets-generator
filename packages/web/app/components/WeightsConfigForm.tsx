@@ -7,7 +7,7 @@ import { useT } from '@/i18n/I18nProvider';
 
 export type WeightsConfig = {
   difficulty: number; // 1..3
-  taskType: 'regular' | 'classic' | 'multiple' | 'inequalities' | 'sequences';
+  taskType: 'regular' | 'classic' | 'reverse' | 'inequalities';
   count: number; // tasks per page (recommended up to 10)
   useIcons: boolean;
 };
@@ -61,16 +61,15 @@ export default function WeightsConfigForm({
         >
           <option value="regular">{t('weights.type.regular')}</option>
           <option value="classic">{t('weights.type.classic')}</option>
-          <option value="multiple">{t('weights.type.multiple')}</option>
+          <option value="reverse">{t('weights.type.reverse')}</option>
           <option value="inequalities">{t('weights.type.inequalities')}</option>
-          <option value="sequences">{t('weights.type.sequences')}</option>
         </Select>
       </label>
 
       {/* Count */}
       <Slider
         min={1}
-        max={taskType === 'classic' || taskType === 'inequalities' ? 10 : 6}
+        max={taskType === 'classic' || taskType === 'reverse' || taskType === 'inequalities' ? 10 : 6}
         step={1}
         value={count}
         onChange={(e) => update({ count: Number((e.target as HTMLInputElement).value) })}

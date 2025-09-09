@@ -16,14 +16,20 @@ function pageWeights(pageNum, options = {}) {
     : false;
   // 4 эмодзи/иконки и их случайные веса 1–9 кг
   const iconSet = useIcons
-    ? ['🔺', '⚪', '⬛', '◆'] // simple shapes icons
-    : ['🦎', '🐢', '🐊', '🦀']; // default animals
-  const animals = [
+    ? ['🔺', '⚪', '⬛', '◆', '●', '▲'] // simple shapes icons (6)
+    : ['🦎', '🐢', '🐊', '🦀', '🐸', '🦞']; // default animals extended (6)
+  // build up to 6 animals with varied weight ranges
+  const baseAnimals = [
     { emoji: iconSet[0], w: rndInt(1, 4) },
     { emoji: iconSet[1], w: rndInt(2, 6) },
     { emoji: iconSet[2], w: rndInt(5, 9) },
     { emoji: iconSet[3], w: rndInt(1, 4) },
+    { emoji: iconSet[4], w: rndInt(3, 7) },
+    { emoji: iconSet[5], w: rndInt(6, 10) },
   ];
+  // pick 5 or 6 items for the legend and generation pool
+  const legendCount = rndInt(5, 6);
+  const animals = baseAnimals.slice(0, legendCount);
   // Перенесём легенду ниже, чтобы не наезжала на заголовок/подзаголовок
   const legendY = 210;
   let subtitle = '';
@@ -32,6 +38,9 @@ function pageWeights(pageNum, options = {}) {
     subtitle = 'Посмотри в легенду сверху и подпиши вес на дисплее весов.';
   } else if (type === 'classic') {
     subtitle = 'Сравни чаши весов. Найди вес неизвестного предмета.';
+  } else if (type === 'reverse') {
+    titleText = 'Уравновесь весы';
+    subtitle = 'Уберите один предмет с левой стороны для равновесия весов';
   } else if (type === 'inequalities') {
     titleText = 'Какая сторона весов тяжелее?';
     subtitle = '';
@@ -42,15 +51,53 @@ function pageWeights(pageNum, options = {}) {
     pageNum,
   });
 
-  // Легенда (общая для обоих типов)
+  // Легенда (общая для обоих типов) — авто‑расстановка по ширине листа, с адаптацией под 2 строки
   const lx = MARGIN + 10;
-  animals.forEach((a, i) => {
-    const x = lx + i * 180;
-    content += `<g>
-      <text x="${x}" y="${legendY}" font-size="48">${a.emoji}</text>
-      <text x="${x + 74}" y="${legendY}" font-family="Arial, sans-serif" font-size="24">${a.w} кг</text>
-    </g>`;
-  });
+  const maxRightXForLabel = WIDTH - MARGIN - 10; // правая граница для текста
+  const useTwoRows = animals.length > 5;
+  const legendEmojiSize = useTwoRows ? 42 : 48;
+  const legendLabelSize = useTwoRows ? 20 : 24;
+  const labelOffset = useTwoRows ? 56 : 64; // чуть компактнее, если 2 строки
+  const available = maxRightXForLabel - labelOffset - lx;
+
+  if (!useTwoRows) {
+    const step = animals.length > 1 ? Math.min(180, Math.floor(available / (animals.length - 1))) : 0;
+    animals.forEach((a, i) => {
+      const x = lx + i * step;
+      content += `<g>
+        <text x="${x}" y="${legendY}" font-size="${legendEmojiSize}">${a.emoji}</text>
+        <text x="${x + labelOffset}" y="${legendY}" font-family="Arial, sans-serif" font-size="${legendLabelSize}">${a.w} кг</text>
+      </g>`;
+    });
+  } else {
+    const rowGap = 44; // расстояние между строками легенды
+    const itemsPerRow = Math.ceil(animals.length / 2); // 3 для 6 значков
+    const stepRow = itemsPerRow > 1 ? Math.min(180, Math.floor(available / (itemsPerRow - 1))) : 0;
+
+    // первая строка
+    for (let i = 0; i < itemsPerRow; i++) {
+      const a = animals[i];
+      const x = lx + i * stepRow;
+      content += `<g>
+        <text x="${x}" y="${legendY}" font-size="${legendEmojiSize}">${a.emoji}</text>
+        <text x="${x + labelOffset}" y="${legendY}" font-family="Arial, sans-serif" font-size="${legendLabelSize}">${a.w} кг</text>
+      </g>`;
+    }
+    // вторая строка
+    for (let i = itemsPerRow; i < animals.length; i++) {
+      const a = animals[i];
+      const idx = i - itemsPerRow;
+      const x = lx + idx * stepRow;
+      const y2 = legendY + rowGap;
+      content += `<g>
+        <text x="${x}" y="${y2}" font-size="${legendEmojiSize}">${a.emoji}</text>
+        <text x="${x + labelOffset}" y="${y2}" font-family="Arial, sans-serif" font-size="${legendLabelSize}">${a.w} кг</text>
+      </g>`;
+    }
+  }
+
+  // дополнительный отступ вниз, если легенда в 2 строки
+  const addTop = useTwoRows ? 40 : 0;
 
   // Регулярные весы — существующее поведение
   function regularScaleSVG(x, y, labelEmojis) {
@@ -150,52 +197,71 @@ function pageWeights(pageNum, options = {}) {
   }
 
   const sx = WIDTH / 2;
-  const top = 310; // больше отступа сверху перед первым примером
+  const top = 310 + addTop; // больше отступа сверху перед первым примером, с учётом дополнительного отступа
   const dy = 300;
 
   if (type === 'classic') {
     const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
-    const topC = 280;
+    const topC = 280 + addTop;
     const dyC = 170;
 
-    // Difficulty handling similar spirit to 'regular' mode
+    // Difficulty handling for strict slot pairs per requirements
     const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
     const hideSlotNumbers = difficulty === 3;
-    // For classic mode, vary counts of known items on each side and the side of unknown
-    // Each entry: [leftKnownMin, leftKnownMax, rightKnownMin, rightKnownMax, unknownOnRightProbability]
-    const profileByDiff = {
-      1: [1, 2, 1, 1, 1.0], // easy: 1–2 left vs 1 right, unknown always on right
-      2: [2, 2, 1, 2, 0.7], // medium: 2 left vs 1–2 right, mostly unknown on right
-      3: [2, 3, 2, 2, 0.5], // hard: 2–3 left vs 2 right, unknown side random
-    };
-    const [lMin, lMax, rMin, rMax, pRight] = profileByDiff[difficulty] || profileByDiff[2];
+
+    // helper to pick a smaller pool of animals to increase variety but allow repetitions later
+    function makePool() {
+      const poolIdxs = Array.from({ length: animals.length }, (_, i) => i)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, rndInt(2, Math.min(5, animals.length)));
+      return poolIdxs.map((j) => animals[j]);
+    }
 
     function genTaskItems() {
-      // choose 2–4 available animals to diversify, allow repetitions via sampling later
-      const poolIdxs = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, rndInt(2, 4));
-      const pool = poolIdxs.map((j) => animals[j]);
-      let leftCount = rndInt(lMin, lMax);
-      let rightCount = rndInt(rMin, rMax);
-      const unknownOnRight = Math.random() < pRight;
+      const pool = makePool();
+      const pickFromPool = () => pool[rndInt(0, pool.length - 1)];
 
-      // Constraints:
-      // - No more than 7 total slots (including one unknown): left + right + 1 ≤ 7 → left + right ≤ 6
-      // - Per side known tiles max 4; if one side is 4, the other must be ≤ 3
-      leftCount = Math.min(leftCount, 4);
-      rightCount = Math.min(rightCount, 4);
-      if (leftCount === 4) rightCount = Math.min(rightCount, 3);
-      if (rightCount === 4) leftCount = Math.min(leftCount, 3);
-      // Ensure total <= 6 by reducing the larger side while keeping at least 1
-      while (leftCount + rightCount > 6) {
-        if (leftCount >= rightCount && leftCount > 1) leftCount--;
-        else if (rightCount > 1) rightCount--;
-        else break;
+      // Decide slot pair and unknown placement
+      let leftSlots = 2, rightSlots = 3, unknownOnRight = true;
+      if (difficulty === 1) {
+        // pair (1,2); unknown must be on the 2-slot side to avoid 0 known on unknown side
+        const leftGetsTwo = Math.random() < 0.5;
+        leftSlots = leftGetsTwo ? 2 : 1;
+        rightSlots = leftGetsTwo ? 1 : 2;
+        unknownOnRight = rightSlots === 2; // unknown on 2-slot side
+        if (!unknownOnRight) {
+          // if unknown on left, ensure left has 2 slots
+          unknownOnRight = true; // force unknown to be on the 2-slot side (which is right here)
+        }
+      } else if (difficulty === 2) {
+        // pair (2,3); place unknown on the 3-slot side
+        const leftGetsThree = Math.random() < 0.5;
+        leftSlots = leftGetsThree ? 3 : 2;
+        rightSlots = leftGetsThree ? 2 : 3;
+        unknownOnRight = rightSlots === 3;
+      } else {
+        // difficulty 3: either (2,3) or (3,3)
+        const pick33 = Math.random() < 0.5;
+        if (pick33) {
+          leftSlots = 3; rightSlots = 3;
+          unknownOnRight = Math.random() < 0.5; // unknown can be on either side
+        } else {
+          const leftGetsThree = Math.random() < 0.5;
+          leftSlots = leftGetsThree ? 3 : 2;
+          rightSlots = leftGetsThree ? 2 : 3;
+          unknownOnRight = rightSlots === 3; // unknown on 3-slot side
+        }
       }
 
-      // sample with possible repetition from pool
-      const pickFromPool = () => pool[rndInt(0, pool.length - 1)];
-      const leftItems = Array.from({ length: leftCount }, () => pickFromPool());
-      const rightItems = Array.from({ length: rightCount }, () => pickFromPool());
+      // Convert total slots to known counts depending on unknown side
+      const leftKnown = leftSlots - (unknownOnRight === false ? 1 : 0);
+      const rightKnown = rightSlots - (unknownOnRight === true ? 1 : 0);
+
+      // Safety guards
+      if (leftKnown < 0 || rightKnown < 0) return null;
+
+      const leftItems = Array.from({ length: leftKnown }, () => pickFromPool());
+      const rightItems = Array.from({ length: rightKnown }, () => pickFromPool());
       return { leftItems, rightItems, unknownOnRight };
     }
 
@@ -210,19 +276,123 @@ function pageWeights(pageNum, options = {}) {
 
     let produced = 0;
     let guardAll = 0;
-    while (produced < tasksCount && guardAll < tasksCount * 50) {
+    while (produced < tasksCount && guardAll < tasksCount * 80) {
       guardAll++;
-      const { leftItems, rightItems, unknownOnRight } = genTaskItems();
+      const res = genTaskItems();
+      if (!res) continue;
+      const { leftItems, rightItems, unknownOnRight } = res;
       if (!isValid(leftItems, rightItems, unknownOnRight)) continue;
+      // On hard mode, avoid identical sets of item types on both sides (ignoring multiplicity)
+      if (difficulty === 3) {
+        const asSet = (arr) => {
+          const s = new Set();
+          for (const it of arr) s.add(it.emoji);
+          return s;
+        };
+        const sL = asSet(leftItems);
+        const sR = asSet(rightItems);
+        const same = sL.size === sR.size && [...sL].every((e) => sR.has(e));
+        if (same) continue;
+      }
       const cx = produced % 2 === 0 ? sx - 230 : sx + 230;
       const cy = topC + Math.floor(produced / 2) * dyC;
       content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight, hideSlotNumbers);
       produced++;
     }
+  } else if (type === 'reverse') {
+    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
+    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const topC = 280 + addTop;
+    const dyC = 170;
+    const hideSlotNumbers = false;
+
+    const pickAny = () => animals[rndInt(0, animals.length - 1)];
+    const sum = (arr) => arr.reduce((s, it) => s + it.w, 0);
+
+    // For hard mode alternate right between 2 and 3. Left will always be 3.
+    let altTwo = true;
+
+    for (let i = 0; i < tasksCount; i++) {
+      let rightCount, leftCount;
+      if (difficulty === 3) {
+        rightCount = altTwo ? 2 : 3; altTwo = !altTwo; leftCount = 3;
+      } else if (difficulty === 1) {
+        rightCount = 1; leftCount = 2;
+      } else { // difficulty 2
+        rightCount = rndInt(1, 2); leftCount = rightCount + 1; // 2 or 3
+      }
+
+      let success = false;
+      let attempts = 0;
+      while (!success && attempts < 60) {
+        attempts++;
+        // Build RIGHT side with unique emojis
+        let rightItems = [];
+        for (let k = 0; k < rightCount; k++) rightItems.push(pickAny());
+        let guardRight = 0;
+        while (new Set(rightItems.map((x) => x.emoji)).size !== rightItems.length && guardRight < 10) {
+          rightItems = [];
+          for (let k = 0; k < rightCount; k++) rightItems.push(pickAny());
+          guardRight++;
+        }
+        const rightSum = sum(rightItems);
+        const rightEmojis = new Set(rightItems.map((x) => x.emoji));
+        const poolLeft = animals.filter((a) => !rightEmojis.has(a.emoji));
+
+        let leftItems = null;
+        if (leftCount === 3) {
+          // need two items to make rightSum, third is removable
+          let pair = null;
+          for (let a = 0; a < poolLeft.length && !pair; a++) {
+            for (let b = a + 1; b < poolLeft.length; b++) {
+              if (poolLeft[a].w + poolLeft[b].w === rightSum) { pair = [poolLeft[a], poolLeft[b]]; break; }
+            }
+          }
+          if (!pair) { continue; }
+          // pick removable not sharing emoji with right or pair; prefer weight not on right
+          const used = new Set([pair[0].emoji, pair[1].emoji, ...rightItems.map((r) => r.emoji)]);
+          let removable = animals.find((a) => !used.has(a.emoji) && !rightItems.some((r) => r.w === a.w));
+          if (!removable) removable = animals.find((a) => !used.has(a.emoji)) || pickAny();
+          leftItems = [pair[0], pair[1], removable];
+        } else {
+          // leftCount === 2: need a single item weight equal to rightSum, second is removable
+          const match = poolLeft.find((a) => a.w === rightSum);
+          if (!match) { continue; }
+          const rightWeights = new Set(rightItems.map((r) => r.w));
+          let removable = poolLeft.find((a) => a.emoji !== match.emoji && !rightWeights.has(a.w));
+          if (!removable) removable = poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
+          leftItems = [match, removable];
+        }
+
+        // Final safety: ensure disjoint emoji sets
+        const leftEmojis = new Set(leftItems.map((x) => x.emoji));
+        const shares = [...leftEmojis].some((e) => rightEmojis.has(e));
+        if (shares) { continue; }
+
+        const cx = i % 2 === 0 ? sx - 230 : sx + 230;
+        const cy = topC + Math.floor(i / 2) * dyC;
+        content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+        success = true;
+      }
+
+      // As a last resort if not successful, fall back to simple solvable case with disjoint emojis
+      if (!success) {
+        const rightItems = [pickAny()];
+        const rightSum = sum(rightItems);
+        const rightEmojis = new Set(rightItems.map((x) => x.emoji));
+        const poolLeft = animals.filter((a) => !rightEmojis.has(a.emoji));
+        const match = poolLeft.find((a) => a.w === rightSum) || poolLeft[0];
+        const removable = poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
+        const leftItems = [match, removable];
+        const cx = i % 2 === 0 ? sx - 230 : sx + 230;
+        const cy = topC + Math.floor(i / 2) * dyC;
+        content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+      }
+    }
   } else if (type === 'inequalities') {
     const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
     const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
-    const topC = 280;
+    const topC = 280 + addTop;
     const dyC = 170;
     const [minC, maxC] = ({ 1: [1, 2], 2: [1, 3], 3: [2, 3] }[difficulty] || [1, 3]);
 

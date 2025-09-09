@@ -70,7 +70,7 @@ export default function WeightsConfigForm({
       {/* Count */}
       <Slider
         min={1}
-        max={taskType === 'classic' ? 10 : 6}
+        max={taskType === 'classic' || taskType === 'inequalities' ? 10 : 6}
         step={1}
         value={count}
         onChange={(e) => update({ count: Number((e.target as HTMLInputElement).value) })}

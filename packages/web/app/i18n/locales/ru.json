@@ -210,7 +210,7 @@
   "weights.type.regular": "Обычные весы",
   "weights.type.classic": "Классические весы",
   "weights.type.multiple": "Множественные (mock)",
-  "weights.type.inequalities": "Неравенства (mock)",
+  "weights.type.inequalities": "Неравенства",
   "weights.type.sequences": "Последовательности (mock)",
   "weights.summary.difficulty": "Сложность",
   "weights.summary.type": "Тип",

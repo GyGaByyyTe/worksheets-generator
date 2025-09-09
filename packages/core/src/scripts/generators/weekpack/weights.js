@@ -27,13 +27,17 @@ function pageWeights(pageNum, options = {}) {
   // Перенесём легенду ниже, чтобы не наезжала на заголовок/подзаголовок
   const legendY = 210;
   let subtitle = '';
+  let titleText = 'СКОЛЬКО ВЕСИТ?';
   if (type === 'regular') {
     subtitle = 'Посмотри в легенду сверху и подпиши вес на дисплее весов.';
   } else if (type === 'classic') {
     subtitle = 'Сравни чаши весов. Найди вес неизвестного предмета.';
+  } else if (type === 'inequalities') {
+    titleText = 'Какая сторона весов тяжелее?';
+    subtitle = '';
   }
   let content = headerSVG({
-    title: 'СКОЛЬКО ВЕСИТ?',
+    title: titleText,
     subtitle,
     pageNum,
   });
@@ -63,6 +67,10 @@ function pageWeights(pageNum, options = {}) {
   }
 
   // «Классические» весы — две чаши с предметами и неизвестным
+  // unknownOnRight:
+  //   true  -> unknown on RIGHT side
+  //   false -> unknown on LEFT side
+  //   null  -> no unknown, both sides known (used for inequalities)
   function classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight = true, hideSlotNumbers = false) {
     const barY = cy + 50;
     const barW = 200; // compact beam
@@ -125,7 +133,7 @@ function pageWeights(pageNum, options = {}) {
     const cardX = cx - 220;
     const cardY = barY - 92; // increased inner padding on all sides
     const cardW = 440;
-    const cardH = 124;
+    const cardH = (unknownOnRight === null ? 154 : 124);
 
     return `
       <g>
@@ -134,10 +142,10 @@ function pageWeights(pageNum, options = {}) {
         <rect x="${px - 7}" y="${barY - pillarH}" width="14" height="${pillarH}" fill="#666"/>
         <rect x="${px - barW / 2}" y="${barY}" width="${barW}" height="6" rx="3" fill="#444"/>
         <!-- trays -->
-        <rect x="${leftX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/>
-        <rect x="${rightX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/>
-        ${renderSide(leftX, leftItems, !unknownOnRight, -1)}
-        ${renderSide(rightX, rightItems, unknownOnRight, 1)}
+        <!-- <rect x="${leftX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/> -->
+        <!-- <rect x="${rightX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/> -->
+        ${renderSide(leftX, leftItems, unknownOnRight === false, -1)}
+        ${renderSide(rightX, rightItems, unknownOnRight === true, 1)}
       </g>`;
   }
 
@@ -210,6 +218,53 @@ function pageWeights(pageNum, options = {}) {
       const cy = topC + Math.floor(produced / 2) * dyC;
       content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight, hideSlotNumbers);
       produced++;
+    }
+  } else if (type === 'inequalities') {
+    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
+    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const topC = 280;
+    const dyC = 170;
+    const [minC, maxC] = ({ 1: [1, 2], 2: [1, 3], 3: [2, 3] }[difficulty] || [1, 3]);
+
+    function makeSide(k) {
+      const arr = [];
+      for (let i = 0; i < k; i++) arr.push(animals[rndInt(0, animals.length - 1)]);
+      return arr;
+    }
+
+    function genPair() {
+      const leftCount = rndInt(minC, maxC);
+      const rightCount = rndInt(minC, maxC);
+      const leftItems = makeSide(Math.min(3, leftCount));
+      const rightItems = makeSide(Math.min(3, rightCount));
+      return { leftItems, rightItems };
+    }
+
+    function sum(items) { return items.reduce((s, it) => s + it.w, 0); }
+
+    for (let i = 0; i < tasksCount; i++) {
+      const { leftItems, rightItems } = genPair();
+      const cx = i % 2 === 0 ? sx - 230 : sx + 230;
+      const cy = topC + Math.floor(i / 2) * dyC;
+      const hideSlotNumbers = difficulty === 3;
+      content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+
+      const leftSum = sum(leftItems);
+      const rightSum = sum(rightItems);
+      const correct = leftSum > rightSum ? 'left' : leftSum === rightSum ? 'equal' : 'right';
+
+      // Render smaller choices inside the card area (visual only)
+      const by = cy + 92; // lowered a bit to avoid overlap with trays
+      const bx = [cx - 120, cx, cx + 120];
+      const labels = ['Левая тяжелее', 'Равны', 'Правая тяжелее'];
+      for (let j = 0; j < 3; j++) {
+        const x = bx[j];
+        const w = j === 1 ? 72 : 110;
+        const rx = x - w / 2;
+        content += `\n        <g>\n          <rect x="${rx}" y="${by - 18}" width="${w}" height="26" rx="8" fill="#fff" stroke="#3f7bf6"/>\n          <text x="${x}" y="${by}" text-anchor="middle" font-size="12" font-family="Arial, sans-serif" fill="#3f7bf6">${labels[j]}</text>\n        </g>`;
+      }
+      // Optionally mark correct subtly (disabled to keep worksheet neutral)
+      // Could add underline or dot, but leaving clean for kids to choose.
     }
   } else {
     // REGULAR

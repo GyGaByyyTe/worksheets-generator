@@ -210,7 +210,7 @@
   "weights.type.regular": "Regular",
   "weights.type.classic": "Classic scales",
   "weights.type.multiple": "Multiple (mock)",
-  "weights.type.inequalities": "Inequalities (mock)",
+  "weights.type.inequalities": "Inequalities",
   "weights.type.sequences": "Sequences (mock)",
   "weights.summary.difficulty": "Difficulty",
   "weights.summary.type": "Type",

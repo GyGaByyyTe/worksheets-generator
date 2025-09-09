@@ -63,15 +63,27 @@ function pageWeights(pageNum, options = {}) {
   }
 
   // «Классические» весы — две чаши с предметами и неизвестным
-  function classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight = true) {
+  function classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight = true, hideSlotNumbers = false) {
     const barY = cy + 50;
-    const barW = 220;
-    const pillarH = 52;
-    const trayW = 100;
+    const barW = 200; // compact beam
+    const pillarH = 50;
+    const trayW = 90;
     const trayH = 6;
 
-    const leftX = cx - 140;
-    const rightX = cx + 140;
+    // spacing between tiles on a tray
+    const slotGap = 60; // non-overlapping spacing (56px tile + 4px gap)
+
+    // compute a slight asymmetry for the pivot based on known items count
+    const leftKnown = leftItems.length;
+    const rightKnown = rightItems.length;
+    // shift center towards the side with fewer known tiles (visually balances and frees central space)
+    const centerShift = Math.max(-30, Math.min(30, (leftKnown - rightKnown) * 18));
+    const px = cx + centerShift; // pivot (pillar/beam) x
+
+    // bring trays closer to pivot so two scales per row don't collide
+    const baseOffset = 96;
+    const leftX = px - baseOffset;
+    const rightX = px + baseOffset;
 
     // helpers: render a tile with emoji and weight label under it
     const tile = (x, y, emoji, wkg) => `
@@ -79,7 +91,7 @@ function pageWeights(pageNum, options = {}) {
         <rect x="${x - 28}" y="${y - 28}" width="56" height="56" rx="10" fill="#fff" stroke="#ddd"/>
         <text x="${x}" y="${y + 5}" text-anchor="middle" font-size="28">${emoji}</text>
         <rect x="${x - 24}" y="${y + 32}" width="48" height="6" rx="4" fill="#3f7bf6"/>
-        <text x="${x}" y="${y + 23}" text-anchor="middle" font-size="14" font-family="Arial, sans-serif" fill="#3f7bf6">${wkg}кг</text>
+        ${hideSlotNumbers ? '' : `<text x="${x}" y="${y + 23}" text-anchor="middle" font-size="14" font-family="Arial, sans-serif" fill="#3f7bf6">${wkg}кг</text>`}
       </g>`;
 
     const unknownTile = (x, y) => `
@@ -89,14 +101,17 @@ function pageWeights(pageNum, options = {}) {
       </g>`;
 
     // layout items per side horizontally without overlap; center around centerX
-    const renderSide = (centerX, items, withUnknown) => {
+    const renderSide = (centerX, items, withUnknown, dir) => {
       let g = '';
       const entries = [...items.map((it) => ({ type: 'known', it })), ...(withUnknown ? [{ type: 'unknown' }] : [])];
-      const slotGap = 64; // 56px tile + 8px gap
       const total = entries.length;
-      const startX = centerX - ((total - 1) * slotGap) / 2;
+      // push groups outward from the pillar to increase clearance but keep within the card
+      const outward = total === 4 ? 36 : total === 3 ? 14 : total === 2 ? 6 : 0;
+      const groupShift = (dir || 0) * outward;
+
+      const startX = centerX + groupShift - ((total - 1) * slotGap) / 2;
       entries.forEach((e, idx) => {
-        const x = total === 1 ? centerX : startX + idx * slotGap;
+        const x = total === 1 ? centerX + groupShift : startX + idx * slotGap;
         if (e.type === 'unknown') {
           g += unknownTile(x, barY - 42);
         } else {
@@ -106,16 +121,23 @@ function pageWeights(pageNum, options = {}) {
       return g;
     };
 
+    // background card to visually separate each scale
+    const cardX = cx - 220;
+    const cardY = barY - 92; // increased inner padding on all sides
+    const cardW = 440;
+    const cardH = 124;
+
     return `
       <g>
+        <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="12" fill="transparent" stroke="#d0d7e2"/>
         <!-- pillar and beam -->
-        <rect x="${cx - 7}" y="${barY - pillarH}" width="14" height="${pillarH}" fill="#666"/>
-        <rect x="${cx - barW / 2}" y="${barY}" width="${barW}" height="6" rx="3" fill="#444"/>
+        <rect x="${px - 7}" y="${barY - pillarH}" width="14" height="${pillarH}" fill="#666"/>
+        <rect x="${px - barW / 2}" y="${barY}" width="${barW}" height="6" rx="3" fill="#444"/>
         <!-- trays -->
         <rect x="${leftX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/>
         <rect x="${rightX - trayW / 2}" y="${barY + 6}" width="${trayW}" height="${trayH}" rx="3" fill="#3f7bf6"/>
-        ${renderSide(leftX, leftItems, !unknownOnRight)}
-        ${renderSide(rightX, rightItems, unknownOnRight)}
+        ${renderSide(leftX, leftItems, !unknownOnRight, -1)}
+        ${renderSide(rightX, rightItems, unknownOnRight, 1)}
       </g>`;
   }
 
@@ -125,11 +147,12 @@ function pageWeights(pageNum, options = {}) {
 
   if (type === 'classic') {
     const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
-    const topC = 300;
-    const dyC = 260;
+    const topC = 280;
+    const dyC = 170;
 
     // Difficulty handling similar spirit to 'regular' mode
     const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const hideSlotNumbers = difficulty === 3;
     // For classic mode, vary counts of known items on each side and the side of unknown
     // Each entry: [leftKnownMin, leftKnownMax, rightKnownMin, rightKnownMax, unknownOnRightProbability]
     const profileByDiff = {
@@ -143,9 +166,24 @@ function pageWeights(pageNum, options = {}) {
       // choose 2–4 available animals to diversify, allow repetitions via sampling later
       const poolIdxs = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, rndInt(2, 4));
       const pool = poolIdxs.map((j) => animals[j]);
-      const leftCount = rndInt(lMin, lMax);
-      const rightCount = rndInt(rMin, rMax);
+      let leftCount = rndInt(lMin, lMax);
+      let rightCount = rndInt(rMin, rMax);
       const unknownOnRight = Math.random() < pRight;
+
+      // Constraints:
+      // - No more than 7 total slots (including one unknown): left + right + 1 ≤ 7 → left + right ≤ 6
+      // - Per side known tiles max 4; if one side is 4, the other must be ≤ 3
+      leftCount = Math.min(leftCount, 4);
+      rightCount = Math.min(rightCount, 4);
+      if (leftCount === 4) rightCount = Math.min(rightCount, 3);
+      if (rightCount === 4) leftCount = Math.min(leftCount, 3);
+      // Ensure total <= 6 by reducing the larger side while keeping at least 1
+      while (leftCount + rightCount > 6) {
+        if (leftCount >= rightCount && leftCount > 1) leftCount--;
+        else if (rightCount > 1) rightCount--;
+        else break;
+      }
+
       // sample with possible repetition from pool
       const pickFromPool = () => pool[rndInt(0, pool.length - 1)];
       const leftItems = Array.from({ length: leftCount }, () => pickFromPool());
@@ -168,9 +206,9 @@ function pageWeights(pageNum, options = {}) {
       guardAll++;
       const { leftItems, rightItems, unknownOnRight } = genTaskItems();
       if (!isValid(leftItems, rightItems, unknownOnRight)) continue;
-      const cx = produced % 2 === 0 ? sx - 220 : sx + 220;
+      const cx = produced % 2 === 0 ? sx - 230 : sx + 230;
       const cy = topC + Math.floor(produced / 2) * dyC;
-      content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight);
+      content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight, hideSlotNumbers);
       produced++;
     }
   } else {
@@ -178,10 +216,10 @@ function pageWeights(pageNum, options = {}) {
     const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
     const rangeByDiff = {
       1: [1, 2],
-      2: [2, 4],
-      3: [3, 5],
+      2: [2, 3],
+      3: [3, 3],
     };
-    const [minK, maxK] = rangeByDiff[difficulty] || [3, 4];
+    const [minK, maxK] = rangeByDiff[difficulty] || [3, 3];
 
     function pickLabelAndTotal() {
       const k = rndInt(minK, maxK);

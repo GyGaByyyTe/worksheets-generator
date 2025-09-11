@@ -129,6 +129,7 @@
 
   "generator.params.connectDots": "Параметры: Соедини точки",
   "generator.params.addition": "Параметры: Сложение",
+  "generator.params.spotDiff": "Параметры: Найди отличия",
 
   "addition.form.difficulty": "Уровень сложности",
   "addition.form.count": "Количество примеров:",
@@ -223,5 +224,18 @@
   "postman.difficulty.2": "Средне",
   "postman.difficulty.3": "Сложно",
   "postman.summary.letters": "Писем",
-  "postman.summary.missing": "Пропусков"
+  "postman.summary.missing": "Пропусков",
+
+  "spotDiff.form.difficulty": "Уровень сложности",
+  "spotDiff.form.types": "Типы объектов",
+  "spotDiff.form.type.shapes": "Фигуры",
+  "spotDiff.form.type.digits": "Цифры",
+  "spotDiff.form.type.letters": "Буквы",
+  "spotDiff.form.letterLang": "Язык букв",
+  "spotDiff.form.bw": "Черно-белая печать",
+  "spotDiff.form.bw.hint": "Исключает отличия по цвету",
+  "spotDiff.form.objectCount": "Количество объектов",
+  "spotDiff.form.diffCount": "Количество отличий",
+  "spotDiff.summary.types": "Типы",
+  "spotDiff.summary.bw": "Ч/Б печать"
 }

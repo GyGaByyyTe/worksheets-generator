@@ -129,6 +129,7 @@
 
   "generator.params.connectDots": "Parameters: Connect the Dots",
   "generator.params.addition": "Parameters: Addition",
+  "generator.params.spotDiff": "Parameters: Spot the Differences",
 
   "addition.form.difficulty": "Difficulty level",
   "addition.form.count": "Examples per page:",

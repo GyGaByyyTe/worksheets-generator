@@ -11,7 +11,10 @@ const { ICONS } = require('../images');
 function pageFindParts(pageNum, options) {
   const opts = options || {};
   const mode = (opts.mode || '').toString(); // 'classic' | 'single' | ''
-  const multiSingle = (String(opts.multiSearchSingleField).toLowerCase() === 'true' || String(opts.multiSearchSingleField) === '1') || mode === 'single';
+  const multiSingle =
+    String(opts.multiSearchSingleField).toLowerCase() === 'true' ||
+    String(opts.multiSearchSingleField) === '1' ||
+    mode === 'single';
   const gridType = (opts.gridType || 'icons').toString(); // 'icons' | 'letters' | 'digits'
   const targetsCount = Number(opts.targetsCount) || 3; // for multi-single mode (icons)
   // difficulty 1..3 -> sizes 3,4,5 (default 3)
@@ -28,9 +31,10 @@ function pageFindParts(pageNum, options) {
     subtitle = 'Найди и обведи все показанные справа кусочки на общем поле.';
   }
   if (gridType === 'letters' || gridType === 'digits') {
-    subtitle = gridType === 'letters'
-      ? 'Найди в поле все слова из списка справа.'
-      : 'Найди в поле все последовательности цифр из списка справа.';
+    subtitle =
+      gridType === 'letters'
+        ? 'Найди в поле все слова из списка справа.'
+        : 'Найди в поле все последовательности цифр из списка справа.';
   }
 
   let content = headerSVG({
@@ -162,7 +166,7 @@ function pageFindParts(pageNum, options) {
         const x = startX + c * cell;
         const y = startY + r * cell;
         s += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" fill="none" stroke="#222"/>
-              <text x="${x + cell / 2}" y="${y + cell / 2 + Math.floor(fontSize/3)}" font-size="${fontSize}" text-anchor="middle">${grid[r][c]}</text>`;
+              <text x="${x + cell / 2}" y="${y + cell / 2 + Math.floor(fontSize / 3)}" font-size="${fontSize}" text-anchor="middle">${grid[r][c]}</text>`;
       }
     }
     s += '</g>';
@@ -178,7 +182,7 @@ function pageFindParts(pageNum, options) {
       // check overlaps
       let ok = true;
       for (const [dr, dc] of shape) {
-        const key = (baseR + dr) + ':' + (baseC + dc);
+        const key = baseR + dr + ':' + (baseC + dc);
         if (avoid.has(key)) {
           ok = false;
           break;
@@ -187,7 +191,7 @@ function pageFindParts(pageNum, options) {
       if (!ok) continue;
       for (const [dr, dc] of shape) {
         grid[baseR + dr][baseC + dc] = icon;
-        avoid.add((baseR + dr) + ':' + (baseC + dc));
+        avoid.add(baseR + dr + ':' + (baseC + dc));
       }
       return true;
     }
@@ -196,11 +200,20 @@ function pageFindParts(pageNum, options) {
 
   // Classic icons mode with 3 separate boards (default)
   if (!multiSingle && gridType === 'icons') {
-    const size = Math.max(3, Math.min(6, Number(opts.fieldSize) || (difficulty === 1 ? 3 : difficulty === 2 ? 4 : 5)));
-    const { cell, startX, baseY, vGap, boardW, boardH } = computeCellAndPositions({ boards: 3, size });
+    const size = Math.max(
+      3,
+      Math.min(
+        6,
+        Number(opts.fieldSize) ||
+          (difficulty === 1 ? 3 : difficulty === 2 ? 4 : 5),
+      ),
+    );
+    const { cell, startX, baseY, vGap, boardW, boardH } =
+      computeCellAndPositions({ boards: 3, size });
 
     // choose shapes pool depending on difficulty
-    const pool = difficulty >= 3 ? baseShapes.concat(advancedShapes) : baseShapes;
+    const pool =
+      difficulty >= 3 ? baseShapes.concat(advancedShapes) : baseShapes;
     const poolIdxs = pool
       .map((_, i) => i)
       .sort(() => Math.random() - 0.5)
@@ -221,18 +234,25 @@ function pageFindParts(pageNum, options) {
       placeShapeOnGrid({ grid, size, shape, icon: targetIcon });
 
       const startY = baseY + i * (boardH + vGap);
-      content += renderBoard({ startX, startY, size, cell, grid, fontSize: Math.max(36, Math.floor(cell*0.48)) });
+      content += renderBoard({
+        startX,
+        startY,
+        size,
+        cell,
+        grid,
+        fontSize: Math.max(36, Math.floor(cell * 0.48)),
+      });
 
       // sample on right for current field
       const px = startX + boardW + 80;
       const py = startY + 20;
       content += `<text x="${px - 30}" y="${py + 40}" font-family="Arial, sans-serif" font-size="22">${i + 1}.</text>`;
       shape.forEach(([dr, dc]) => {
-        const x = px + dc * Math.floor(cell*0.64);
-        const y = py + dr * Math.floor(cell*0.64);
-        const sq = Math.floor(cell*0.64);
+        const x = px + dc * Math.floor(cell * 0.64);
+        const y = py + dr * Math.floor(cell * 0.64);
+        const sq = Math.floor(cell * 0.64);
         content += `<rect x="${x}" y="${y}" width="${sq}" height="${sq}" fill="none" stroke="#222"/>
-        <text x="${x + Math.floor(sq/2)}" y="${y + Math.floor(sq*0.7)}" text-anchor="middle" font-size="${Math.max(24, Math.floor(sq*0.45))}">${targetIcon}</text>`;
+        <text x="${x + Math.floor(sq / 2)}" y="${y + Math.floor(sq * 0.7)}" text-anchor="middle" font-size="${Math.max(24, Math.floor(sq * 0.45))}">${targetIcon}</text>`;
       });
     }
 
@@ -241,8 +261,18 @@ function pageFindParts(pageNum, options) {
 
   // Single large field with multiple shapes (icons)
   if (multiSingle && gridType === 'icons') {
-    const size = Math.max(5, Math.min(12, Number(opts.fieldSize) || (difficulty === 1 ? 6 : difficulty === 2 ? 8 : 10)));
-    const { cell, startX, baseY, boardW, boardH } = computeCellAndPositions({ boards: 1, size });
+    const size = Math.max(
+      5,
+      Math.min(
+        12,
+        Number(opts.fieldSize) ||
+          (difficulty === 1 ? 6 : difficulty === 2 ? 8 : 10),
+      ),
+    );
+    const { cell, startX, baseY, boardW, boardH } = computeCellAndPositions({
+      boards: 1,
+      size,
+    });
 
     // grid fill
     const grid = [];
@@ -251,18 +281,33 @@ function pageFindParts(pageNum, options) {
       for (let c = 0; c < size; c++) grid[r][c] = choice(icons);
     }
 
-    const pool = baseShapes.concat(advancedShapes).sort(() => Math.random() - 0.5);
+    const pool = baseShapes
+      .concat(advancedShapes)
+      .sort(() => Math.random() - 0.5);
     const avoid = new Set();
 
     const samples = [];
     for (let i = 0; i < Math.max(1, Math.min(6, targetsCount)); i++) {
       const shape = transformRandom(pool[i % pool.length]);
       const targetIcon = choice(icons);
-      const placed = placeShapeOnGrid({ grid, size, shape, icon: targetIcon, avoid });
+      const placed = placeShapeOnGrid({
+        grid,
+        size,
+        shape,
+        icon: targetIcon,
+        avoid,
+      });
       if (placed) samples.push({ shape, icon: targetIcon });
     }
 
-    content += renderBoard({ startX, startY: baseY, size, cell, grid, fontSize: Math.max(28, Math.floor(cell*0.48)) });
+    content += renderBoard({
+      startX,
+      startY: baseY,
+      size,
+      cell,
+      grid,
+      fontSize: Math.max(28, Math.floor(cell * 0.48)),
+    });
 
     // samples column on the right
     let px = startX + boardW + 40;
@@ -274,7 +319,7 @@ function pageFindParts(pageNum, options) {
         const x = px + dc * sq;
         const y = py + dr * sq;
         content += `<rect x="${x}" y="${y}" width="${sq}" height="${sq}" fill="none" stroke="#222"/>
-        <text x="${x + Math.floor(sq/2)}" y="${y + Math.floor(sq*0.7)}" text-anchor="middle" font-size="${Math.max(20, Math.floor(sq*0.45))}">${smp.icon}</text>`;
+        <text x="${x + Math.floor(sq / 2)}" y="${y + Math.floor(sq * 0.7)}" text-anchor="middle" font-size="${Math.max(20, Math.floor(sq * 0.45))}">${smp.icon}</text>`;
       });
       py += Math.floor(cell * 0.6) * 4 + 16;
     });
@@ -284,7 +329,8 @@ function pageFindParts(pageNum, options) {
 
   // Letters/Digits word/sequence search on a single field
   {
-    const lang = ((opts.lang || 'ru').toString().toLowerCase() === 'en') ? 'en' : 'ru';
+    const lang =
+      (opts.lang || 'ru').toString().toLowerCase() === 'en' ? 'en' : 'ru';
     const count = Math.max(1, Math.min(6, Number(opts.targetsCount) || 3));
 
     // Build target list based on gridType and language
@@ -298,14 +344,52 @@ function pageFindParts(pageNum, options) {
         candidates.push(s);
       }
     } else {
-      const RU_WORDS = ['КОТ','ЛИС','САД','ДОМ','НОС','МАК','ЛУГ','СУП','ЛЕД','СОЛО','РУКА','НОГА','СЫР','МЯЧ','РАК','ЛУК'];
-      const EN_WORDS = ['CAT','DOG','SUN','TREE','BIRD','MOON','FISH','STAR','BOOK','DUCK','FROG','LION'];
+      const RU_WORDS = [
+        'КОТ',
+        'ЛИС',
+        'САД',
+        'ДОМ',
+        'НОС',
+        'МАК',
+        'ЛУГ',
+        'СУП',
+        'ЛЕД',
+        'СОЛО',
+        'РУКА',
+        'НОГА',
+        'СЫР',
+        'МЯЧ',
+        'РАК',
+        'ЛУК',
+      ];
+      const EN_WORDS = [
+        'CAT',
+        'DOG',
+        'SUN',
+        'TREE',
+        'BIRD',
+        'MOON',
+        'FISH',
+        'STAR',
+        'BOOK',
+        'DUCK',
+        'FROG',
+        'LION',
+      ];
       const base = lang === 'en' ? EN_WORDS : RU_WORDS;
       // Shuffle and use uppercased words
-      candidates = base.slice().sort(() => Math.random() - 0.5).map((w) => w.toUpperCase());
+      candidates = base
+        .slice()
+        .sort(() => Math.random() - 0.5)
+        .map((w) => w.toUpperCase());
       // If not enough, repeat shuffled
       while (candidates.length < count * 3) {
-        candidates = candidates.concat(base.slice().sort(() => Math.random() - 0.5).map((w) => w.toUpperCase()));
+        candidates = candidates.concat(
+          base
+            .slice()
+            .sort(() => Math.random() - 0.5)
+            .map((w) => w.toUpperCase()),
+        );
       }
     }
 
@@ -313,9 +397,17 @@ function pageFindParts(pageNum, options) {
     const longest = candidates.reduce((m, w) => Math.max(m, w.length), 0);
     const size = Math.max(
       longest + 1,
-      Math.min(16, Number(opts.fieldSize) || (difficulty === 1 ? 8 : difficulty === 2 ? 10 : 12))
+      Math.min(
+        16,
+        Number(opts.fieldSize) ||
+          (difficulty === 1 ? 8 : difficulty === 2 ? 10 : 12),
+      ),
     );
-    const { cell, startX, baseY, boardW } = computeCellAndPositions({ boards: 1, size, reserveRight: 300 });
+    const { cell, startX, baseY, boardW } = computeCellAndPositions({
+      boards: 1,
+      size,
+      reserveRight: 300,
+    });
 
     // prepare grid
     const grid = Array.from({ length: size }, () => Array(size).fill(''));
@@ -379,9 +471,15 @@ function pageFindParts(pageNum, options) {
     const used = new Set();
     let idx = 0;
     let guard = 0;
-    while (placed.length < count && guard < count * 50 && idx < candidates.length) {
+    while (
+      placed.length < count &&
+      guard < count * 50 &&
+      idx < candidates.length
+    ) {
       guard++;
-      const w = String(candidates[idx++] || '').toUpperCase().replace(/[^A-ZА-ЯЁ0-9]/g, '');
+      const w = String(candidates[idx++] || '')
+        .toUpperCase()
+        .replace(/[^A-ZА-ЯЁ0-9]/g, '');
       if (!w || used.has(w)) continue;
       // For digits, ensure only digits
       if (gridType === 'digits' && /\D/.test(w)) continue;
@@ -407,7 +505,7 @@ function pageFindParts(pageNum, options) {
         w = '';
         for (let j = 0; j < L; j++) w += randDigit();
       } else {
-        w = (lang === 'en' ? 'CAT' : 'КОТ');
+        w = lang === 'en' ? 'CAT' : 'КОТ';
       }
       if (used.has(w)) continue;
       const ok = placeWordRandom(w) || placeWordDeterministic(w);
@@ -418,7 +516,12 @@ function pageFindParts(pageNum, options) {
     }
 
     // fill the rest
-    const randChar = gridType === 'digits' ? randDigit : (lang === 'en' ? randLatin : randomLetters());
+    const randChar =
+      gridType === 'digits'
+        ? randDigit
+        : lang === 'en'
+          ? randLatin
+          : randomLetters();
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
         if (!grid[r][c]) grid[r][c] = randChar();
@@ -426,7 +529,14 @@ function pageFindParts(pageNum, options) {
     }
 
     // render board
-    content += renderBoard({ startX, startY: baseY, size, cell, grid, fontSize: Math.max(24, Math.floor(cell*0.5)) });
+    content += renderBoard({
+      startX,
+      startY: baseY,
+      size,
+      cell,
+      grid,
+      fontSize: Math.max(24, Math.floor(cell * 0.5)),
+    });
 
     // render target list on the right (only placed ones)
     const px = startX + boardW + 40;

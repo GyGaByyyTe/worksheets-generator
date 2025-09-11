@@ -20,7 +20,8 @@ export default function WeightsConfigForm({
   onChange: (next: WeightsConfig) => void;
 }) {
   const t = useT();
-  const update = (patch: Partial<WeightsConfig>) => onChange({ ...value, ...patch });
+  const update = (patch: Partial<WeightsConfig>) =>
+    onChange({ ...value, ...patch });
   const { difficulty, taskType, count, useIcons } = value;
 
   React.useEffect(() => {
@@ -43,7 +44,9 @@ export default function WeightsConfigForm({
         <Select
           value={String(difficulty)}
           onChange={(e) =>
-            update({ difficulty: Number((e.target as HTMLSelectElement).value) })
+            update({
+              difficulty: Number((e.target as HTMLSelectElement).value),
+            })
           }
         >
           <option value="1">{t('weights.difficulty.1')}</option>
@@ -57,7 +60,12 @@ export default function WeightsConfigForm({
         <div className="ui-field__label">{t('weights.form.type')}</div>
         <Select
           value={taskType}
-          onChange={(e) => update({ taskType: (e.target as HTMLSelectElement).value as WeightsConfig['taskType'] })}
+          onChange={(e) =>
+            update({
+              taskType: (e.target as HTMLSelectElement)
+                .value as WeightsConfig['taskType'],
+            })
+          }
         >
           <option value="regular">{t('weights.type.regular')}</option>
           <option value="classic">{t('weights.type.classic')}</option>
@@ -69,10 +77,18 @@ export default function WeightsConfigForm({
       {/* Count */}
       <Slider
         min={1}
-        max={taskType === 'classic' || taskType === 'reverse' || taskType === 'inequalities' ? 10 : 6}
+        max={
+          taskType === 'classic' ||
+          taskType === 'reverse' ||
+          taskType === 'inequalities'
+            ? 10
+            : 6
+        }
         step={1}
         value={count}
-        onChange={(e) => update({ count: Number((e.target as HTMLInputElement).value) })}
+        onChange={(e) =>
+          update({ count: Number((e.target as HTMLInputElement).value) })
+        }
         label={t('weights.form.count')}
         valueLabel={count}
       />
@@ -80,7 +96,9 @@ export default function WeightsConfigForm({
       {/* Icons toggle */}
       <Switch
         checked={useIcons}
-        onChange={(e) => update({ useIcons: (e.target as HTMLInputElement).checked })}
+        onChange={(e) =>
+          update({ useIcons: (e.target as HTMLInputElement).checked })
+        }
         label={t('weights.form.useIcons')}
       />
     </div>

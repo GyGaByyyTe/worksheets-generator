@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React from 'react';
 import Modal from '@/components/ui/modal';
 import Button from '@/components/ui/button';
@@ -21,7 +21,10 @@ export type FindPartsPanelProps = {
 
 const STORAGE_KEY = 'findParts.config.v1';
 
-export default function FindPartsPanel({ open = false, onClose }: FindPartsPanelProps) {
+export default function FindPartsPanel({
+  open = false,
+  onClose,
+}: FindPartsPanelProps) {
   const t = useT();
   const { lang } = useI18n();
   const [cfg, setCfg] = React.useState<FindPartsPanelConfig>({
@@ -40,7 +43,9 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
         if (
           parsed &&
           typeof parsed.difficulty === 'number' &&
-          (parsed.gridType === 'icons' || parsed.gridType === 'letters' || parsed.gridType === 'digits') &&
+          (parsed.gridType === 'icons' ||
+            parsed.gridType === 'letters' ||
+            parsed.gridType === 'digits') &&
           typeof parsed.multiSingle === 'boolean' &&
           typeof parsed.targetsCount === 'number'
         ) {
@@ -74,16 +79,36 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
   // Also pass lang
   const hidden = (
     <>
-      <input type="hidden" name="taskOptions[find-parts][difficulty]" value={String(cfg.difficulty)} />
-      <input type="hidden" name="taskOptions[find-parts][gridType]" value={cfg.gridType} />
-      <input type="hidden" name="taskOptions[find-parts][multiSearchSingleField]" value={cfg.multiSingle ? 'true' : 'false'} />
-      <input type="hidden" name="taskOptions[find-parts][targetsCount]" value={String(cfg.targetsCount)} />
+      <input
+        type="hidden"
+        name="taskOptions[find-parts][difficulty]"
+        value={String(cfg.difficulty)}
+      />
+      <input
+        type="hidden"
+        name="taskOptions[find-parts][gridType]"
+        value={cfg.gridType}
+      />
+      <input
+        type="hidden"
+        name="taskOptions[find-parts][multiSearchSingleField]"
+        value={cfg.multiSingle ? 'true' : 'false'}
+      />
+      <input
+        type="hidden"
+        name="taskOptions[find-parts][targetsCount]"
+        value={String(cfg.targetsCount)}
+      />
       <input type="hidden" name="taskOptions[find-parts][lang]" value={lang} />
     </>
   );
 
   const modal = (
-    <Modal open={open} onClose={onClose || (() => {})} title={t('generator.params.findParts')}>
+    <Modal
+      open={open}
+      onClose={onClose || (() => {})}
+      title={t('generator.params.findParts')}
+    >
       <div
         style={{
           display: 'grid',
@@ -94,11 +119,16 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
       >
         {/* Difficulty */}
         <label className="ui-field">
-          <div className="ui-field__label">{t('findParts.form.difficulty')}</div>
+          <div className="ui-field__label">
+            {t('findParts.form.difficulty')}
+          </div>
           <Select
             value={String(cfg.difficulty)}
             onChange={(e) =>
-              setCfg((p) => ({ ...p, difficulty: Number((e.target as HTMLSelectElement).value) }))
+              setCfg((p) => ({
+                ...p,
+                difficulty: Number((e.target as HTMLSelectElement).value),
+              }))
             }
           >
             <option value="1">{t('findParts.difficulty.1')}</option>
@@ -112,7 +142,12 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
           <div className="ui-field__label">{t('findParts.form.gridType')}</div>
           <Select
             value={cfg.gridType}
-            onChange={(e) => setCfg((p) => ({ ...p, gridType: (e.target as HTMLSelectElement).value as any }))}
+            onChange={(e) =>
+              setCfg((p) => ({
+                ...p,
+                gridType: (e.target as HTMLSelectElement).value as any,
+              }))
+            }
           >
             <option value="icons">{t('findParts.gridType.icons')}</option>
             <option value="letters">{t('findParts.gridType.letters')}</option>
@@ -127,7 +162,12 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
             max={6}
             step={1}
             value={cfg.targetsCount}
-            onChange={(e) => setCfg((p) => ({ ...p, targetsCount: Number((e.target as HTMLInputElement).value) }))}
+            onChange={(e) =>
+              setCfg((p) => ({
+                ...p,
+                targetsCount: Number((e.target as HTMLInputElement).value),
+              }))
+            }
             label={t('findParts.form.targetsCount')}
             valueLabel={cfg.targetsCount}
           />
@@ -138,15 +178,31 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
           <div style={{ gridColumn: '1 / span 2' }}>
             <Switch
               checked={cfg.multiSingle}
-              onChange={(e) => setCfg((p) => ({ ...p, multiSingle: (e.target as HTMLInputElement).checked }))}
+              onChange={(e) =>
+                setCfg((p) => ({
+                  ...p,
+                  multiSingle: (e.target as HTMLInputElement).checked,
+                }))
+              }
               label={t('findParts.form.modeSingle')}
             />
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-        <Button type="button" variant="outline" onClick={onClose}>{t('buttons.cancel')}</Button>
-        <Button type="button" onClick={onClose}>{t('buttons.apply')}</Button>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 8,
+          marginTop: 12,
+        }}
+      >
+        <Button type="button" variant="outline" onClick={onClose}>
+          {t('buttons.cancel')}
+        </Button>
+        <Button type="button" onClick={onClose}>
+          {t('buttons.apply')}
+        </Button>
       </div>
     </Modal>
   );
@@ -157,15 +213,18 @@ export default function FindPartsPanel({ open = false, onClose }: FindPartsPanel
       {/* Summary tags */}
       <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
         <span className="tag">
-          {t('findParts.summary.difficulty')}: {t(`findParts.difficulty.${cfg.difficulty}`)}
+          {t(`findParts.difficulty.${cfg.difficulty}`)}
         </span>
         <span className="tag">
-          {t('findParts.summary.gridType')}: {t(`findParts.gridType.${cfg.gridType}`)}
+          {t('findParts.summary.gridType')}:{' '}
+          {t(`findParts.gridType.${cfg.gridType}`)}
         </span>
         {cfg.gridType === 'icons' && cfg.multiSingle && (
           <span className="tag">{t('findParts.summary.singleField')}</span>
         )}
-        <span className="tag">{t('findParts.summary.targetsCount')}: {cfg.targetsCount}</span>
+        <span className="tag">
+          {t('findParts.summary.targetsCount')}: {cfg.targetsCount}
+        </span>
       </div>
 
       {modal}

@@ -42,7 +42,9 @@ export default function SubtractionConfigForm({
     >
       {/* Difficulty */}
       <label className="ui-field">
-        <div className="ui-field__label">{t('subtraction.form.difficulty')}</div>
+        <div className="ui-field__label">
+          {t('subtraction.form.difficulty')}
+        </div>
         <Select
           value={String(difficulty)}
           onChange={(e) =>
@@ -87,7 +89,9 @@ export default function SubtractionConfigForm({
       {/* Icon theme */}
       {difficulty === 1 && useIcons && (
         <label className="ui-field">
-          <div className="ui-field__label">{t('subtraction.form.iconTheme')}</div>
+          <div className="ui-field__label">
+            {t('subtraction.form.iconTheme')}
+          </div>
           <Select
             value={iconTheme || 'fruits'}
             onChange={(e) =>

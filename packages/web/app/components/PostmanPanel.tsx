@@ -2,83 +2,80 @@
 import React from 'react';
 import Modal from '@/components/ui/modal';
 import Button from '@/components/ui/button';
-import WeightsConfigForm, {
-  type WeightsConfig,
-} from '@/components/WeightsConfigForm';
+import PostmanConfigForm, {
+  type PostmanConfig,
+} from '@/components/PostmanConfigForm';
 import { useT } from '@/i18n/I18nProvider';
 
-export type WeightsPanelProps = {
+export type PostmanPanelProps = {
   defaultDifficulty?: number; // 1..3
-  defaultTaskType?: WeightsConfig['taskType'];
-  defaultUseIcons?: boolean;
-  defaultCount?: number; // 1..15
   open?: boolean; // controls modal visibility (from parent)
   onClose?: () => void;
 };
 
-export default function WeightsPanel({
-  defaultDifficulty = 2,
-  defaultTaskType = 'regular',
-  defaultUseIcons = false,
-  defaultCount = 6,
+export default function PostmanPanel({
+  defaultDifficulty = 3,
   open = false,
   onClose,
-}: WeightsPanelProps) {
+}: PostmanPanelProps) {
   const t = useT();
-  const [cfg, setCfg] = React.useState<WeightsConfig>({
+  const [cfg, setCfg] = React.useState<PostmanConfig>({
     difficulty: defaultDifficulty,
-    taskType: defaultTaskType,
-    useIcons: defaultUseIcons,
-    count: defaultCount,
+    // defaults per difficulty (hard by default)
+    lettersMin: defaultDifficulty === 1 ? 1 : defaultDifficulty === 2 ? 2 : 5,
+    lettersMax: defaultDifficulty === 1 ? 3 : defaultDifficulty === 2 ? 4 : 6,
+    missingMin: defaultDifficulty === 1 ? 1 : defaultDifficulty === 2 ? 2 : 3,
+    missingMax: defaultDifficulty === 1 ? 4 : defaultDifficulty === 2 ? 4 : 5,
   });
 
-  const difficultyLabel = (d: number) => t(`weights.difficulty.${d}`);
-  const typeLabel = (tp: WeightsConfig['taskType']) => t(`weights.type.${tp}`);
+  const difficultyLabel = (d: number) => t(`postman.difficulty.${d}`);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {/* Hidden inputs to submit the current config */}
       <input
         type="hidden"
-        name="taskOptions[weights][difficulty]"
+        name="taskOptions[postman][difficulty]"
         value={String(cfg.difficulty)}
       />
       <input
         type="hidden"
-        name="taskOptions[weights][type]"
-        value={cfg.taskType}
+        name="taskOptions[postman][lettersMin]"
+        value={String(cfg.lettersMin)}
       />
       <input
         type="hidden"
-        name="taskOptions[weights][count]"
-        value={String(cfg.count)}
+        name="taskOptions[postman][lettersMax]"
+        value={String(cfg.lettersMax)}
       />
       <input
         type="hidden"
-        name="taskOptions[weights][useIcons]"
-        value={cfg.useIcons ? 'true' : 'false'}
+        name="taskOptions[postman][missingMin]"
+        value={String(cfg.missingMin)}
+      />
+      <input
+        type="hidden"
+        name="taskOptions[postman][missingMax]"
+        value={String(cfg.missingMax)}
       />
 
       {/* Summary of selected preferences */}
       <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
         <span className="tag">{difficultyLabel(cfg.difficulty)}</span>
         <span className="tag">
-          {t('weights.summary.type')}: {typeLabel(cfg.taskType)}
+          {t('postman.summary.letters')}: {cfg.lettersMin}–{cfg.lettersMax}
         </span>
         <span className="tag">
-          {t('weights.summary.count')}: {cfg.count}
+          {t('postman.summary.missing')}: {cfg.missingMin}–{cfg.missingMax}
         </span>
-        {cfg.useIcons && (
-          <span className="tag">{t('weights.summary.icons')}</span>
-        )}
       </div>
 
       <Modal
         open={open}
         onClose={onClose || (() => {})}
-        title={t('weights.modal.title')}
+        title={t('postman.modal.title')}
       >
-        <WeightsConfigForm value={cfg} onChange={setCfg} />
+        <PostmanConfigForm value={cfg} onChange={setCfg} />
         <div
           style={{
             display: 'flex',

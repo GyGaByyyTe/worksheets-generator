@@ -61,7 +61,10 @@ function pageWeights(pageNum, options = {}) {
   const available = maxRightXForLabel - labelOffset - lx;
 
   if (!useTwoRows) {
-    const step = animals.length > 1 ? Math.min(180, Math.floor(available / (animals.length - 1))) : 0;
+    const step =
+      animals.length > 1
+        ? Math.min(180, Math.floor(available / (animals.length - 1)))
+        : 0;
     animals.forEach((a, i) => {
       const x = lx + i * step;
       content += `<g>
@@ -72,7 +75,10 @@ function pageWeights(pageNum, options = {}) {
   } else {
     const rowGap = 44; // расстояние между строками легенды
     const itemsPerRow = Math.ceil(animals.length / 2); // 3 для 6 значков
-    const stepRow = itemsPerRow > 1 ? Math.min(180, Math.floor(available / (itemsPerRow - 1))) : 0;
+    const stepRow =
+      itemsPerRow > 1
+        ? Math.min(180, Math.floor(available / (itemsPerRow - 1)))
+        : 0;
 
     // первая строка
     for (let i = 0; i < itemsPerRow; i++) {
@@ -118,7 +124,14 @@ function pageWeights(pageNum, options = {}) {
   //   true  -> unknown on RIGHT side
   //   false -> unknown on LEFT side
   //   null  -> no unknown, both sides known (used for inequalities)
-  function classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight = true, hideSlotNumbers = false) {
+  function classicScaleSVG(
+    cx,
+    cy,
+    leftItems,
+    rightItems,
+    unknownOnRight = true,
+    hideSlotNumbers = false,
+  ) {
     const barY = cy + 50;
     const barW = 200; // compact beam
     const pillarH = 50;
@@ -132,7 +145,10 @@ function pageWeights(pageNum, options = {}) {
     const leftKnown = leftItems.length;
     const rightKnown = rightItems.length;
     // shift center towards the side with fewer known tiles (visually balances and frees central space)
-    const centerShift = Math.max(-30, Math.min(30, (leftKnown - rightKnown) * 18));
+    const centerShift = Math.max(
+      -30,
+      Math.min(30, (leftKnown - rightKnown) * 18),
+    );
     const px = cx + centerShift; // pivot (pillar/beam) x
 
     // bring trays closer to pivot so two scales per row don't collide
@@ -158,7 +174,10 @@ function pageWeights(pageNum, options = {}) {
     // layout items per side horizontally without overlap; center around centerX
     const renderSide = (centerX, items, withUnknown, dir) => {
       let g = '';
-      const entries = [...items.map((it) => ({ type: 'known', it })), ...(withUnknown ? [{ type: 'unknown' }] : [])];
+      const entries = [
+        ...items.map((it) => ({ type: 'known', it })),
+        ...(withUnknown ? [{ type: 'unknown' }] : []),
+      ];
       const total = entries.length;
       // push groups outward from the pillar to increase clearance but keep within the card
       const outward = total === 4 ? 36 : total === 3 ? 14 : total === 2 ? 6 : 0;
@@ -180,7 +199,7 @@ function pageWeights(pageNum, options = {}) {
     const cardX = cx - 220;
     const cardY = barY - 92; // increased inner padding on all sides
     const cardW = 440;
-    const cardH = (unknownOnRight === null ? 154 : 124);
+    const cardH = unknownOnRight === null ? 154 : 124;
 
     return `
       <g>
@@ -201,12 +220,18 @@ function pageWeights(pageNum, options = {}) {
   const dy = 300;
 
   if (type === 'classic') {
-    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
+    const tasksCount =
+      options && Number(options.count)
+        ? Math.max(1, Math.min(10, Number(options.count)))
+        : 6;
     const topC = 280 + addTop;
     const dyC = 170;
 
     // Difficulty handling for strict slot pairs per requirements
-    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const difficulty =
+      options && Number(options.difficulty)
+        ? Math.max(1, Math.min(3, Number(options.difficulty)))
+        : 2;
     const hideSlotNumbers = difficulty === 3;
 
     // helper to pick a smaller pool of animals to increase variety but allow repetitions later
@@ -222,7 +247,9 @@ function pageWeights(pageNum, options = {}) {
       const pickFromPool = () => pool[rndInt(0, pool.length - 1)];
 
       // Decide slot pair and unknown placement
-      let leftSlots = 2, rightSlots = 3, unknownOnRight = true;
+      let leftSlots = 2,
+        rightSlots = 3,
+        unknownOnRight = true;
       if (difficulty === 1) {
         // pair (1,2); unknown must be on the 2-slot side to avoid 0 known on unknown side
         const leftGetsTwo = Math.random() < 0.5;
@@ -243,7 +270,8 @@ function pageWeights(pageNum, options = {}) {
         // difficulty 3: either (2,3) or (3,3)
         const pick33 = Math.random() < 0.5;
         if (pick33) {
-          leftSlots = 3; rightSlots = 3;
+          leftSlots = 3;
+          rightSlots = 3;
           unknownOnRight = Math.random() < 0.5; // unknown can be on either side
         } else {
           const leftGetsThree = Math.random() < 0.5;
@@ -261,7 +289,9 @@ function pageWeights(pageNum, options = {}) {
       if (leftKnown < 0 || rightKnown < 0) return null;
 
       const leftItems = Array.from({ length: leftKnown }, () => pickFromPool());
-      const rightItems = Array.from({ length: rightKnown }, () => pickFromPool());
+      const rightItems = Array.from({ length: rightKnown }, () =>
+        pickFromPool(),
+      );
       return { leftItems, rightItems, unknownOnRight };
     }
 
@@ -296,12 +326,25 @@ function pageWeights(pageNum, options = {}) {
       }
       const cx = produced % 2 === 0 ? sx - 230 : sx + 230;
       const cy = topC + Math.floor(produced / 2) * dyC;
-      content += classicScaleSVG(cx, cy, leftItems, rightItems, unknownOnRight, hideSlotNumbers);
+      content += classicScaleSVG(
+        cx,
+        cy,
+        leftItems,
+        rightItems,
+        unknownOnRight,
+        hideSlotNumbers,
+      );
       produced++;
     }
   } else if (type === 'reverse') {
-    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
-    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const tasksCount =
+      options && Number(options.count)
+        ? Math.max(1, Math.min(10, Number(options.count)))
+        : 6;
+    const difficulty =
+      options && Number(options.difficulty)
+        ? Math.max(1, Math.min(3, Number(options.difficulty)))
+        : 2;
     const topC = 280 + addTop;
     const dyC = 170;
     const hideSlotNumbers = false;
@@ -315,11 +358,16 @@ function pageWeights(pageNum, options = {}) {
     for (let i = 0; i < tasksCount; i++) {
       let rightCount, leftCount;
       if (difficulty === 3) {
-        rightCount = altTwo ? 2 : 3; altTwo = !altTwo; leftCount = 3;
+        rightCount = altTwo ? 2 : 3;
+        altTwo = !altTwo;
+        leftCount = 3;
       } else if (difficulty === 1) {
-        rightCount = 1; leftCount = 2;
-      } else { // difficulty 2
-        rightCount = rndInt(1, 2); leftCount = rightCount + 1; // 2 or 3
+        rightCount = 1;
+        leftCount = 2;
+      } else {
+        // difficulty 2
+        rightCount = rndInt(1, 2);
+        leftCount = rightCount + 1; // 2 or 3
       }
 
       let success = false;
@@ -330,7 +378,10 @@ function pageWeights(pageNum, options = {}) {
         let rightItems = [];
         for (let k = 0; k < rightCount; k++) rightItems.push(pickAny());
         let guardRight = 0;
-        while (new Set(rightItems.map((x) => x.emoji)).size !== rightItems.length && guardRight < 10) {
+        while (
+          new Set(rightItems.map((x) => x.emoji)).size !== rightItems.length &&
+          guardRight < 10
+        ) {
           rightItems = [];
           for (let k = 0; k < rightCount; k++) rightItems.push(pickAny());
           guardRight++;
@@ -345,33 +396,60 @@ function pageWeights(pageNum, options = {}) {
           let pair = null;
           for (let a = 0; a < poolLeft.length && !pair; a++) {
             for (let b = a + 1; b < poolLeft.length; b++) {
-              if (poolLeft[a].w + poolLeft[b].w === rightSum) { pair = [poolLeft[a], poolLeft[b]]; break; }
+              if (poolLeft[a].w + poolLeft[b].w === rightSum) {
+                pair = [poolLeft[a], poolLeft[b]];
+                break;
+              }
             }
           }
-          if (!pair) { continue; }
+          if (!pair) {
+            continue;
+          }
           // pick removable not sharing emoji with right or pair; prefer weight not on right
-          const used = new Set([pair[0].emoji, pair[1].emoji, ...rightItems.map((r) => r.emoji)]);
-          let removable = animals.find((a) => !used.has(a.emoji) && !rightItems.some((r) => r.w === a.w));
-          if (!removable) removable = animals.find((a) => !used.has(a.emoji)) || pickAny();
+          const used = new Set([
+            pair[0].emoji,
+            pair[1].emoji,
+            ...rightItems.map((r) => r.emoji),
+          ]);
+          let removable = animals.find(
+            (a) => !used.has(a.emoji) && !rightItems.some((r) => r.w === a.w),
+          );
+          if (!removable)
+            removable = animals.find((a) => !used.has(a.emoji)) || pickAny();
           leftItems = [pair[0], pair[1], removable];
         } else {
           // leftCount === 2: need a single item weight equal to rightSum, second is removable
           const match = poolLeft.find((a) => a.w === rightSum);
-          if (!match) { continue; }
+          if (!match) {
+            continue;
+          }
           const rightWeights = new Set(rightItems.map((r) => r.w));
-          let removable = poolLeft.find((a) => a.emoji !== match.emoji && !rightWeights.has(a.w));
-          if (!removable) removable = poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
+          let removable = poolLeft.find(
+            (a) => a.emoji !== match.emoji && !rightWeights.has(a.w),
+          );
+          if (!removable)
+            removable =
+              poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
           leftItems = [match, removable];
         }
 
         // Final safety: ensure disjoint emoji sets
         const leftEmojis = new Set(leftItems.map((x) => x.emoji));
         const shares = [...leftEmojis].some((e) => rightEmojis.has(e));
-        if (shares) { continue; }
+        if (shares) {
+          continue;
+        }
 
         const cx = i % 2 === 0 ? sx - 230 : sx + 230;
         const cy = topC + Math.floor(i / 2) * dyC;
-        content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+        content += classicScaleSVG(
+          cx,
+          cy,
+          leftItems,
+          rightItems,
+          null,
+          hideSlotNumbers,
+        );
         success = true;
       }
 
@@ -382,23 +460,40 @@ function pageWeights(pageNum, options = {}) {
         const rightEmojis = new Set(rightItems.map((x) => x.emoji));
         const poolLeft = animals.filter((a) => !rightEmojis.has(a.emoji));
         const match = poolLeft.find((a) => a.w === rightSum) || poolLeft[0];
-        const removable = poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
+        const removable =
+          poolLeft.find((a) => a.emoji !== match.emoji) || pickAny();
         const leftItems = [match, removable];
         const cx = i % 2 === 0 ? sx - 230 : sx + 230;
         const cy = topC + Math.floor(i / 2) * dyC;
-        content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+        content += classicScaleSVG(
+          cx,
+          cy,
+          leftItems,
+          rightItems,
+          null,
+          hideSlotNumbers,
+        );
       }
     }
   } else if (type === 'inequalities') {
-    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(10, Number(options.count))) : 6;
-    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const tasksCount =
+      options && Number(options.count)
+        ? Math.max(1, Math.min(10, Number(options.count)))
+        : 6;
+    const difficulty =
+      options && Number(options.difficulty)
+        ? Math.max(1, Math.min(3, Number(options.difficulty)))
+        : 2;
     const topC = 280 + addTop;
     const dyC = 170;
-    const [minC, maxC] = ({ 1: [1, 2], 2: [1, 3], 3: [2, 3] }[difficulty] || [1, 3]);
+    const [minC, maxC] = { 1: [1, 2], 2: [1, 3], 3: [2, 3] }[difficulty] || [
+      1, 3,
+    ];
 
     function makeSide(k) {
       const arr = [];
-      for (let i = 0; i < k; i++) arr.push(animals[rndInt(0, animals.length - 1)]);
+      for (let i = 0; i < k; i++)
+        arr.push(animals[rndInt(0, animals.length - 1)]);
       return arr;
     }
 
@@ -410,18 +505,28 @@ function pageWeights(pageNum, options = {}) {
       return { leftItems, rightItems };
     }
 
-    function sum(items) { return items.reduce((s, it) => s + it.w, 0); }
+    function sum(items) {
+      return items.reduce((s, it) => s + it.w, 0);
+    }
 
     for (let i = 0; i < tasksCount; i++) {
       const { leftItems, rightItems } = genPair();
       const cx = i % 2 === 0 ? sx - 230 : sx + 230;
       const cy = topC + Math.floor(i / 2) * dyC;
       const hideSlotNumbers = difficulty === 3;
-      content += classicScaleSVG(cx, cy, leftItems, rightItems, null, hideSlotNumbers);
+      content += classicScaleSVG(
+        cx,
+        cy,
+        leftItems,
+        rightItems,
+        null,
+        hideSlotNumbers,
+      );
 
       const leftSum = sum(leftItems);
       const rightSum = sum(rightItems);
-      const correct = leftSum > rightSum ? 'left' : leftSum === rightSum ? 'equal' : 'right';
+      const correct =
+        leftSum > rightSum ? 'left' : leftSum === rightSum ? 'equal' : 'right';
 
       // Render smaller choices inside the card area (visual only)
       const by = cy + 92; // lowered a bit to avoid overlap with trays
@@ -438,7 +543,10 @@ function pageWeights(pageNum, options = {}) {
     }
   } else {
     // REGULAR
-    const difficulty = options && Number(options.difficulty) ? Math.max(1, Math.min(3, Number(options.difficulty))) : 2;
+    const difficulty =
+      options && Number(options.difficulty)
+        ? Math.max(1, Math.min(3, Number(options.difficulty)))
+        : 2;
     const rangeByDiff = {
       1: [1, 2],
       2: [2, 3],
@@ -461,7 +569,10 @@ function pageWeights(pageNum, options = {}) {
     const usedTotals = new Set();
     const labels = [];
     let guard = 0;
-    const tasksCount = options && Number(options.count) ? Math.max(1, Math.min(6, Number(options.count))) : 6;
+    const tasksCount =
+      options && Number(options.count)
+        ? Math.max(1, Math.min(6, Number(options.count)))
+        : 6;
     while (labels.length < tasksCount && guard < 500) {
       guard++;
       const { label, total } = pickLabelAndTotal();

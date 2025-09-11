@@ -148,7 +148,6 @@
   "addition.theme.shapes": "Shapes 🔷🔺",
 
   "addition.modal.title": "Addition settings",
-  "addition.summary.difficulty": "Difficulty",
   "addition.summary.count": "Examples per page",
   "addition.summary.icons": "Icons",
 
@@ -173,7 +172,6 @@
   "subtraction.theme.shapes": "Shapes 🔷🔺",
 
   "subtraction.modal.title": "Subtraction settings",
-  "subtraction.summary.difficulty": "Difficulty",
   "subtraction.summary.count": "Examples per page",
   "subtraction.summary.icons": "Icons",
 
@@ -191,7 +189,6 @@
   "findParts.form.words": "Words/sequences (comma-separated)",
   "findParts.form.words.placeholder": "e.g.: CAT, TREE, SUN",
   "findParts.form.targetsCount": "Targets count",
-  "findParts.summary.difficulty": "Difficulty",
   "findParts.summary.gridType": "Grid type",
   "findParts.summary.singleField": "Single large field",
   "findParts.summary.words": "Words",
@@ -211,8 +208,20 @@
   "weights.type.classic": "Classic scales",
   "weights.type.reverse": "Reverse task",
   "weights.type.inequalities": "Inequalities",
-  "weights.summary.difficulty": "Difficulty",
   "weights.summary.type": "Type",
   "weights.summary.count": "Tasks per page",
-  "weights.summary.icons": "Icons"
+  "weights.summary.icons": "Icons",
+
+  "generator.params.postman": "Parameters: Postman",
+  "postman.modal.title": "Postman settings",
+  "postman.form.difficulty": "Difficulty level",
+  "postman.form.lettersMin": "Letters min",
+  "postman.form.lettersMax": "Letters max",
+  "postman.form.missingMin": "Missing houses min",
+  "postman.form.missingMax": "Missing houses max",
+  "postman.difficulty.1": "Easy",
+  "postman.difficulty.2": "Medium",
+  "postman.difficulty.3": "Hard",
+  "postman.summary.letters": "Letters",
+  "postman.summary.missing": "Missing"
 }

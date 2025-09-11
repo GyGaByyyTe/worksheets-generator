@@ -97,9 +97,7 @@ export default function SubtractionPanel({
 
       {/* Summary of selected preferences */}
       <div className="gen-tags" style={{ flexWrap: 'wrap' }}>
-        <span className="tag">
-          {t('subtraction.summary.difficulty')}: {difficultyLabel(cfg.difficulty)}
-        </span>
+        <span className="tag">{difficultyLabel(cfg.difficulty)}</span>
         <span className="tag">
           {t('subtraction.summary.count')}: {cfg.count}
         </span>

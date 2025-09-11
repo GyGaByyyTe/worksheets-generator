@@ -148,7 +148,6 @@
   "addition.theme.shapes": "Фигуры 🔷🔺",
 
   "addition.modal.title": "Настройки сложения",
-  "addition.summary.difficulty": "Сложность",
   "addition.summary.count": "Примеров на странице",
   "addition.summary.icons": "Иконки",
 
@@ -173,7 +172,6 @@
   "subtraction.theme.shapes": "Фигуры 🔷🔺",
 
   "subtraction.modal.title": "Настройки вычитания",
-  "subtraction.summary.difficulty": "Сложность",
   "subtraction.summary.count": "Примеров на странице",
   "subtraction.summary.icons": "Иконки",
 
@@ -191,7 +189,6 @@
   "findParts.form.words": "Слова/последовательности (через запятую)",
   "findParts.form.words.placeholder": "например: КОТ, ЛИСА, САД",
   "findParts.form.targetsCount": "Количество целей",
-  "findParts.summary.difficulty": "Сложность",
   "findParts.summary.gridType": "Тип поля",
   "findParts.summary.singleField": "Одно большое поле",
   "findParts.summary.words": "Слова",
@@ -204,15 +201,27 @@
   "weights.form.type": "Тип задач",
   "weights.form.count": "Количество задач:",
   "weights.form.useIcons": "Использовать иконки",
-  "weights.difficulty.1": "Лёгкий",
-  "weights.difficulty.2": "Средний",
-  "weights.difficulty.3": "Сложный",
+  "weights.difficulty.1": "Лёгко",
+  "weights.difficulty.2": "Средне",
+  "weights.difficulty.3": "Сложно",
   "weights.type.regular": "Обычные весы",
   "weights.type.classic": "Классические весы",
   "weights.type.reverse": "Обратная задача",
   "weights.type.inequalities": "Неравенства",
-  "weights.summary.difficulty": "Сложность",
   "weights.summary.type": "Тип",
   "weights.summary.count": "Задач на странице",
-  "weights.summary.icons": "Иконки"
+  "weights.summary.icons": "Иконки",
+
+  "generator.params.postman": "Параметры: Почтальон",
+  "postman.modal.title": "Настройки: Почтальон",
+  "postman.form.difficulty": "Уровень сложности",
+  "postman.form.lettersMin": "Писем минимум",
+  "postman.form.lettersMax": "Писем максимум",
+  "postman.form.missingMin": "Пропусков минимум",
+  "postman.form.missingMax": "Пропусков максимум",
+  "postman.difficulty.1": "Лёгко",
+  "postman.difficulty.2": "Средне",
+  "postman.difficulty.3": "Сложно",
+  "postman.summary.letters": "Писем",
+  "postman.summary.missing": "Пропусков"
 }

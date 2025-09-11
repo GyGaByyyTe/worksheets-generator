@@ -7,6 +7,7 @@ import AdditionPanel from '@/components/AdditionPanel';
 import SubtractionPanel from '@/components/SubtractionPanel';
 import FindPartsPanel from '@/components/FindPartsPanel';
 import WeightsPanel from '@/components/WeightsPanel';
+import PostmanPanel from '@/components/PostmanPanel';
 import ErrorAlert from '@/components/ErrorAlert';
 import ResultsView from '@/components/ResultsView';
 import LoadingButton from '@/components/LoadingButton';
@@ -47,6 +48,7 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
   const [openSubtraction, setOpenSubtraction] = React.useState<boolean>(false);
   const [openFindParts, setOpenFindParts] = React.useState<boolean>(false);
   const [openWeights, setOpenWeights] = React.useState<boolean>(false);
+  const [openPostman, setOpenPostman] = React.useState<boolean>(false);
 
   return (
     <div className="container">
@@ -163,7 +165,10 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                   {t('buttons.configure')}
                 </button>
               </div>
-              <FindPartsPanel open={openFindParts} onClose={() => setOpenFindParts(false)} />
+              <FindPartsPanel
+                open={openFindParts}
+                onClose={() => setOpenFindParts(false)}
+              />
             </div>
           )}
 
@@ -216,6 +221,30 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
             </div>
           )}
 
+          {selected.includes('postman') && (
+            <div className="panel">
+              <div
+                className="row"
+                style={{ justifyContent: 'space-between', width: '100%' }}
+              >
+                <div style={{ fontWeight: 600 }}>
+                  {t('generator.params.postman')}
+                </div>
+                <button
+                  type="button"
+                  className="ui-btn ui-btn--sm ui-btn--outline"
+                  onClick={() => setOpenPostman(true)}
+                >
+                  {t('buttons.configure')}
+                </button>
+              </div>
+              <PostmanPanel
+                open={openPostman}
+                onClose={() => setOpenPostman(false)}
+              />
+            </div>
+          )}
+
           {selected.includes('weights') && (
             <div className="panel">
               <div
@@ -233,7 +262,10 @@ export default function GeneratorForm({ tasks = [] }: GeneratorFormProps) {
                   {t('buttons.configure')}
                 </button>
               </div>
-              <WeightsPanel open={openWeights} onClose={() => setOpenWeights(false)} />
+              <WeightsPanel
+                open={openWeights}
+                onClose={() => setOpenWeights(false)}
+              />
             </div>
           )}
 

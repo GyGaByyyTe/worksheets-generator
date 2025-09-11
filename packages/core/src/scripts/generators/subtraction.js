@@ -40,17 +40,59 @@ const hasAnyBorrow = (a, b) => {
 function rangeByDifficulty(d) {
   switch (d) {
     case 1: // до 10, без займов, только однозначные
-      return { min: 0, max: 9, resultMin: 0, resultMax: 9, requireBorrow: false, forbidBorrow: true };
+      return {
+        min: 0,
+        max: 9,
+        resultMin: 0,
+        resultMax: 9,
+        requireBorrow: false,
+        forbidBorrow: true,
+      };
     case 2: // до 20, допускаются займы, хотя бы одно однозначное
-      return { min: 0, max: 20, resultMin: 0, resultMax: 20, requireBorrow: false, forbidBorrow: false };
+      return {
+        min: 0,
+        max: 20,
+        resultMin: 0,
+        resultMax: 20,
+        requireBorrow: false,
+        forbidBorrow: false,
+      };
     case 3: // до 100 без займов
-      return { min: 0, max: 99, resultMin: 0, resultMax: 99, requireBorrow: false, forbidBorrow: true };
+      return {
+        min: 0,
+        max: 99,
+        resultMin: 0,
+        resultMax: 99,
+        requireBorrow: false,
+        forbidBorrow: true,
+      };
     case 4: // до 100 с займами
-      return { min: 0, max: 99, resultMin: 0, resultMax: 99, requireBorrow: true, forbidBorrow: false };
+      return {
+        min: 0,
+        max: 99,
+        resultMin: 0,
+        resultMax: 99,
+        requireBorrow: true,
+        forbidBorrow: false,
+      };
     case 5: // до 1000 без займов
-      return { min: 0, max: 999, resultMin: 0, resultMax: 999, requireBorrow: false, forbidBorrow: true };
+      return {
+        min: 0,
+        max: 999,
+        resultMin: 0,
+        resultMax: 999,
+        requireBorrow: false,
+        forbidBorrow: true,
+      };
     case 6: // до 1000 с займами
-      return { min: 0, max: 999, resultMin: 0, resultMax: 999, requireBorrow: true, forbidBorrow: false };
+      return {
+        min: 0,
+        max: 999,
+        resultMin: 0,
+        resultMax: 999,
+        requireBorrow: true,
+        forbidBorrow: false,
+      };
     default:
       return rangeByDifficulty(3);
   }
@@ -81,7 +123,11 @@ function pickPair({ difficulty = 3, useIcons = false } = {}) {
   return [5, 3];
 }
 
-function generateSubtractionTasks({ difficulty = 3, count = 15, useIcons = false } = {}) {
+function generateSubtractionTasks({
+  difficulty = 3,
+  count = 15,
+  useIcons = false,
+} = {}) {
   const d = Number(difficulty) || 3;
   const tasks = [];
   while (tasks.length < count) {
@@ -253,7 +299,12 @@ function renderPage(pageNum, tasks, options = {}) {
   return svg;
 }
 
-function generateSubtractionWorksheets({ count = 10, outDir = 'worksheets', difficulty = 3, useIcons = false } = {}) {
+function generateSubtractionWorksheets({
+  count = 10,
+  outDir = 'worksheets',
+  difficulty = 3,
+  useIcons = false,
+} = {}) {
   const out = path.resolve(process.cwd(), outDir);
   if (!fs.existsSync(out)) fs.mkdirSync(out, { recursive: true });
 

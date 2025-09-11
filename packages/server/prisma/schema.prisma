@@ -11,49 +11,51 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String       @map("password_hash")
-  createdAt    DateTime     @default(now()) @map("created_at")
+  id           String               @id @default(uuid())
+  email        String               @unique
+  passwordHash String               @map("password_hash")
+  createdAt    DateTime             @default(now()) @map("created_at")
   generations  Generation[]
+  downloads    GenerationDownload[] @relation("UserDownloads")
 }
 
 model Generation {
-  id        String   @id @default(uuid())
-  userId    String?  @map("user_id")
-  user      User?    @relation(fields: [userId], references: [id])
+  id        String               @id @default(uuid())
+  userId    String?              @map("user_id")
+  user      User?                @relation(fields: [userId], references: [id])
   seed      String?
   tasks     Json
   days      Int
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime             @default(now()) @map("created_at")
   pages     Page[]
+  downloads GenerationDownload[] @relation("GenerationDownloads")
 
   @@index([userId])
 }
 
 model Page {
-  id            String     @id @default(uuid())
-  generationId  String     @map("generation_id")
-  generation    Generation @relation(fields: [generationId], references: [id])
-  day           Int
-  filename      String
-  mimeType      String     @map("mime_type")
-  svgText       String?    @map("svg_text")
-  binary        Bytes?     // for PNG/JPEG
-  sizeBytes     Int?       @map("size_bytes")
-  createdAt     DateTime   @default(now()) @map("created_at")
+  id           String     @id @default(uuid())
+  generationId String     @map("generation_id")
+  generation   Generation @relation(fields: [generationId], references: [id])
+  day          Int
+  filename     String
+  mimeType     String     @map("mime_type")
+  svgText      String?    @map("svg_text")
+  binary       Bytes? // for PNG/JPEG
+  sizeBytes    Int?       @map("size_bytes")
+  createdAt    DateTime   @default(now()) @map("created_at")
 
   @@index([generationId])
   @@index([generationId, day])
 }
 
 model GenerationDownload {
-  id           String      @id @default(uuid())
-  generationId String      @map("generation_id")
-  generation   Generation  @relation(fields: [generationId], references: [id])
-  userId       String?     @map("user_id")
-  user         User?       @relation(fields: [userId], references: [id])
-  createdAt    DateTime    @default(now()) @map("created_at")
+  id           String     @id @default(uuid())
+  generationId String     @map("generation_id")
+  generation   Generation @relation("GenerationDownloads", fields: [generationId], references: [id])
+  userId       String?    @map("user_id")
+  user         User?      @relation("UserDownloads", fields: [userId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
 
   @@index([generationId])
   @@index([userId])

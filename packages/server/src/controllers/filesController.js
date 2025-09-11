@@ -107,14 +107,94 @@ async function downloadGeneration(req, res) {
       );
       return res.send(pdf);
     } catch (e) {
-      // Fallback to HTML attachment if PDF generation is unavailable
-      await recordDownload();
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename=\"worksheets-${genId}.html\"`,
-      );
-      return res.send(html);
+      // No-Chromium fallback: build a real multi-page PDF from stored images/SVG using pdf-lib and sharp
+      try {
+        const doc = await (async () => {
+          const { PDFDocument, StandardFonts } = require('pdf-lib');
+          const sharp = require('sharp');
+          const A4_WIDTH_PT = 595.28; // 210mm at 72 DPI
+          const A4_HEIGHT_PT = 841.89; // 297mm at 72 DPI
+
+          const pdfDoc = await PDFDocument.create();
+          // Optional: set metadata
+          pdfDoc.setTitle(`Worksheets ${genId}`);
+          pdfDoc.setProducer('worksheets-generator');
+          pdfDoc.setCreator('worksheets-generator');
+
+          // Requery pages with content
+          const pagesFull = await prisma.page.findMany({
+            where: { generationId: genId },
+            orderBy: [{ day: 'asc' }, { filename: 'asc' }],
+            select: { id: true, filename: true, mimeType: true, svgText: true, binary: true },
+          });
+
+          for (const p of pagesFull) {
+            let imgBuf;
+            let isPng = false;
+            if (p.mimeType === 'image/svg+xml' && p.svgText) {
+              // Render SVG to PNG at high density for print
+              imgBuf = await sharp(Buffer.from(p.svgText), { density: 300 })
+                .png({ quality: 100 })
+                .toBuffer();
+              isPng = true;
+            } else if (p.binary) {
+              imgBuf = Buffer.from(p.binary);
+              const mt = (p.mimeType || '').toLowerCase();
+              isPng = mt.includes('png');
+              // If not PNG/JPEG, try to convert unknown to PNG
+              if (!mt.includes('png') && !mt.includes('jpeg') && !mt.includes('jpg')) {
+                imgBuf = await sharp(imgBuf).png({ quality: 100 }).toBuffer();
+                isPng = true;
+              }
+            } else {
+              // As a last resort, pull via HTTP (shouldn’t happen often)
+              const url = `${baseUrl}/files/${p.id}`;
+              const resp = await fetch(url);
+              if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`);
+              const arr = await resp.arrayBuffer();
+              imgBuf = Buffer.from(arr);
+              // Best-effort type detection
+              const sig = imgBuf.slice(0, 4).toString('hex');
+              isPng = sig.startsWith('89504e47'); // PNG signature
+            }
+
+            let embedded;
+            if (isPng) embedded = await pdfDoc.embedPng(imgBuf);
+            else embedded = await pdfDoc.embedJpg(imgBuf);
+
+            const { width, height } = embedded;
+            // Compute scale to fit A4 while preserving aspect ratio
+            const scale = Math.min(A4_WIDTH_PT / width, A4_HEIGHT_PT / height);
+            const drawW = width * scale;
+            const drawH = height * scale;
+            const x = (A4_WIDTH_PT - drawW) / 2;
+            const y = (A4_HEIGHT_PT - drawH) / 2;
+
+            const page = pdfDoc.addPage([A4_WIDTH_PT, A4_HEIGHT_PT]);
+            page.drawImage(embedded, { x, y, width: drawW, height: drawH });
+          }
+
+          return pdfDoc;
+        })();
+
+        const pdfBytes = await doc.save();
+        await recordDownload();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename=\"worksheets-${genId}.pdf\"`,
+        );
+        return res.send(Buffer.from(pdfBytes));
+      } catch (fallbackErr) {
+        // Final fallback to HTML attachment (should be rare now)
+        await recordDownload();
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename=\"worksheets-${genId}.html\"`,
+        );
+        return res.send(html);
+      }
     }
   } catch (e) {
     return res.status(400).json({ error: String((e && e.message) || e) });

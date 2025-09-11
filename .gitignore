@@ -1,5 +1,6 @@
 .idea
 .junie
+deploy/
 **/.next/
 generated/
 node_modules/
